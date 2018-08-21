@@ -1,0 +1,6 @@
+{% load mln_utils %}
+{% with save=module|get_or_none:"save_networker_text" %}
+{% if save is not None %}
+<text>{{ save.text }}</text>
+{% endif %}
+{% endwith %}

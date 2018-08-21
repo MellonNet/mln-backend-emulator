@@ -1,0 +1,21 @@
+{% load mln_utils %}
+<save
+{% with save=module|get_generic_settings %}
+	{% if save is not None %}
+		{% if save.skin_id is not None %}
+			skin="{{ save.skin_id|uuid_skin_str }}"
+		{% endif %}
+		{% if save.color_id is not None %}
+			color="{{ save.color_id|uuid_color_str }}"
+		{% endif %}
+	{% endif %}
+	>{% endwith %}
+	{% for template in module|get_save_templates %}
+		{% include template %}
+	{% endfor %}
+</save>
+<setup>
+{% for template in module|get_setup_templates %}
+	{% include template %}
+{% endfor %}
+</setup>

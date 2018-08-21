@@ -1,0 +1,21 @@
+{% extends "mln/base.html" %}
+{% load static %}
+{% load mln_utils %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'mln/page.css' %}" />
+<div>
+{% for model in user.factory_models.all %}
+	<figure>
+		<img src="{{ model.image.url }}">
+		<figcaption>{{ model.title }}</figcaption>
+		<figcaption>{{ model.description }}</figcaption>
+	</figure>
+{% endfor %}
+</div>
+<form method="post" enctype="multipart/form-data">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<button type="submit">Upload</button>
+</form>
+{% endblock %}
+

@@ -1,0 +1,22 @@
+{% extends "mln/base.html" %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'mln/page.css' %}" />
+<title>Login</title>
+<h2>Login</h2>
+{% if next %}
+	{% if user.is_authenticated %}
+	<p>Your account doesn't have access to this page. To proceed,
+	please login with an account that has access.</p>
+	{% else %}
+	<p>Please login to see this page.</p>
+	{% endif %}
+{% endif %}
+<form method="post">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<input type="submit" value="Login" />
+</form>
+<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+<p><a href="{% url 'sign_up' %}">Sign up</a></p>
+{% endblock %}

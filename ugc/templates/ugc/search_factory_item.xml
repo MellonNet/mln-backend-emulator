@@ -1,0 +1,6 @@
+{% extends "mln/webservice/base.xml" %}
+{% load static %}
+{% block content %}
+{# there are also attributes "CheckpriceImage" and "CheckpriceLink", those aren't implemented #}
+<item id="{{ model.id }}" galleryname="todo" title="{{ model.title }}" description="{{ model.description }}" href="{{ model.image.url }}" thumbnail="{{ model.image.url }}" DownloadImage="{% static 'ugc/download.png' %}" DownloadLink="{{ model.model.url }}" />
+{% endblock %}

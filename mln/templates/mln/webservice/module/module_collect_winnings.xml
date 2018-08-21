@@ -1,0 +1,9 @@
+{% extends "mln/webservice/base.xml" %}
+{% load mln_utils %}
+{% block content %}
+{% if won %}
+<inventory>
+	<added itemid="{{ prize.item_id|uuid_str }}" qty="{{ prize.qty }}" />
+</inventory>
+{% endif %}
+{% endblock %}

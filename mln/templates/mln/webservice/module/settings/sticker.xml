@@ -1,0 +1,8 @@
+{% load mln_utils %}
+{% for sticker in module.save_sticker.all %}
+	<Movieclip
+	{% if sticker|is_background %}
+		b_bg="True"
+	{% endif %}
+	id="{{ sticker.item_id|uuid_str }}" _x="{{ sticker.x }}" _y="{{ sticker.y }}" _xscale="{{ sticker.scale_x }}" _yscale="{{ sticker.scale_y }}" _rotation="{{ sticker.rotation }}" depth="{{ sticker.depth }}" />
+{% endfor %}

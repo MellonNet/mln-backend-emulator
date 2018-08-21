@@ -1,0 +1,6 @@
+{% load mln_utils %}
+{% with setup=module|get_or_none:"setup_friend_share" %}
+{% if setup is not None %}
+<friend friendUsername="{{ setup.friend.username }}" friendID="{{ setup.friend.id }}" />
+{% endif %}
+{% endwith %}

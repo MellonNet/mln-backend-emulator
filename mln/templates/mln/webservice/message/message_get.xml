@@ -1,0 +1,11 @@
+{% extends "mln/webservice/base.xml" %}
+{% load mln_utils %}
+{% block content %}
+<message senderMemberID="{{ message.sender.id }}" senderMemberAvatar="{{ message.sender.profile.avatar }}" bodyID="{{ message.body_id|uuid_str }}">
+	<attachments>
+	{% for attachment in message.attachments.all %}
+		<attachment itemID="{{ attachment.item_id|uuid_str}}" qty="{{ attachment.qty }}" />
+	{% endfor %}
+	</attachments>
+</message>
+{% endblock %}

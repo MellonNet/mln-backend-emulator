@@ -1,0 +1,5 @@
+{% extends "mln/webservice/base.xml" %}
+{% load mln_utils %}
+{% block content %}
+{% include "mln/webservice/page/write_page_modules.xml" with page_owner=user %}
+{% endblock %}

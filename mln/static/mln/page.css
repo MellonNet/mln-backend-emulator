@@ -1,0 +1,32 @@
+
+main {
+	background-color: #3173a5;
+	border: solid #3173a5;
+	border-radius: 0.3rem;
+	color: white;
+	padding: 0.5rem 1rem;
+}
+
+figure {
+	background-color: lightblue;
+	border: 0.1rem white solid;
+	border-radius: .5rem;
+	color: black;
+	display: block;
+	float: left;
+	height: 5rem;
+	padding: 0.5rem;
+	width: 5rem;
+}
+
+figure img {
+	max-width: 70%;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+figure figcaption {
+	font-size: 0.5rem;
+	text-align: center;
+}

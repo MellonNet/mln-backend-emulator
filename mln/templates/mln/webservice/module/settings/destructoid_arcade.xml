@@ -1,0 +1,14 @@
+{% load mln_utils %}
+{% with save=module|get_or_none:"save_destructoid_arcade" %}
+{% if save is not None %}
+<gameSetting ownerPlayed="{% if save.owner_played %}true{% else %}false{% endif %}" energyUsed="{{ save.energy_used }}" skins="{{ module|get_destructoid_arcade_skins }}" >
+{% for column in module|get_destructoid_arcade_grid %}
+<column>
+{% for row in column %}
+<row density="{{ row }}" />
+{% endfor %}
+</column>
+{% endfor %}
+</gameSetting>
+{% endif %}
+{% endwith %}

@@ -1,0 +1,8 @@
+{% load mln_utils %}
+{% for track in module|get_save_soundtrack %}
+	<track>
+	{% for id, pan in track %}
+		<Sound id="{{ id }}" pan="{{ pan }}" />
+	{% endfor %}
+	</track>
+{% endfor %}
