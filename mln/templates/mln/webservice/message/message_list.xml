@@ -1,0 +1,13 @@
+{% extends "mln/webservice/base.xml" %}
+{% load mln_utils %}
+{% block content %}
+<messages>
+	{% for message in messages %}
+		<message messageID="{{ message.id }}" username="{{ message.sender.username }}" bodyID="{{ message.body_id|uuid_str }}" read="{{ message.is_read }}" hasAttachment="{{ message.attachments.exists }}" replyAble="{{ message|replyable }}"
+		{% if message.reply_body_id is not None %}
+			replyBodyID="{{ message.reply_body_id|uuid_str }}"
+		{% endif %}
+		/>
+	{% endfor %}
+</messages>
+{% endblock %}

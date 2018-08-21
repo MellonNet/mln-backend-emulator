@@ -1,0 +1,7 @@
+{% extends "mln/webservice/base.xml" %}
+{% load static %}
+{% block content %}
+{% for model in user.factory_models.all %}
+<item id="{{ model.id }}" galleryname="todo" title="{{ model.title }}" description="{{ model.description }}" href="{{ model.image.url }}" thumbnail="{{ model.image.url }}" />
+{% endfor %}
+{% endblock %}

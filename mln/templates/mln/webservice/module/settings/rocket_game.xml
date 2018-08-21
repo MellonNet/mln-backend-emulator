@@ -1,0 +1,6 @@
+{% load mln_utils %}
+{% with save=module|get_or_none:"save_rocket_game" %}
+{% if save is not None %}
+<theme>{{ save.get_theme_display }}</theme>
+{% endif %}
+{% endwith %}

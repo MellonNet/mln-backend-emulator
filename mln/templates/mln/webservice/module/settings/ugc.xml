@@ -1,0 +1,6 @@
+{% load mln_utils %}
+{% with save=module|get_or_none:"save_ugc" %}
+{% if save is not None %}
+<Movieclip id="{{ save.ref }}" />
+{% endif %}
+{% endwith %}

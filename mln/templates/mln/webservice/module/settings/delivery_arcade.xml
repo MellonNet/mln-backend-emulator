@@ -1,0 +1,13 @@
+{% load mln_utils %}
+{% with save=module|get_or_none:"save_delivery_arcade" %}
+{% if save is not None %}
+<gameSetting ownerPlayed="{% if save.owner_played %}true{% else %}false{% endif %}" timer="{{ save.timer }}" >
+{% for tile in module.tiles.all %}
+<tile t="{{ tile|get_delivery_tile_name }}" x="{{ tile.x }}" y="{{tile.y }}" />
+{% endfor %}
+{% for id, x, y in save|get_delivery_checkpoints %}
+<cp t="{{ id }}" x="{{ x }}" y="{{ y }}" />
+{% endfor %}
+</gameSetting>
+{% endif %}
+{% endwith %}

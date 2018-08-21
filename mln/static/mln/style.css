@@ -1,0 +1,29 @@
+
+body {
+	margin: 0 auto;
+	width: 950px;
+}
+
+footer {
+	color: grey;
+	font-size: x-small;
+	padding: 1rem;
+	text-align: center;
+}
+
+nav {
+	margin-top: 2rem;
+}
+
+nav > a {
+	border-top-left-radius: 0.3em;
+	border-top-right-radius: 0.3em;
+	background-color: #3173a5;
+	color: white;
+	padding: 0.5rem 1rem;
+	text-decoration: none;
+}
+
+#accountinfo {
+	float: right;
+}

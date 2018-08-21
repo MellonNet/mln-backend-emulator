@@ -1,0 +1,20 @@
+{% extends "mln/base.html" %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'mln/page.css' %}" />
+<div>
+{% for creation in user.creation_lab_creations.all %}
+	<figure>
+		<img src="{{ creation.image.url }}">
+		<figcaption>{{ creation.title }}</figcaption>
+		<figcaption>{{ creation.description }}</figcaption>
+	</figure>
+{% endfor %}
+</div>
+<form method="post" enctype="multipart/form-data">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<button type="submit">Upload</button>
+</form>
+{% endblock %}
+

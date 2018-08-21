@@ -1,0 +1,7 @@
+{% extends "mln/webservice/base.xml" %}
+{% load static %}
+{% block content %}
+{% for creation in user.creation_lab_creations.all %}
+<item id="{{ creation.id }}" title="{{ creation.title }}" description="{{ creation.description }}" href="{{ creation.image.url }}" thumbnail="{{ creation.image.url }}" category="todo" DownloadLink="todo" />
+{% endfor %}
+{% endblock %}

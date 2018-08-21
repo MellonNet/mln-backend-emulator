@@ -1,0 +1,16 @@
+{% load mln_utils %}<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+{% spaceless %}
+<response type="{{ request_type }}"
+	{% if error_msg is not None %}
+		status="error"
+		userMessages="{{ error_msg|uuid_str }}"
+		>
+	{% else %}
+		>
+		<result>
+			{% block content %}
+			{% endblock %}
+		</result>
+	{% endif %}
+</response>
+{% endspaceless %}

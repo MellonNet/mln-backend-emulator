@@ -1,0 +1,7 @@
+{% extends "mln/webservice/base.xml" %}
+{% load static %}
+{% block content %}
+{% for image in user.gallery_images.all %}
+<item id="{{ image.id }}" galleryname="todo" title="{{ image.title }}" description="{{ image.description }}" href="{{ image.image.url }}" thumbnail="{{ image.image.url }}" />
+{% endfor %}
+{% endblock %}

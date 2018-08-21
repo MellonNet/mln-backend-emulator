@@ -1,0 +1,14 @@
+{% load mln_utils %}
+{% with save=module|get_or_none:"save_hop_arcade" %}
+{% if save is not None %}
+<gameSetting ownerPlayed="{% if save.owner_played %}true{% else %}false{% endif %}" >
+{% for column in module|get_hop_arcade_grid %}
+<column>
+{% for row in column %}
+<row frame="{{ row }}" />
+{% endfor %}
+</column>
+{% endfor %}
+</gameSetting>
+{% endif %}
+{% endwith %}

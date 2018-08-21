@@ -1,0 +1,9 @@
+{% extends "mln/webservice/base.xml" %}
+{% load mln_utils %}
+{% block content %}
+<items>
+	{% for stack in module_stacks %}
+		<item itemID="{{ stack.item_id|uuid_str }}" qty="{{ stack.qty }}" />
+	{% endfor %}
+</items>
+{% endblock %}
