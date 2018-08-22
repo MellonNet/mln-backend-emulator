@@ -49,6 +49,7 @@ class Profile(models.Model):
 	This includes the avatar, user rank, available votes, page skin and page colors, as well as "About me" statements.
 	"""
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	is_networker = models.BooleanField(default=False)
 	avatar = models.CharField(max_length=64, default="0#1,6,1,16,5,1,6,13,2,9,2,2,1,1")
 	rank = models.PositiveSmallIntegerField(default=0)
 	available_votes = models.PositiveSmallIntegerField(default=20)
