@@ -6,13 +6,13 @@
 
 #### Requirements:
 * Python >= 3.6
-* Django >= 2.0
+* Django >= 2.1
 * Pillow library
 * (Flash player plugin in the browser)
 
 ### Installation
 
-[Install Python and Django.](https://docs.djangoproject.com/en/2.1/intro/install/). Install Pillow (`pip install Pillow`).
+[Install Python and Django](https://docs.djangoproject.com/en/2.1/intro/install/). Install Pillow (`pip install Pillow`).
 
 Download this repository and place it where you like.
 Download the MLN content files - to avoid potential problems with copyright, they aren't included in the repo nor linked here, but it should be possible to find them if you search the web or ask someone involved in the MLN recreation effort.
@@ -25,7 +25,7 @@ Initialize the database by running `python manage.py migrate`. This will create 
 ### Run the server
 
 Run the server with `python manage.py runserver` (the option ` --noreload` can be used to disable automatic file scanning which can significantly improve performance). At this point the server should be running at `localhost:8000`.
-Do *not* use this way of running the server in production (if you actually want the server to be available to users over the network). [Here](https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/)'s a list of things to do before deploying the server in production, and [here](https://docs.djangoproject.com/en/2.0/howto/deployment/wsgi/)'s how to run the server with an actual dedicated web server using WSGI.
+Do *not* use this way of running the server in production (if you actually want the server to be available to users over the network). [Here](https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/)'s a list of things to do before deploying the server in production, and [here](https://docs.djangoproject.com/en/2.1/howto/deployment/wsgi/)'s how to run the server with an actual dedicated web server using WSGI.
 
 The MLN private view should be available at http://localhost:8000/mln/private_view/default. The server also works with Django's admin interface, which should be available at http://localhost:8000/admin/.
 
@@ -53,6 +53,8 @@ The MLN private view should be available at http://localhost:8000/mln/private_vi
 * Creation lab
 
 #### Not implemented
+* Networkers
+* Masterpieces
 * Random items sometimes sent to friends when you click on modules
 * Items guests can receive in "battle" modules or similar
 * Some serverside prereq checking
