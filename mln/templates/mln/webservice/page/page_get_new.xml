@@ -22,7 +22,7 @@
 </settings>
 {# the user the page belongs to #}
 {# needed to display username, avatar and rank on pages #}
-<userProfile userName="{{ page_owner.username }}" gameRank="{{ page_owner.profile.rank }}" avatar="{{ page_owner.profile.avatar }}" >
+<userProfile userName="{{ page_owner.username }}" gameRank="{{ page_owner.profile.rank }}" avatar="{{ page_owner.profile.get_avatar }}" >
 	{# needed to save statements (both private and public) #}
 	<statements>
 		<statement question="{{ page_owner.profile.statement_0_q_id|uuid_str }}" answer="{{ page_owner.profile.statement_0_a_id|uuid_str }}" />
@@ -36,7 +36,7 @@
 {# needed to display friend list (both private and public) #}
 <friends>
 {% for friendship, friend, status in friends %}
-	<friend friendUserName="{{ friend.username }}" avatar="{{ friend.profile.avatar }}" rank="{{ friend.profile.rank }}" status="{{ status }}"
+	<friend friendUserName="{{ friend.username }}" avatar="{{ friend.profile.get_avatar }}" rank="{{ friend.profile.rank }}" status="{{ status }}"
 	{# needed for message send (private), bff module (public) #}
 	friendID="{{ friend.id }}"
 	{% if is_private_view %}

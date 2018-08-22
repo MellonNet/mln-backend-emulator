@@ -74,6 +74,12 @@ class Profile(models.Model):
 	def __str__(self):
 		return self.user.username
 
+	def get_avatar(self):
+		"""Get the avatar including whether the user is a networker, which is for some reason part of the avatar field."""
+		if self.is_networker:
+			return self.avatar+"#n"
+		return self.avatar
+
 	def add_inv_item(self, item_id, qty=1):
 		"""
 		Add one or more items to the user's inventory.

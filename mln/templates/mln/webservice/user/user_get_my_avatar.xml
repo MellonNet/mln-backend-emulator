@@ -1,5 +1,5 @@
 {% extends "mln/webservice/base.xml" %}
 {% load mln_utils %}
 {% block content %}
-<userProfile avatar="{{ user.profile.avatar }}" />
+<userProfile avatar="{{ user.profile.get_avatar }}" />
 {% endblock %}
