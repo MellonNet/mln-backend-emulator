@@ -2,8 +2,8 @@
 {% load mln_utils %}
 {% block content %}
 <items>
-	{% for stack in module_stacks %}
-		<item itemID="{{ stack.item_id|uuid_str }}" qty="{{ stack.qty }}" />
+	{% for item_id, qty in module_stacks %}
+		<item itemID="{{ item_id|uuid_str }}" qty="{{ qty }}" />
 	{% endfor %}
 </items>
 {% endblock %}

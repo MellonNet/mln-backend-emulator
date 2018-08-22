@@ -73,7 +73,8 @@ def get_or_create_module(user, elem):
 	instance_id = elem.get("instanceID")
 	if instance_id == "00000000-0000-0000-0000-000000000000":
 		item_id = uuid_int(elem.get("itemID"))
-		user.profile.remove_inv_item(item_id)
+		if not user.profile.is_networker:
+			user.profile.remove_inv_item(item_id)
 		module = Module.objects.create(item_id=item_id, pos_x=0, pos_y=0, owner=user)
 	else:
 		module = Module.objects.get(id=int(instance_id))
@@ -94,8 +95,9 @@ def handle_page_save_layout(user, request):
 
 	# if a module is not in the supplied list of modules it was removed and should be deleted
 	removed_modules = Module.objects.filter(owner=user).exclude(id__in=present_ids)
-	for module in removed_modules.all():
-		user.profile.add_inv_item(module.item_id)
+	if not user.profile.is_networker:
+		for module in removed_modules.all():
+			user.profile.add_inv_item(module.item_id)
 	removed_modules.delete()
 
 	return {}
