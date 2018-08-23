@@ -38,10 +38,12 @@ class Module(models.Model):
 			time_yield = 0
 			time_remainder = time_since_harvest
 		else:
-			YIELD_MULTIPLIER = 1 # to make growth faster
-			time_since_harvest *= YIELD_MULTIPLIER
 			time_yield, time_remainder = divmod(time_since_harvest, (DAY / yield_info.yield_per_day))
-		click_yield, click_remainder = divmod(self.clicks_since_last_harvest, yield_info.clicks_per_yield)
+		if yield_info.clicks_per_yield == 0:
+			click_yield = 0
+			click_remainder = self.clicks_since_last_harvest
+		else:
+			click_yield, click_remainder = divmod(self.clicks_since_last_harvest, yield_info.clicks_per_yield)
 		final_yield = min(time_yield + click_yield, yield_info.max_yield)
 		return final_yield, time_remainder, click_remainder
 
