@@ -8,6 +8,7 @@ This module is responsible for decrypting requests, dispatching the requests to 
 import base64
 import xml.etree.ElementTree as et
 
+from django.conf import settings
 from django.http import HttpResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
@@ -64,7 +65,8 @@ handlers = {
 def webservice(request):
 	user = request.user
 	data = decrypt(request.POST["input"])
-	print(data)
+	if settings.DEBUG:
+		print(data)
 	xml_request = et.fromstring(data)
 	assert xml_request.tag == "request"
 	request_type = xml_request.get("type")
@@ -97,7 +99,7 @@ def webservice(request):
 		template = "mln/webservice/base.xml"
 	out = loader.get_template(template).render(context, request)
 
-	if request_type != "MessageList":
+	if settings.DEBUG:
 		print(out)
 	out = out.encode()
 	out = encrypt(out)
