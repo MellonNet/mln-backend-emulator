@@ -5,17 +5,23 @@ In debug mode django's staticfiles server is also registered, in production this
 """
 from django.conf import settings
 from django.contrib import admin
+from django.http import Http404
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic.edit import CreateView
 
+def flashvars_handler(request):
+	raise Http404("""
+	Page is not intended to be viewed, only serves as root for flashvars.
+	Contact the server operator if you did not intend to get here.""")
+
 urlpatterns = [
 	path("mln/", include("mln.urls")),
 	path("ugc/", include("ugc.urls")),
-	path("ugc", lambda *args, **kwargs: None, name="ugc"),
+	path("ugc", flashvars_handler, name="ugc"),
 	path("creation_lab/", include("creation_lab.urls")),
-	path("creation_lab", lambda *args, **kwargs: None, name="creation_lab"),
+	path("creation_lab", flashvars_handler, name="creation_lab"),
 	path("accounts/", include("django.contrib.auth.urls")),
 	path("accounts/sign_up", CreateView.as_view(
 		template_name="registration/sign_up.html",
