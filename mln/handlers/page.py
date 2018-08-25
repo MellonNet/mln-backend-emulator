@@ -105,9 +105,9 @@ def handle_page_save_layout(user, request):
 def handle_page_save_options(user, request):
 	settings = request.find("result/settings/color")
 	if settings.get("skinID") == "undefined":
-		user.profile.page_skin_id = None
+		user.profile.page_skin = None
 	else:
-		user.profile.page_skin_id = uuid.UUID(settings.get("skinID"))
+		user.profile.page_skin_id = uuid_int(settings.get("skinID"))
 
 	color_id = uuid.UUID(settings.get("colorID")).node & 0xff # these UUIDs aren't actually proper UUIDs
 	user.profile.page_color_id = color_id
