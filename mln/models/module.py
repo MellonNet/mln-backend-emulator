@@ -59,11 +59,13 @@ class Module(models.Model):
 		"""
 		Harvest the module.
 		Place the yielded items into the owner's inventory, and update time and click counts.
+		If the module was set up, the set up item will be lost at this point.
 		"""
 		harvest_qty, time_remainder, click_remainder = self._calc_yield_info()
 		self.owner.profile.add_inv_item(self.get_yield_item_id(), qty=harvest_qty)
 		self.last_harvest_time = now() - time_remainder
 		self.clicks_since_last_harvest = click_remainder
+		self.is_setup = False
 		self.save()
 
 	def vote(self, voter):
@@ -109,7 +111,6 @@ class Module(models.Model):
 		else:
 			for cost in ModuleExecutionCost.objects.filter(module_item_id=self.item_id):
 				executer.profile.remove_inv_item(cost.item_id, cost.qty)
-		self.is_setup = False
 		self.save()
 
 	def select_arcade_prize(self, user):
