@@ -97,6 +97,8 @@ def handle_page_save_layout(user, request):
 	removed_modules = Module.objects.filter(owner=user).exclude(id__in=present_ids)
 	if not user.profile.is_networker:
 		for module in removed_modules.all():
+			if module.is_setup:
+				module.teardown()
 			user.profile.add_inv_item(module.item_id)
 	removed_modules.delete()
 
