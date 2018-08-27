@@ -174,6 +174,8 @@ def deserialize_sticker(module, save, setup):
 		module.save_sticker.create(module=module, **attrs)
 
 def deserialize_trade(module, save, setup):
+	if module.is_setup:
+		module.teardown()
 	attrs = {}
 	give = setup.find("item[@type='Give']")
 	request = setup.find("item[@type='Request']")
