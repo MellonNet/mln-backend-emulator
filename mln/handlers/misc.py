@@ -34,6 +34,6 @@ def handle_user_save_my_statements(user, request):
 	"""Save the "About me" statements when a user updates them."""
 	for statement in request.findall("statements/statement"):
 		order = statement.get("order")
-		setattr(user.profile, "statement_%s_q_id" % order, uuid_int(statement.get("question")))
-		setattr(user.profile, "statement_%s_a_id" % order, uuid_int(statement.get("answer")))
+		setattr(user.profile, "statement_%s_question_id" % order, uuid_int(statement.get("question")))
+		setattr(user.profile, "statement_%s_answer_id" % order, uuid_int(statement.get("answer")))
 	user.profile.save()
