@@ -25,9 +25,13 @@ class Module(models.Model):
 	def __str__(self):
 		return "%s's %s at pos (%i, %i), %i clicks" % (self.owner, self.item.name, self.pos_x, self.pos_y, self.total_clicks)
 
+	def get_info(self):
+		"""Get the ModuleInfo for this module."""
+		return ModuleInfo.objects.get(item_id=self.item_id)
+
 	def _calc_yield_info(self):
 		"""Calculate the yield of this module (how many items you can harvest), as well as the time and clicks that remain."""
-		info = ModuleInfo.objects.get(item_id=self.item_id)
+		info = self.get_info()
 		if info.is_setupable and not self.is_setup:
 			return 0, 0, 0
 		yield_info = get_or_none(ModuleYieldInfo, item_id=self.item_id)
@@ -126,7 +130,7 @@ class Module(models.Model):
 
 	def get_settings_classes(self):
 		"""Get the save data classes for this module."""
-		info = ModuleInfo.objects.get(item_id=self.item_id)
+		info = self.get_info()
 		href = info.href_editor
 		href = href[href.rindex("/")+1:href.rindex(".")]
 		if href in module_settings_classes:

@@ -3,7 +3,6 @@ import uuid
 
 from ..models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance, RocketGameTheme
 from ..models.module_settings_arcade import DestructoidBlockSkin, DestructoidCharacterSkin, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
-from ..models.static import ModuleInfo
 from .page import get_or_create_module
 from .utils import uuid_int
 
@@ -224,7 +223,7 @@ def handle_module_save_settings(user, request):
 	for cls in module.get_settings_classes():
 		SETTINGS_HANDLERS[cls](module, request.find("result/save"), request.find("result/setup"))
 
-	info = ModuleInfo.objects.get(item_id=module.item_id)
+	info = module.get_info()
 	if info.is_executable and not info.is_setupable:
 		module.is_setup = True
 		module.save()
