@@ -25,12 +25,14 @@
 <userProfile userName="{{ page_owner.username }}" gameRank="{{ page_owner.profile.rank }}" avatar="{{ page_owner.profile.get_avatar }}" >
 	{# needed to save statements (both private and public) #}
 	<statements>
-		<statement question="{{ page_owner.profile.statement_0_q_id|uuid_str }}" answer="{{ page_owner.profile.statement_0_a_id|uuid_str }}" />
-		<statement question="{{ page_owner.profile.statement_1_q_id|uuid_str }}" answer="{{ page_owner.profile.statement_1_a_id|uuid_str }}" />
-		<statement question="{{ page_owner.profile.statement_2_q_id|uuid_str }}" answer="{{ page_owner.profile.statement_2_a_id|uuid_str }}" />
-		<statement question="{{ page_owner.profile.statement_3_q_id|uuid_str }}" answer="{{ page_owner.profile.statement_3_a_id|uuid_str }}" />
-		<statement question="{{ page_owner.profile.statement_4_q_id|uuid_str }}" answer="{{ page_owner.profile.statement_4_a_id|uuid_str }}" />
-		<statement question="{{ page_owner.profile.statement_5_q_id|uuid_str }}" answer="{{ page_owner.profile.statement_5_a_id|uuid_str }}" />
+		{% if page_owner.profile.statement_0_question_id is not None %}
+		<statement question="{{ page_owner.profile.statement_0_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_0_answer_id|uuid_str }}" />
+		<statement question="{{ page_owner.profile.statement_1_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_1_answer_id|uuid_str }}" />
+		<statement question="{{ page_owner.profile.statement_2_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_2_answer_id|uuid_str }}" />
+		<statement question="{{ page_owner.profile.statement_3_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_3_answer_id|uuid_str }}" />
+		<statement question="{{ page_owner.profile.statement_4_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_4_answer_id|uuid_str }}" />
+		<statement question="{{ page_owner.profile.statement_5_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_5_answer_id|uuid_str }}" />
+		{% endif %}
 	</statements>
 </userProfile>
 {# needed to display friend list (both private and public) #}

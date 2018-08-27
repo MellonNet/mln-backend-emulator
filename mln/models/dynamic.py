@@ -57,18 +57,6 @@ class Profile(models.Model):
 	page_skin = models.ForeignKey(ItemInfo, null=True, blank=True, related_name="+", on_delete=models.PROTECT, limit_choices_to={"type": ItemType.SKIN.value})
 	page_color = models.ForeignKey(Color, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
 	page_column_color_id = models.PositiveSmallIntegerField(null=True) # hardcoded for some reason
-	statement_0_q = models.ForeignKey(Question, related_name="+", on_delete=models.PROTECT, default=43520)
-	statement_0_a = models.ForeignKey(Answer, related_name="+", on_delete=models.PROTECT, default=46069)
-	statement_1_q = models.ForeignKey(Question, related_name="+", on_delete=models.PROTECT, default=43521)
-	statement_1_a = models.ForeignKey(Answer, related_name="+", on_delete=models.PROTECT, default=43239)
-	statement_2_q = models.ForeignKey(Question, related_name="+", on_delete=models.PROTECT, default=43522)
-	statement_2_a = models.ForeignKey(Answer, related_name="+", on_delete=models.PROTECT, default=43525)
-	statement_3_q = models.ForeignKey(Question, related_name="+", on_delete=models.PROTECT, default=43523)
-	statement_3_a = models.ForeignKey(Answer, related_name="+", on_delete=models.PROTECT, default=46126)
-	statement_4_q = models.ForeignKey(Question, related_name="+", on_delete=models.PROTECT, default=46062)
-	statement_4_a = models.ForeignKey(Answer, related_name="+", on_delete=models.PROTECT, default=46169)
-	statement_5_q = models.ForeignKey(Question, related_name="+", on_delete=models.PROTECT, default=46063)
-	statement_5_a = models.ForeignKey(Answer, related_name="+", on_delete=models.PROTECT, default=46170)
 	friends = models.ManyToManyField("self", through="Friendship", symmetrical=False)
 
 	def __str__(self):
@@ -140,6 +128,10 @@ class Profile(models.Model):
 			self.remove_inv_item(requirement.item_id, requirement.qty)
 		# add newly built item
 		self.add_inv_item(blueprint_info.build_id)
+
+for i in range(6):
+	Profile.add_to_class("statement_%i_question" % i, models.ForeignKey(Question, null=True, blank=True, related_name="+", on_delete=models.PROTECT))
+	Profile.add_to_class("statement_%i_answer" % i, models.ForeignKey(Answer, null=True, blank=True, related_name="+", on_delete=models.PROTECT))
 
 class InventoryStack(Stack):
 	"""A stack of items in the user's inventory."""
