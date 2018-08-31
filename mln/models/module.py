@@ -131,7 +131,11 @@ class Module(models.Model):
 			self.owner.profile.add_inv_item(trade.request_item, trade.request_qty)
 			# give item was already taken from owner at setup
 		else:
-			for cost in ModuleExecutionCost.objects.filter(module_item_id=self.item_id):
+			costs = ModuleExecutionCost.objects.filter(module_item_id=self.item_id)
+			for cost in costs:
+				if not executer.inventory.filter(item_id=cost.item_id, qty__gte=cost.qty).exists():
+					raise RuntimeError("Executer doesn't have execution cost %s in inventory" % cost)
+			for cost in costs:
 				executer.profile.remove_inv_item(cost.item_id, cost.qty)
 		self.save()
 
