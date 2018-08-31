@@ -62,9 +62,6 @@ class ModuleSaveSticker(models.Model):
 	rotation = models.SmallIntegerField()
 	depth = models.SmallIntegerField()
 
-	def __str__(self):
-		return "%s of %s" % (self.item.name, self.module)
-
 class ModuleSaveUGC(models.Model):
 	"""
 	Save data for modules with user-generated content (UGC): gallery, factory, and creation lab.
