@@ -73,7 +73,14 @@ class Module(models.Model):
 		self.save()
 
 	def vote(self, voter):
-		"""Vote on the module. Add a click to the module, and remove one from the voter's available votes."""
+		"""
+		Vote on the module. Add a click to the module, and remove one from the voter's available votes.
+		Raise ValueError if the voter is the module owner.
+		"""
+		if voter == self.owner:
+			raise ValueError("Can't vote on own module")
+		if voter.profile.available_votes <= 0:
+			raise RuntimeError("Voter has no votes left")
 		self.clicks_since_last_harvest += 1
 		self.total_clicks += 1
 		self.save()
