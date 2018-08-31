@@ -118,10 +118,15 @@ class Profile(models.Model):
 		"""
 		Use a blueprint to create a new item and add it to the user's inventory.
 		Remove the blueprint's requirements from the user's inventory.
+		Raise ValueError if the passed ID does not belong to a blueprint.
+		Raise RuntimeError if the blueprint or a required item is not in the user's inventory.
 		"""
 		if not self.user.inventory.filter(item_id=blueprint_id).exists():
 			raise RuntimeError("Blueprint not in inventory")
-		blueprint_info = BlueprintInfo.objects.get(item_id=blueprint_id)
+		try:
+			blueprint_info = BlueprintInfo.objects.get(item_id=blueprint_id)
+		except ObjectDoesNotExist:
+			raise ValueError("Item with ID %i is not a blueprint" % blueprint_id)
 		requirements = BlueprintRequirement.objects.filter(blueprint_item_id=blueprint_id)
 		# verify that requirements are met
 		for requirement in requirements:
