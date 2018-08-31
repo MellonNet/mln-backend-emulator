@@ -87,15 +87,19 @@ class Profile(models.Model):
 		Remove one or more items from the user's inventory.
 		Always use this function instead of modifying InventoryStacks directly.
 		This function subtracts the number of items from the stack, and deletes the stack if no more items are left.
+		Raise RuntimeError if the stack to remove items from does not exist, or if it has fewer items than should be removed.
 		"""
-		stack = self.user.inventory.get(item_id=item_id)
+		try:
+			stack = self.user.inventory.get(item_id=item_id)
+		except ObjectDoesNotExist:
+			raise RuntimeError("No stack of item ID %i of user %s exists to delete from" % (item_id, self))
 		if stack.qty > qty:
 			stack.qty -= qty
 			stack.save()
 		elif stack.qty == qty:
 			stack.delete()
 		else:
-			raise ValueError("Stack of item %i of user %s has fewer items than the %i requested to delete!" % (stack.item_id, self, qty))
+			raise RuntimeError("%s has fewer items than the %i requested to delete" % (stack, qty))
 
 	def update_available_votes(self):
 		"""
