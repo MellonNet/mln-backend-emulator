@@ -92,6 +92,8 @@ class Module(models.Model):
 		Set up the module with items.
 		Raise RuntimeError if the owner doesn't have the required items in their inventory.
 		"""
+		if self.is_setup:
+			return
 		if ModuleSetupTrade in self.get_settings_classes():
 			trade = ModuleSetupTrade.objects.get(module=self)
 			self.owner.profile.remove_inv_item(trade.give_item_id, trade.give_qty)
@@ -108,6 +110,8 @@ class Module(models.Model):
 
 	def teardown(self):
 		"""Remove the set up items."""
+		if not self.is_setup:
+			return
 		if ModuleSetupTrade in self.get_settings_classes():
 			trade = ModuleSetupTrade.objects.get(module=self)
 			self.owner.profile.add_inv_item(trade.give_item_id, trade.give_qty)
