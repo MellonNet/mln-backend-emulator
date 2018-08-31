@@ -131,7 +131,7 @@ class Profile(models.Model):
 		# verify that requirements are met
 		for requirement in requirements:
 			if not self.user.inventory.filter(item_id=requirement.item_id, qty__gte=requirement.qty).exists():
-				raise RuntimeError("Blueprint requirements not met!")
+				raise RuntimeError("Blueprint requirements not met")
 		# remove required items
 		for requirement in requirements:
 			self.remove_inv_item(requirement.item_id, requirement.qty)

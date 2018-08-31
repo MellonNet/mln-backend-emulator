@@ -88,12 +88,19 @@ class Module(models.Model):
 		voter.profile.save()
 
 	def setup(self):
-		"""Set up the module with items."""
+		"""
+		Set up the module with items.
+		Raise RuntimeError if the owner doesn't have the required items in their inventory.
+		"""
 		if ModuleSetupTrade in self.get_settings_classes():
 			trade = ModuleSetupTrade.objects.get(module=self)
 			self.owner.profile.remove_inv_item(trade.give_item_id, trade.give_qty)
 		else:
-			for cost in ModuleSetupCost.objects.filter(module_item_id=self.item_id):
+			costs = ModuleSetupCost.objects.filter(module_item_id=self.item_id)
+			for cost in costs:
+				if not self.owner.inventory.filter(item_id=cost.item_id, qty__gte=cost.qty).exists():
+					raise RuntimeError("Owner doesn't have setup requirement %s in inventory" % cost)
+			for cost in costs:
 				self.owner.profile.remove_inv_item(cost.item_id, cost.qty)
 		self.is_setup = True
 		self.last_harvest_time = now()
