@@ -3,7 +3,6 @@ import uuid
 from django.contrib.auth.models import User
 
 from ..models.dynamic import get_or_none, Friendship, FriendshipStatus
-from ..models.module import Module
 from ..models.static import ItemType
 from .utils import uuid_int
 
@@ -75,9 +74,9 @@ def get_or_create_module(user, elem):
 		item_id = uuid_int(elem.get("itemID"))
 		if not user.profile.is_networker:
 			user.profile.remove_inv_item(item_id)
-		module = Module.objects.create(item_id=item_id, pos_x=0, pos_y=0, owner=user)
+		module = user.modules.create(item_id=item_id, pos_x=0, pos_y=0)
 	else:
-		module = Module.objects.get(id=int(instance_id))
+		module = user.modules.get(id=int(instance_id))
 	return module
 
 def handle_page_save_layout(user, request):
@@ -94,7 +93,7 @@ def handle_page_save_layout(user, request):
 		present_ids.append(module.id)
 
 	# if a module is not in the supplied list of modules it was removed and should be deleted
-	removed_modules = Module.objects.filter(owner=user).exclude(id__in=present_ids)
+	removed_modules = user.modules.exclude(id__in=present_ids)
 	if not user.profile.is_networker:
 		for module in removed_modules.all():
 			if module.is_setup:
