@@ -26,7 +26,7 @@ class Message(models.Model):
 	sender = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
 	recipient = models.ForeignKey(User, related_name="messages", on_delete=models.CASCADE)
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
-	reply_body = models.ForeignKey(MessageBody, null=True, related_name="+", on_delete=models.CASCADE)
+	reply_body = models.ForeignKey(MessageBody, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
 	is_read = models.BooleanField(default=False)
 
 	def __str__(self):
@@ -56,7 +56,7 @@ class Profile(models.Model):
 	last_vote_update_time = models.DateTimeField(default=now)
 	page_skin = models.ForeignKey(ItemInfo, null=True, blank=True, related_name="+", on_delete=models.PROTECT, limit_choices_to={"type": ItemType.SKIN.value})
 	page_color = models.ForeignKey(Color, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-	page_column_color_id = models.PositiveSmallIntegerField(null=True) # hardcoded for some reason
+	page_column_color_id = models.PositiveSmallIntegerField(null=True, blank=True) # hardcoded for some reason
 	friends = models.ManyToManyField("self", through="Friendship", symmetrical=False)
 
 	def __str__(self):
