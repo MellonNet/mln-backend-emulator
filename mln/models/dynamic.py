@@ -144,7 +144,7 @@ class Profile(models.Model):
 		except ObjectDoesNotExist:
 			raise RuntimeError("No friendship relation with ID %i exists" % relation_id)
 		if friendship.from_profile != self and friendship.to_profile != self:
-			raise RuntimeError("Friendship relation with ID %i is not related to this user" % relation_id)
+			raise RuntimeError("%s is not related to user %s" % (friendship, self))
 		return friendship
 
 	def send_friend_invite(self, invitee_name):
@@ -176,9 +176,9 @@ class Profile(models.Model):
 		"""
 		relation = self._get_friendship(relation_id)
 		if relation.to_profile != self:
-			raise RuntimeError("Friendship relation with ID %i is not related to this user" % relation_id)
+			raise RuntimeError("%s is not related to this user" % relation)
 		if relation.status != FriendshipStatus.PENDING.value:
-			raise RuntimeError("Friendship relation with ID %i is not a pending relation" % relation_id)
+			raise RuntimeError("%s is not a pending relation" % relation)
 		if accept:
 			relation.status = FriendshipStatus.FRIEND.value
 			relation.save()
@@ -195,7 +195,7 @@ class Profile(models.Model):
 		"""
 		relation = self._get_friendship(relation_id)
 		if relation.status != FriendshipStatus.FRIEND.value:
-			raise RuntimeError("Friendship relation with ID %i is not a friend relation" % relation_id)
+			raise RuntimeError("%s is not a friend relation" % relation)
 		relation.delete()
 
 	def block_friend(self, relation_id):
@@ -208,7 +208,7 @@ class Profile(models.Model):
 		"""
 		relation = self._get_friendship(relation_id)
 		if relation.status != FriendshipStatus.FRIEND.value:
-			raise RuntimeError("Friendship relation with ID %i is not a friend relation" % relation_id)
+			raise RuntimeError("%s is not a friend relation" % relation)
 		# the direction of the relation is important for blocked friends
 		if relation.to_profile == self:
 			friend = relation.from_profile
@@ -228,7 +228,7 @@ class Profile(models.Model):
 		"""
 		relation = self._get_friendship(relation_id)
 		if relation.status != FriendshipStatus.BLOCKED.value:
-			raise RuntimeError("Friendship relation with ID %i is not a blocked relation" % relation_id)
+			raise RuntimeError("%s is not a blocked relation" % relation)
 		if relation.from_profile != self:
 			raise MLNError(MLNError.YOU_ARE_BLOCKED)
 		relation.status = FriendshipStatus.FRIEND.value
