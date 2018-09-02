@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.timezone import now
 
-from .static import Answer, BlueprintInfo, BlueprintRequirement, Color, EnumField, ItemInfo, ItemType, MessageBody, Stack, Question
+from .static import Answer, BlueprintInfo, BlueprintRequirement, Color, EnumField, ItemInfo, ItemType, MessageBody, MLNError, Stack, Question
 
 DAY = datetime.timedelta(days=1)
 
@@ -137,6 +137,44 @@ class Profile(models.Model):
 			self.remove_inv_item(requirement.item_id, requirement.qty)
 		# add newly built item
 		self.add_inv_item(blueprint_info.build_id)
+
+	def block_friend(self, relation_id):
+		"""Block a friend."""
+		relation = Friendship.objects.get(id=relation_id)
+		# the direction of the relation is important for blocked friends
+		if relation.to_profile == self:
+			friend = relation.from_profile
+			relation.from_profile = self
+			relation.to_profile = friend
+		relation.status = FriendshipStatus.BLOCKED.value
+		relation.save()
+
+	def unblock_friend(self, relation_id):
+		"""Unblock a friend."""
+		relation = Friendship.objects.get(id=relation_id)
+		if relation.from_profile == self:
+			relation.status = FriendshipStatus.FRIEND.value
+		else:
+			raise MLNError(MLNError.YOU_ARE_BLOCKED)
+		relation.save()
+
+	def handle_friend_invite_response(self, relation_id, accept):
+		"""Accept or decline a friend request."""
+		relation = Friendship.objects.get(id=relation_id)
+		if accept:
+			relation.status = FriendshipStatus.FRIEND.value
+			relation.save()
+		else:
+			relation.delete()
+
+	def remove_friend(self, relation_id):
+		"""Remove a friend from the user's friend list."""
+		Friendship.objects.get(id=relation_id).delete()
+
+	def send_friend_invite(self, invitee_name):
+		"""Send a friend request to someone."""
+		invitee = User.objects.get(username=invitee_name)
+		friendship = self.outgoing_friendships.create(to_profile=invitee.profile)
 
 for i in range(6):
 	Profile.add_to_class("statement_%i_question" % i, models.ForeignKey(Question, null=True, blank=True, related_name="+", on_delete=models.PROTECT))
