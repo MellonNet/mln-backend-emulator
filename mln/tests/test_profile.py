@@ -3,16 +3,18 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from mln.models.static import ItemInfo
+from mln.models.dynamic import FriendshipStatus
+from mln.models.static import ItemInfo, MLNError
 
-class ProfileTest(TestCase):
+class UserTest(TestCase):
+	def setUp(self):
+		self.user = User.objects.create()
+
+class ProfileTest(UserTest):
 	@classmethod
 	def setUpTestData(cls):
 		cls.APPLE = ItemInfo.objects.get(name="Apple").id
 		cls.APPLE_PIE_BLUEPRINT = ItemInfo.objects.get(name="Apple Pie Blueprint").id
-
-	def setUp(self):
-		self.user = User.objects.create()
 
 	def test_get_avatar_no_networker(self):
 		self.assertEqual(self.user.profile.get_avatar(), self.user.profile.avatar)
@@ -90,3 +92,155 @@ class ProfileTest(TestCase):
 		self.user.profile.add_inv_item(self.APPLE_PIE_BLUEPRINT)
 		with self.assertRaises(RuntimeError):
 			self.user.profile.use_blueprint(self.APPLE_PIE_BLUEPRINT)
+
+	def test_send_friend_invite_no_user(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.send_friend_invite("missinguser")
+
+	def test_handle_friend_invite_response_no_relation(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.handle_friend_invite_response(-1, True)
+
+	def test_remove_friend_no_relation(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.remove_friend(-1)
+
+	def test_block_friend_no_relation(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.block_friend(-1)
+
+	def test_unblock_friend_no_relation(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.unblock_friend(-1)
+
+class TwoUsersTest(UserTest):
+	def setUp(self):
+		super().setUp()
+		self.other_user = User.objects.create(username="other")
+
+class NoFriendTest(TwoUsersTest):
+	def test_send_friend_invite_ok(self):
+		self.user.profile.send_friend_invite("other")
+		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).count(), 1)
+
+	def test_send_friend_invite_again(self):
+		self.user.profile.send_friend_invite("other")
+		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).count(), 1)
+		self.user.profile.send_friend_invite("other")
+		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).count(), 1)
+
+class FriendshipRelationTest(TwoUsersTest):
+	def set_up_relation(self, status):
+		self.friendship_id = self.user.profile.outgoing_friendships.create(to_profile=self.other_user.profile, status=status.value).id
+
+class PendingFriendTest(FriendshipRelationTest):
+	def setUp(self):
+		super().setUp()
+		self.set_up_relation(FriendshipStatus.PENDING)
+
+	def test_handle_friend_invite_response_wrong_direction(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.handle_friend_invite_response(self.friendship_id, True)
+
+	def test_handle_friend_invite_response_accept_ok(self):
+		self.other_user.profile.handle_friend_invite_response(self.friendship_id, True)
+		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile, status=FriendshipStatus.FRIEND.value).count(), 1)
+
+	def test_handle_friend_invite_response_decline_ok(self):
+		self.other_user.profile.handle_friend_invite_response(self.friendship_id, False)
+		self.assertFalse(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).exists())
+
+	def test_remove_friend_pending(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.remove_friend(self.friendship_id)
+
+	def test_block_friend_pending(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.block_friend(self.friendship_id)
+
+	def test_unblock_friend_pending(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.unblock_friend(self.friendship_id)
+
+class FriendTest(FriendshipRelationTest):
+	def setUp(self):
+		super().setUp()
+		self.set_up_relation(FriendshipStatus.FRIEND)
+
+	def test_send_friend_invite_friend(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.send_friend_invite("other")
+
+	def test_handle_friend_invite_response_friend(self):
+		with self.assertRaises(RuntimeError):
+			self.other_user.profile.handle_friend_invite_response(self.friendship_id, True)
+
+	def test_remove_friend_ok(self):
+		self.user.profile.remove_friend(self.friendship_id)
+		self.assertFalse(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).exists())
+
+	def test_block_friend_one_way_ok(self):
+		self.user.profile.block_friend(self.friendship_id)
+		self.assertFalse(self.other_user.profile.outgoing_friendships.filter(to_profile=self.user.profile).exists())
+		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile, status=FriendshipStatus.BLOCKED.value).count(), 1)
+
+	def test_block_friend_other_way_ok(self):
+		self.other_user.profile.block_friend(self.friendship_id)
+		self.assertFalse(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).exists())
+		self.assertEqual(self.other_user.profile.outgoing_friendships.filter(to_profile=self.user.profile, status=FriendshipStatus.BLOCKED.value).count(), 1)
+
+	def test_unblock_friend_friend(self):
+		with self.assertRaises(RuntimeError):
+			self.other_user.profile.unblock_friend(self.friendship_id)
+
+class BlockedFriendTest(FriendshipRelationTest):
+	def setUp(self):
+		super().setUp()
+		self.set_up_relation(FriendshipStatus.BLOCKED)
+
+	def test_send_friend_invite_blocked(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.send_friend_invite("other")
+
+	def test_handle_friend_invite_response_blocked(self):
+		with self.assertRaises(RuntimeError):
+			self.other_user.profile.handle_friend_invite_response(self.friendship_id, True)
+
+	def test_remove_friend_blocked(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.remove_friend(self.friendship_id)
+
+	def test_block_friend_blocked(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.block_friend(self.friendship_id)
+
+	def test_unblock_friend_ok(self):
+		self.user.profile.unblock_friend(self.friendship_id)
+		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile, status=FriendshipStatus.FRIEND.value).count(), 1)
+
+	def test_unblock_friend_wrong_direction(self):
+		with self.assertRaises(MLNError):
+			self.other_user.profile.unblock_friend(self.friendship_id)
+
+class ThirdFriendTest(FriendshipRelationTest):
+	def setUp(self):
+		super().setUp()
+		self.set_up_relation(FriendshipStatus.FRIEND)
+		self.third_user = User.objects.create(username="third")
+		self.other_friendship_id = self.other_user.profile.outgoing_friendships.create(to_profile=self.third_user.profile, status=FriendshipStatus.FRIEND.value).id
+
+	def test_handle_friend_invite_response_unrelated(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.handle_friend_invite_response(self.other_friendship_id, True)
+
+	def test_remove_friend_unrelated(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.remove_friend(self.other_friendship_id)
+
+	def test_block_friend_unrelated(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.block_friend(self.other_friendship_id)
+
+	def test_unblock_friend_unrelated(self):
+		with self.assertRaises(RuntimeError):
+			self.user.profile.unblock_friend(self.other_friendship_id)
