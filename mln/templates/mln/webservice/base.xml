@@ -3,7 +3,7 @@
 <response type="{{ request_type }}"
 	{% if error_msg is not None %}
 		status="error"
-		userMessages="{{ error_msg|uuid_str }}"
+		userMessages="{{ error_msg }}"
 		>
 	{% else %}
 		>

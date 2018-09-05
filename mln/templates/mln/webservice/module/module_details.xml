@@ -1,7 +1,7 @@
 {% extends "mln/webservice/base.xml" %}
 {% load mln_utils %}
 {% block content %}
-<item itemID="{{ module.item_id|uuid_str }}" instanceID="{{ module.id }}" >
+<item itemID="{{ module.item_id }}" instanceID="{{ module.id }}" >
 	<settings>
 		{% include "mln/webservice/module/settings/base.xml" with module=module %}
 	</settings>

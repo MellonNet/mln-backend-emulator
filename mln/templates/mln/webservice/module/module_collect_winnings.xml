@@ -3,7 +3,7 @@
 {% block content %}
 {% if won %}
 <inventory>
-	<added itemid="{{ prize.item_id|uuid_str }}" qty="{{ prize.qty }}" />
+	<added itemid="{{ prize.item_id }}" qty="{{ prize.qty }}" />
 </inventory>
 {% endif %}
 {% endblock %}

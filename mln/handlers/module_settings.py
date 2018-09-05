@@ -1,10 +1,7 @@
 """Handlers for module specific save data updates."""
-import uuid
-
 from ..models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance, RocketGameTheme
 from ..models.module_settings_arcade import DestructoidBlockSkin, DestructoidCharacterSkin, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
 from .page import get_or_create_module
-from .utils import uuid_int
 
 def create_or_update(cls, module, attrs):
 	save_obj, created = cls.objects.get_or_create(module=module, defaults=attrs)
@@ -90,11 +87,11 @@ def deserialize_generic(module, save, setup):
 	attrs = {}
 	skin_id = save.get("skin")
 	if skin_id is not None:
-		skin_id = uuid.UUID(skin_id).node & 0xff # these UUIDs aren't actually proper UUIDs
+		skin_id = int(skin_id)
 		attrs["skin_id"] = skin_id
 	color_id = save.get("color")
 	if color_id is not None:
-		color_id = uuid.UUID(color_id).node & 0xff # these UUIDs aren't actually proper UUIDs
+		color_id = int(color_id)
 		attrs["color_id"] = color_id
 
 	create_or_update(ModuleSaveGeneric, module, attrs)
@@ -150,7 +147,7 @@ def deserialize_soundtrack(module, save, setup):
 			if id == "blankSound":
 				id = None
 			else:
-				id = uuid_int(id)
+				id = int(id)
 			pan = int(sound.get("pan"))
 			attrs["sound_%i_%i_id" % (i, j)] = id
 			attrs["sound_%i_%i_pan" % (i, j)] = pan
@@ -162,7 +159,7 @@ def deserialize_sticker(module, save, setup):
 	module.save_sticker.all().delete()
 	for movieclip in save.findall("Movieclip"):
 		attrs = {}
-		attrs["item_id"] = uuid_int(movieclip.get("id"))
+		attrs["item_id"] = int(movieclip.get("id"))
 		attrs["x"] = float(movieclip.get("_x"))
 		attrs["y"] = float(movieclip.get("_y"))
 		attrs["scale_x"] = int(movieclip.get("_xscale"))
@@ -178,9 +175,9 @@ def deserialize_trade(module, save, setup):
 	attrs = {}
 	give = setup.find("item[@type='Give']")
 	request = setup.find("item[@type='Request']")
-	attrs["give_item_id"] = uuid_int(give.get("itemID"))
+	attrs["give_item_id"] = int(give.get("itemID"))
 	attrs["give_qty"] = int(give.get("qty"))
-	attrs["request_item_id"] = uuid_int(request.get("itemID"))
+	attrs["request_item_id"] = int(request.get("itemID"))
 	attrs["request_qty"] = int(request.get("qty"))
 
 	create_or_update(ModuleSetupTrade, module, attrs)

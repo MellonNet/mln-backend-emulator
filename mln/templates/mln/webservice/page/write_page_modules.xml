@@ -1,6 +1,6 @@
 {% load mln_utils %}
 {% for module in page_owner.modules.all %}
-	<item type="module" itemID="{{ module.item_id|uuid_str }}" instanceID="{{ module.id }}"
+	<item type="module" itemID="{{ module.item_id }}" instanceID="{{ module.id }}"
 		{% if module.is_setup %}
 		isSetup="True"
 		{% endif %}
@@ -10,7 +10,7 @@
 			{% with yield_item_qty=module.calc_yield_qty %}
 				{% if yield_item_qty > 0 %}
 					<items>
-						<item itemID="{{ module.get_yield_item_id|uuid_str }}" qty="{{ yield_item_qty }}" />
+						<item itemID="{{ module.get_yield_item_id }}" qty="{{ yield_item_qty }}" />
 					</items>
 				{% endif %}
 			{% endwith %}

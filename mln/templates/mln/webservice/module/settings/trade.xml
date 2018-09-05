@@ -1,7 +1,7 @@
 {% load mln_utils %}
 {% with setup=module|get_or_none:"setup_trade" %}
 {% if setup is not None %}
-<item type="Give" itemID="{{ setup.give_item_id|uuid_str }}" qty="{{ setup.give_qty }}" itemType="{{ setup.give_item|get_item_type_name }}" />
-<item type="Request" itemID="{{ setup.request_item_id|uuid_str }}" qty="{{ setup.request_qty }}" itemType="{{ setup.request_item|get_item_type_name }}" />
+<item type="Give" itemID="{{ setup.give_item_id }}" qty="{{ setup.give_qty }}" itemType="{{ setup.give_item|get_item_type_name }}" />
+<item type="Request" itemID="{{ setup.request_item_id }}" qty="{{ setup.request_qty }}" itemType="{{ setup.request_item|get_item_type_name }}" />
 {% endif %}
 {% endwith %}

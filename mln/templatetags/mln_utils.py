@@ -1,6 +1,4 @@
 """Various utility functions for accessing or formatting data for templates that would be too complex to do in the templates themselves."""
-import uuid
-
 from django import template
 
 from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupTrade
@@ -111,7 +109,7 @@ def get_save_soundtrack(module):
 			if id is None:
 				id = "blankSound"
 			else:
-				id = uuid_str(id)
+				id = str(id)
 			pan = getattr(save, "sound_%i_%i_pan" % (i, j))
 			track.append((id, pan))
 		tracks.append(track)
@@ -139,17 +137,3 @@ def replyable(message):
 		return MessageReplyType.NORMAL_AND_EASY_REPLY.value
 	else:
 		return MessageReplyType.NORMAL_REPLY_ONLY.value
-
-@register.filter
-def uuid_color_str(id):
-	return "{22A85F30-D823-4BCE-8898-55028DB1CD%.2x}" % id
-
-@register.filter
-def uuid_skin_str(id):
-	return "{21A85F30-D823-4BCE-8898-55028DB1CD%.2x}" % id
-
-@register.filter
-def uuid_str(integer):
-	first_part = integer & 0xffffff
-	second_part = integer >> 24
-	return str(uuid.UUID(fields=(integer, 0, second_part, 0, 0, 0)))

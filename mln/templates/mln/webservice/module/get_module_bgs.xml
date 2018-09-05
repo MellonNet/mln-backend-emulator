@@ -2,6 +2,6 @@
 {% load mln_utils %}
 {% block content %}
 	{% for id in backgrounds %}
-		<item id="{{ id|uuid_str }}" />
+		<item id="{{ id }}" />
 	{% endfor %}
 {% endblock %}
