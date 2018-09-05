@@ -195,3 +195,6 @@ class ModuleSkin(models.Model):
 
 	def __str__(self):
 		return self.name
+
+class StartingStack(Stack):
+	"""A stack that users start off with in their inventory when they create an account."""
