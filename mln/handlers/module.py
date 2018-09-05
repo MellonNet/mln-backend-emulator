@@ -1,9 +1,8 @@
 from ..models.module import Module
 from ..models.static import ItemInfo, ItemType
-from .utils import uuid_int
 
 def handle_get_module_bgs(user, request):
-	item_id = uuid_int(request.get("id")) # todo: do something with this
+	item_id = int(request.get("id")) # todo: do something with this
 	backgrounds = [info.id for info in ItemInfo.objects.filter(type=ItemType.BACKGROUND.value)]
 	return {"backgrounds": backgrounds}
 

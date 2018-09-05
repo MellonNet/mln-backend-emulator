@@ -10,10 +10,10 @@
 <settings>
 	<color
 	{% if page_owner.profile.page_skin_id is not None %}
-		skinID="{{ page_owner.profile.page_skin_id|uuid_str }}"
+		skinID="{{ page_owner.profile.page_skin_id }}"
 	{% endif %}
 	{% if page_owner.profile.page_color is not None %}
-		colorID="{{ page_owner.profile.page_color_id|uuid_color_str }}"
+		colorID="{{ page_owner.profile.page_color_id }}"
 	{% endif %}
 	{% if page_owner.profile.page_column_color_id is not None %}
 		columnColorID="{{ page_owner.profile.page_column_color_id }}"
@@ -26,12 +26,12 @@
 	{# needed to save statements (both private and public) #}
 	<statements>
 		{% if page_owner.profile.statement_0_question_id is not None %}
-		<statement question="{{ page_owner.profile.statement_0_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_0_answer_id|uuid_str }}" />
-		<statement question="{{ page_owner.profile.statement_1_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_1_answer_id|uuid_str }}" />
-		<statement question="{{ page_owner.profile.statement_2_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_2_answer_id|uuid_str }}" />
-		<statement question="{{ page_owner.profile.statement_3_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_3_answer_id|uuid_str }}" />
-		<statement question="{{ page_owner.profile.statement_4_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_4_answer_id|uuid_str }}" />
-		<statement question="{{ page_owner.profile.statement_5_question_id|uuid_str }}" answer="{{ page_owner.profile.statement_5_answer_id|uuid_str }}" />
+		<statement question="{{ page_owner.profile.statement_0_question_id }}" answer="{{ page_owner.profile.statement_0_answer_id }}" />
+		<statement question="{{ page_owner.profile.statement_1_question_id }}" answer="{{ page_owner.profile.statement_1_answer_id }}" />
+		<statement question="{{ page_owner.profile.statement_2_question_id }}" answer="{{ page_owner.profile.statement_2_answer_id }}" />
+		<statement question="{{ page_owner.profile.statement_3_question_id }}" answer="{{ page_owner.profile.statement_3_answer_id }}" />
+		<statement question="{{ page_owner.profile.statement_4_question_id }}" answer="{{ page_owner.profile.statement_4_answer_id }}" />
+		<statement question="{{ page_owner.profile.statement_5_question_id }}" answer="{{ page_owner.profile.statement_5_answer_id }}" />
 		{% endif %}
 	</statements>
 </userProfile>
@@ -58,7 +58,7 @@
 {% if not is_private_view %}
 	<badges>
 	{% for badge in badges %}
-		<badge id="{{ badge.item_id|uuid_str }}" />
+		<badge id="{{ badge.item_id }}" />
 	{% endfor %}
 	</badges>
 {% endif %}
@@ -78,7 +78,7 @@
 	<inventory>
 		<items>
 		{% for stack in viewing_user.inventory.all %}
-			<item id="{{ stack.item_id|uuid_str }}" qty="{{ stack.qty }}" type="{{ stack.item|get_item_type_name }}" />
+			<item id="{{ stack.item_id }}" qty="{{ stack.qty }}" type="{{ stack.item|get_item_type_name }}" />
 		{% endfor %}
 		</items>
 	</inventory>

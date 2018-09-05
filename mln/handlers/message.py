@@ -1,6 +1,5 @@
 """Mail functionality handlers."""
 from ..models.dynamic import Message
-from .utils import uuid_int
 
 def handle_message_delete(user, request):
 	"""Delete a message from the user's inbox."""
@@ -19,8 +18,8 @@ def handle_message_detach(user, request):
 def handle_message_easy_reply(user, request):
 	"""Send a reply from a list of suggested replies."""
 	recipient_id = int(request.get("recipientID"))
-	org_body_id = uuid_int(request.get("orgBodyID"))
-	body_id = uuid_int(request.get("bodyID"))
+	org_body_id = int(request.get("orgBodyID"))
+	body_id = int(request.get("bodyID"))
 	return Message.objects.create(sender=user, recipient_id=recipient_id, body_id=body_id, reply_body_id=org_body_id)
 
 def handle_message_easy_reply_with_attachments(user, request):
@@ -44,7 +43,7 @@ def handle_message_list(user, request):
 def handle_message_send(user, request):
 	"""Send a message to someone."""
 	recipient_id = int(request.get("recipientID"))
-	body_id = uuid_int(request.get("bodyID"))
+	body_id = int(request.get("bodyID"))
 	return Message.objects.create(sender=user, recipient_id=recipient_id, body_id=body_id)
 
 def handle_message_send_with_attachment(user, request):
@@ -54,7 +53,7 @@ def handle_message_send_with_attachment(user, request):
 
 def create_attachment(message, request):
 	"""Remove items from the user's inventory and attach it to the message."""
-	attachment_item_id = uuid_int(request.get("itemID"))
+	attachment_item_id = int(request.get("itemID"))
 	attachment_qty = int(request.get("qty"))
 	message.sender.profile.remove_inv_item(attachment_item_id, attachment_qty)
 	message.attachments.create(item_id=attachment_item_id, qty=attachment_qty, message=message)

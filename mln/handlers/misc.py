@@ -1,9 +1,8 @@
 """Handlers that don't belong in any other group."""
 from ..models.static import ItemInfo, ItemType
-from .utils import uuid_int
 
 def handle_blueprint_use(user, request):
-	blueprint_id = uuid_int(request.get("blueprintID"))
+	blueprint_id = int(request.get("blueprintID"))
 	user.profile.use_blueprint(blueprint_id)
 
 def handle_inventory_module_get(user, request):
@@ -34,6 +33,6 @@ def handle_user_save_my_statements(user, request):
 	"""Save the "About me" statements when a user updates them."""
 	for statement in request.findall("statements/statement"):
 		order = statement.get("order")
-		setattr(user.profile, "statement_%s_question_id" % order, uuid_int(statement.get("question")))
-		setattr(user.profile, "statement_%s_answer_id" % order, uuid_int(statement.get("answer")))
+		setattr(user.profile, "statement_%s_question_id" % order, int(statement.get("question")))
+		setattr(user.profile, "statement_%s_answer_id" % order, int(statement.get("answer")))
 	user.profile.save()
