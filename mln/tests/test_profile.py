@@ -16,13 +16,6 @@ class ProfileTest(UserTest):
 		cls.APPLE = ItemInfo.objects.get(name="Apple").id
 		cls.APPLE_PIE_BLUEPRINT = ItemInfo.objects.get(name="Apple Pie Blueprint").id
 
-	def test_get_avatar_no_networker(self):
-		self.assertEqual(self.user.profile.get_avatar(), self.user.profile.avatar)
-
-	def test_get_avatar_networker(self):
-		self.user.profile.is_networker = True
-		self.assertEqual(self.user.profile.get_avatar(), self.user.profile.avatar+"#n")
-
 	def test_add_inv_item_empty(self):
 		add_qty = 10
 		self.user.profile.add_inv_item(self.APPLE, add_qty)

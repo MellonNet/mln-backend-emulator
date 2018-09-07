@@ -24,6 +24,13 @@ SETUP_TEMPLATES = {
 register = template.Library()
 
 @register.filter
+def get_avatar(profile):
+	"""Get the avatar including whether the user is a networker, which is for some reason part of the avatar field."""
+	if profile.is_networker:
+		return profile.avatar+"#n"
+	return profile.avatar
+
+@register.filter
 def get_concert_arcade_arrows(module):
 	arrows = module.save_concert_arcade.arrows
 	for arrowtype in "-90", "180", "0", "90":
