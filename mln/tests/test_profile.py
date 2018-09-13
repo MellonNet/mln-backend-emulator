@@ -1,24 +1,29 @@
 from datetime import timedelta
 
 from django.contrib.auth.models import User
-from django.test import TestCase
 
 from mln.models.static import ItemInfo
+from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 
-class UserTest(TestCase):
-	def setUp(self):
-		self.user = User.objects.create()
+@cls_setup
+def apple(cls):
+	cls.APPLE = ItemInfo.objects.get(name="Apple").id
 
-class TwoUsersTest(UserTest):
-	def setUp(self):
-		super().setUp()
-		self.other_user = User.objects.create(username="other")
+@cls_setup
+def apple_pie_blueprint(cls):
+	cls.APPLE_PIE_BLUEPRINT = ItemInfo.objects.get(name="Apple Pie Blueprint").id
 
-class ProfileTest(UserTest):
-	@classmethod
-	def setUpTestData(cls):
-		cls.APPLE = ItemInfo.objects.get(name="Apple").id
-		cls.APPLE_PIE_BLUEPRINT = ItemInfo.objects.get(name="Apple Pie Blueprint").id
+@setup
+def one_user(self):
+	self.user = User.objects.create(username="user")
+
+@setup
+@requires(one_user)
+def two_users(self):
+	self.other_user = User.objects.create(username="other")
+
+class ProfileTest(TestCase):
+	SETUP = apple, apple_pie_blueprint, one_user
 
 	def test_add_inv_item_empty(self):
 		add_qty = 10
