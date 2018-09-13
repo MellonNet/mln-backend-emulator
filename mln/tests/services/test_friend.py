@@ -3,9 +3,33 @@ from django.contrib.auth.models import User
 from mln.models.dynamic import FriendshipStatus
 from mln.models.static import MLNError
 from mln.services.friend import block_friend, handle_friend_invite_response, remove_friend, send_friend_invite, unblock_friend
-from mln.tests.test_profile import UserTest, TwoUsersTest
+from mln.tests.setup_testcase import requires, setup, TestCase
+from mln.tests.test_profile import one_user, two_users
 
-class OneUserTest(UserTest):
+@setup
+@requires(two_users)
+def pending_friends(self):
+	self.friendship_id = self.user.profile.outgoing_friendships.create(to_profile=self.other_user.profile, status=FriendshipStatus.PENDING.value).id
+
+@setup
+@requires(two_users)
+def friends(self):
+	self.friendship_id = self.user.profile.outgoing_friendships.create(to_profile=self.other_user.profile, status=FriendshipStatus.FRIEND.value).id
+
+@setup
+@requires(two_users)
+def blocked_friends(self):
+	self.friendship_id = self.user.profile.outgoing_friendships.create(to_profile=self.other_user.profile, status=FriendshipStatus.BLOCKED.value).id
+
+@setup
+@requires(friends)
+def three_friends(self):
+	self.third_user = User.objects.create(username="third")
+	self.other_friendship_id = self.other_user.profile.outgoing_friendships.create(to_profile=self.third_user.profile, status=FriendshipStatus.FRIEND.value).id
+
+class OneUserTest(TestCase):
+	SETUP = one_user,
+
 	def test_send_friend_invite_no_user(self):
 		with self.assertRaises(RuntimeError):
 			send_friend_invite(self.user, "missinguser")
@@ -26,7 +50,9 @@ class OneUserTest(UserTest):
 		with self.assertRaises(RuntimeError):
 			unblock_friend(self.user, -1)
 
-class NoFriendTest(TwoUsersTest):
+class NoFriendTest(TestCase):
+	SETUP = two_users,
+
 	def test_send_friend_invite_ok(self):
 		send_friend_invite(self.user, "other")
 		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).count(), 1)
@@ -37,14 +63,8 @@ class NoFriendTest(TwoUsersTest):
 		send_friend_invite(self.user, "other")
 		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).count(), 1)
 
-class FriendshipRelationTest(TwoUsersTest):
-	def set_up_relation(self, status):
-		self.friendship_id = self.user.profile.outgoing_friendships.create(to_profile=self.other_user.profile, status=status.value).id
-
-class PendingFriendTest(FriendshipRelationTest):
-	def setUp(self):
-		super().setUp()
-		self.set_up_relation(FriendshipStatus.PENDING)
+class PendingFriendTest(TestCase):
+	SETUP = pending_friends,
 
 	def test_handle_friend_invite_response_wrong_direction(self):
 		with self.assertRaises(RuntimeError):
@@ -70,10 +90,8 @@ class PendingFriendTest(FriendshipRelationTest):
 		with self.assertRaises(RuntimeError):
 			unblock_friend(self.user, self.friendship_id)
 
-class FriendTest(FriendshipRelationTest):
-	def setUp(self):
-		super().setUp()
-		self.set_up_relation(FriendshipStatus.FRIEND)
+class FriendTest(TestCase):
+	SETUP = friends,
 
 	def test_send_friend_invite_friend(self):
 		with self.assertRaises(RuntimeError):
@@ -101,10 +119,8 @@ class FriendTest(FriendshipRelationTest):
 		with self.assertRaises(RuntimeError):
 			unblock_friend(self.other_user, self.friendship_id)
 
-class BlockedFriendTest(FriendshipRelationTest):
-	def setUp(self):
-		super().setUp()
-		self.set_up_relation(FriendshipStatus.BLOCKED)
+class BlockedFriendTest(TestCase):
+	SETUP = blocked_friends,
 
 	def test_send_friend_invite_blocked(self):
 		with self.assertRaises(RuntimeError):
@@ -130,12 +146,8 @@ class BlockedFriendTest(FriendshipRelationTest):
 		with self.assertRaises(MLNError):
 			unblock_friend(self.other_user, self.friendship_id)
 
-class ThirdFriendTest(FriendshipRelationTest):
-	def setUp(self):
-		super().setUp()
-		self.set_up_relation(FriendshipStatus.FRIEND)
-		self.third_user = User.objects.create(username="third")
-		self.other_friendship_id = self.other_user.profile.outgoing_friendships.create(to_profile=self.third_user.profile, status=FriendshipStatus.FRIEND.value).id
+class ThirdFriendTest(TestCase):
+	SETUP = three_friends,
 
 	def test_handle_friend_invite_response_unrelated(self):
 		with self.assertRaises(RuntimeError):
