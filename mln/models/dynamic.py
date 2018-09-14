@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.timezone import now
 
-from .static import Answer, BlueprintInfo, BlueprintRequirement, Color, EnumField, ItemInfo, ItemType, MessageBody, MLNError, Stack, Question
+from .static import Answer, BlueprintInfo, BlueprintRequirement, Color, EnumField, ItemInfo, ItemType, MessageBody, Stack, Question
 
 DAY = datetime.timedelta(days=1)
 

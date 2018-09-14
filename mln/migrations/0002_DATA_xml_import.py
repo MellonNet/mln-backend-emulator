@@ -4,7 +4,6 @@ import xml.etree.ElementTree as et
 from django.db import migrations
 
 from mln.models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleSkin, ModuleYieldInfo, Question
-from mln.webservice import decrypt
 
 def import_xml(apps, schema_editor):
 	xml = et.parse(os.path.abspath(os.path.join(__file__, "..", "..", "..", "..", "content", "upload", "XMLCache/MLN/MLN_1033_20100211081940.xml")))
