@@ -1,6 +1,5 @@
-from django.core.exceptions import ObjectDoesNotExist
-
 from ..models.dynamic import FriendshipStatus, Message
+from ..models.static import MessageBody
 
 def _check_recipient(user, recipient_id):
 	if not user.profile.is_networker:
@@ -40,9 +39,9 @@ def easy_reply(user, recipient_id, org_body_id, body_id):
 	if not user.messages.filter(body_id=org_body_id, sender_id=recipient_id).exists():
 		raise RuntimeError("User %s does not have a message with body ID %i from user with ID %i to reply to" % (user, org_body_id, recipient_id))
 	body = MessageBody.objects.get(id=org_body_id)
-	if not body.filter(id=body_id).exists():
+	if not body.easy_replies.filter(id=body_id).exists():
 		raise RuntimeError("Message body with ID %i is not an easy reply of %s" % (body_id, body))
-	Message.objects.create(sender=user, recipient_id=recipient_id, body_id=body_id, reply_body_id=org_body_id)
+	return Message.objects.create(sender=user, recipient_id=recipient_id, body_id=body_id, reply_body_id=org_body_id)
 
 def open_message(user, message_id):
 	"""Get a message and mark it as read."""
