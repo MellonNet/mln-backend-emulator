@@ -13,7 +13,7 @@ def handle_message_easy_reply(user, request):
 	recipient_id = int(request.get("recipientID"))
 	org_body_id = int(request.get("orgBodyID"))
 	body_id = int(request.get("bodyID"))
-	easy_reply(user, recipient_id, org_body_id, body_id)
+	return easy_reply(user, recipient_id, org_body_id, body_id)
 
 def handle_message_easy_reply_with_attachments(user, request):
 	"""Like easy reply, but also attach items."""
