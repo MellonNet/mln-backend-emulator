@@ -64,7 +64,7 @@ handlers = {
 @csrf_exempt
 def webservice(request):
 	user = request.user
-	data = decrypt(request.POST["input"])
+	data = _decrypt(request.POST["input"])
 	if settings.DEBUG:
 		print(data)
 	xml_request = et.fromstring(data)
@@ -102,19 +102,19 @@ def webservice(request):
 	if settings.DEBUG:
 		print(out)
 	out = out.encode()
-	out = encrypt(out)
+	out = _encrypt(out)
 	return HttpResponse(out)
 
 ENCRYPTION_KEY = b"0e0 t00e0-0 i etiaonmld"
 
-def xor(data, key=ENCRYPTION_KEY):
+def _xor(data, key=ENCRYPTION_KEY):
 	res = bytearray(len(data))
 	for i in range(len(data)):
 		res[i] = data[i] ^ key[i % len(key)]
 	return res
 
-def decrypt(data):
-	return xor(base64.b64decode(data))
+def _decrypt(data):
+	return _xor(base64.b64decode(data))
 
-def encrypt(data):
-	return base64.b64encode(xor(data))
+def _encrypt(data):
+	return base64.b64encode(_xor(data))
