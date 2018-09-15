@@ -1,8 +1,8 @@
-from mln.models.static import ItemInfo, ItemType, MessageBody
+from mln.models.static import MessageBody
 from mln.services.message import create_attachment, delete_message, detach_attachments, easy_reply, open_message, send_message
 from mln.tests.services.test_friend import friends
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-from mln.tests.test_profile import two_users
+from mln.tests.test_profile import item, two_users
 
 @cls_setup
 def body(cls):
@@ -22,10 +22,6 @@ def easy_reply_body(cls):
 @requires(body, two_users)
 def message(self):
 	self.message = self.user.messages.create(sender=self.other_user, body_id=self.BODY.id)
-
-@cls_setup
-def item(cls):
-	cls.ITEM_ID = ItemInfo.objects.create(name="Test Item", type=ItemType.ITEM.value).id
 
 @setup
 @requires(item, two_users)
