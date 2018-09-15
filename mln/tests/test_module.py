@@ -1,56 +1,80 @@
 from datetime import timedelta
 from unittest.mock import patch
 
-from mln.models.static import ArcadePrize, ItemInfo, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
-from mln.tests.setup_testcase import requires, setup, TestCase
-from mln.tests.test_profile import one_user, two_users
+from mln.models.static import ArcadePrize, ItemInfo, ItemType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
+from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
+from mln.tests.test_profile import item, one_user, two_users
+
+@cls_setup
+@requires(item)
+def harvestable_module(cls):
+	cls.HARVESTABLE_MODULE_ID = ItemInfo.objects.create(name="Harvestable Module", type=ItemType.MODULE.value).id
+	cls.MODULE_INFO = ModuleInfo.objects.create(item_id=cls.HARVESTABLE_MODULE_ID, is_executable=False, is_setupable=False, href_editor="/upload5F35F258-650A-46E6-A4F3-07C4823F51EA.swf")
+	cls.MODULE_YIELD_INFO = ModuleYieldInfo.objects.create(item_id=cls.HARVESTABLE_MODULE_ID, yield_item_id=cls.ITEM_ID, max_yield=10, yield_per_day=5, clicks_per_yield=20)
 
 @setup
-@requires(one_user)
-def flower_module(self):
-	self.module = self.user.modules.create(item=ItemInfo.objects.get(name="Flower Patch Module"), pos_x=0, pos_y=0)
+@requires(harvestable_module, one_user)
+def has_harvestable_module(self):
+	self.module = self.user.modules.create(item_id=self.HARVESTABLE_MODULE_ID, pos_x=0, pos_y=0)
+
+@cls_setup
+@requires(item)
+def setupable_module(cls):
+	cls.SETUPABLE_MODULE_ID = ItemInfo.objects.create(name="Setupable Module", type=ItemType.MODULE.value).id
+	ModuleInfo.objects.create(item_id=cls.SETUPABLE_MODULE_ID, is_executable=True, is_setupable=True, href_editor="/upload5F35F258-650A-46E6-A4F3-07C4823F51EA.swf")
+	ModuleSetupCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=10)
+	ModuleExecutionCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=1)
 
 @setup
-@requires(one_user)
-def farm_module(self):
-	self.module = self.user.modules.create(item=ItemInfo.objects.get(name="Farm Pet Module, Rank 1"), pos_x=0, pos_y=0)
+@requires(setupable_module, one_user)
+def has_setupable_module(self):
+	self.module = self.user.modules.create(item_id=self.SETUPABLE_MODULE_ID, pos_x=0, pos_y=0)
 
 @setup
-@requires(farm_module)
-def setup_farm_module(self):
+@requires(has_setupable_module)
+def setup_setupable_module(self):
 	self.module.is_setup = True
 
+@cls_setup
+def arcade_module(cls):
+	cls.ARCADE_MODULE_ID = ItemInfo.objects.create(name="Delivery Arcade Game", type=ItemType.MODULE.value).id
+	cls.ARCADE_PRIZE_IDS = []
+	for i in range(5):
+		prize_id = ItemInfo.objects.create(name="Arcade Prize %i" % i, type=ItemType.ITEM.value).id
+		ArcadePrize.objects.create(module_item_id=cls.ARCADE_MODULE_ID, item_id=prize_id, qty=i, success_rate=20)
+		cls.ARCADE_PRIZE_IDS.append(prize_id)
+
 @setup
-@requires(one_user)
-def arcade_module(self):
-	self.module = self.user.modules.create(item=ItemInfo.objects.get(name="Delivery Arcade Game"), pos_x=0, pos_y=0)
+@requires(arcade_module, one_user)
+def has_arcade_module(self):
+	self.module = self.user.modules.create(item_id=self.ARCADE_MODULE_ID, pos_x=0, pos_y=0)
 
 class HarvestTest(TestCase):
-	SETUP = flower_module,
+	SETUP = has_harvestable_module,
 
 	def test_get_info(self):
-		self.assertEqual(self.module.get_info(), ModuleInfo.objects.get(item_id=self.module.item_id))
+		self.assertEqual(self.module.get_info(), self.MODULE_INFO)
 
 	def test_calc_yield_qty_time(self):
 		self.assertEqual(self.module.calc_yield_qty(), 0)
 		self.module.last_harvest_time = self.module.last_harvest_time - timedelta(days=1)
-		self.assertEqual(self.module.calc_yield_qty(), ModuleYieldInfo.objects.get(item_id=self.module.item_id).yield_per_day)
+		self.assertEqual(self.module.calc_yield_qty(), self.MODULE_YIELD_INFO.yield_per_day)
 
 	def test_calc_yield_qty_clicks(self):
 		clicks = 42
 		self.assertEqual(self.module.calc_yield_qty(), 0)
 		self.module.clicks_since_last_harvest = clicks
-		self.assertEqual(self.module.calc_yield_qty(), clicks//ModuleYieldInfo.objects.get(item_id=self.module.item_id).clicks_per_yield)
+		self.assertEqual(self.module.calc_yield_qty(), clicks//self.MODULE_YIELD_INFO.clicks_per_yield)
 
 	def test_calc_yield_qty_max(self):
-		info = ModuleYieldInfo.objects.get(item_id=self.module.item_id)
+		info = self.MODULE_YIELD_INFO
 		clicks = info.clicks_per_yield * info.max_yield * 10
 		self.assertEqual(self.module.calc_yield_qty(), 0)
 		self.module.clicks_since_last_harvest = clicks
 		self.assertEqual(self.module.calc_yield_qty(), info.max_yield)
 
 	def test_get_yield_item_id(self):
-		self.assertEqual(self.module.get_yield_item_id(), ModuleYieldInfo.objects.get(item_id=self.module.item_id).yield_item_id)
+		self.assertEqual(self.module.get_yield_item_id(), self.MODULE_YIELD_INFO.yield_item_id)
 
 	def test_harvest(self):
 		clicks = 42
@@ -66,7 +90,7 @@ class HarvestTest(TestCase):
 		self.assertFalse(self.module.is_setup)
 
 class VoteExecuteTest(TestCase):
-	SETUP = two_users, farm_module, setup_farm_module
+	SETUP = two_users, setupable_module, setup_setupable_module
 
 	def test_vote_ok(self):
 		av_votes = self.other_user.profile.available_votes
@@ -96,7 +120,7 @@ class VoteExecuteTest(TestCase):
 			self.assertFalse(self.other_user.inventory.filter(item_id=cost.item_id, qty=cost.qty).exists())
 
 class SetupableTest(TestCase):
-	SETUP = farm_module,
+	SETUP = has_setupable_module,
 
 	def test_setup_no_items(self):
 		with self.assertRaises(RuntimeError):
@@ -138,7 +162,7 @@ class SetupableTest(TestCase):
 		self.assertFalse(self.module.is_setup)
 
 class ArcadeTest(TestCase):
-	SETUP = arcade_module, two_users
+	SETUP = has_arcade_module, two_users
 
 	def test_select_arcade_prize(self):
 		with patch("random.randrange", return_value=0):
