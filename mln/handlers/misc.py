@@ -1,38 +1,22 @@
-"""Handlers that don't belong in any other group."""
-from ..models.static import ItemInfo, ItemType
+from ..services.misc import inventory_module_get, use_blueprint, user_save_my_avatar, user_save_my_statements
 
 def handle_blueprint_use(user, request):
 	blueprint_id = int(request.get("blueprintID"))
-	user.profile.use_blueprint(blueprint_id)
+	use_blueprint(user, blueprint_id)
 
 def handle_inventory_module_get(user, request):
-	"""
-	Return all modules available in the page builder.
-	Networkers have access to all MLN modules, while normal users only have access to those in their inventory.
-	"""
-	module_stacks = []
-	if user.profile.is_networker:
-		for module in ItemInfo.objects.filter(type=ItemType.MODULE.value):
-			module_stacks.append((module.id, 1))
-	else:
-		for stack in user.inventory.filter(item__type=ItemType.MODULE.value).all():
-			module_stacks.append((stack.item_id, stack.qty))
-	return {"module_stacks": module_stacks}
+	return {"module_stacks": inventory_module_get(user)}
 
 def handle_user_get_my_avatar(user, result):
 	"""Doesn't actually seem to be necessary since the avatar is already included in the page?"""
 	return
 
 def handle_user_save_my_avatar(user, request):
-	"""Save the user's avatar when the user updates it."""
 	profile = request.find("result/userProfile")
-	user.profile.avatar = profile.get("avatar")
-	user.profile.save()
+	user_save_my_avatar(user, profile.get("avatar"))
 
 def handle_user_save_my_statements(user, request):
-	"""Save the "About me" statements when a user updates them."""
+	statements = []
 	for statement in request.findall("statements/statement"):
-		order = statement.get("order")
-		setattr(user.profile, "statement_%s_question_id" % order, int(statement.get("question")))
-		setattr(user.profile, "statement_%s_answer_id" % order, int(statement.get("answer")))
-	user.profile.save()
+		statements.append((int(statement.get("question")), int(statement.get("answer"))))
+	user_save_my_statements(user, statements)

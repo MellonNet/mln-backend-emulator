@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.timezone import now
 
-from .static import Answer, BlueprintInfo, BlueprintRequirement, Color, EnumField, ItemInfo, ItemType, MessageBody, Stack, Question
+from .static import Answer, Color, EnumField, ItemInfo, ItemType, MessageBody, Stack, Question
 
 DAY = datetime.timedelta(days=1)
 
@@ -107,31 +107,6 @@ class Profile(models.Model):
 			self.available_votes = min(self.available_votes + new_votes, max_votes)
 			self.last_vote_update_time = now() - time_remainder
 			self.save()
-
-	def use_blueprint(self, blueprint_id):
-		"""
-		Use a blueprint to create a new item and add it to the user's inventory.
-		Remove the blueprint's requirements from the user's inventory.
-		Raise ValueError if the passed ID does not belong to a blueprint.
-		Raise RuntimeError if the blueprint or a required item is not in the user's inventory.
-		"""
-		if not self.user.inventory.filter(item_id=blueprint_id).exists():
-			raise RuntimeError("Blueprint not in inventory")
-		try:
-			blueprint_info = BlueprintInfo.objects.get(item_id=blueprint_id)
-		except ObjectDoesNotExist:
-			raise ValueError("Item with ID %i is not a blueprint" % blueprint_id)
-		requirements = BlueprintRequirement.objects.filter(blueprint_item_id=blueprint_id)
-		# verify that requirements are met
-		for requirement in requirements:
-			if not self.user.inventory.filter(item_id=requirement.item_id, qty__gte=requirement.qty).exists():
-				raise RuntimeError("Blueprint requirements not met")
-		# remove required items
-		for requirement in requirements:
-			self.remove_inv_item(requirement.item_id, requirement.qty)
-		# add newly built item
-		self.add_inv_item(blueprint_info.build_id)
-
 
 for i in range(6):
 	Profile.add_to_class("statement_%i_question" % i, models.ForeignKey(Question, null=True, blank=True, related_name="+", on_delete=models.PROTECT))

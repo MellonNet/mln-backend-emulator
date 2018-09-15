@@ -6,14 +6,6 @@ from mln.models.static import ItemInfo, ItemType
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 
 @cls_setup
-def apple(cls):
-	cls.APPLE = ItemInfo.objects.get(name="Apple").id
-
-@cls_setup
-def apple_pie_blueprint(cls):
-	cls.APPLE_PIE_BLUEPRINT = ItemInfo.objects.get(name="Apple Pie Blueprint").id
-
-@cls_setup
 def item(cls):
 	cls.ITEM_ID = ItemInfo.objects.create(name="Test Item", type=ItemType.ITEM.value).id
 
@@ -26,8 +18,13 @@ def one_user(self):
 def two_users(self):
 	self.other_user = User.objects.create(username="other")
 
+@setup
+@requires(one_user)
+def networker(self):
+	self.user.profile.is_networker = True
+
 class ProfileTest(TestCase):
-	SETUP = item, apple, apple_pie_blueprint, one_user
+	SETUP = item, one_user
 
 	def test_add_inv_item_empty(self):
 		add_qty = 10
@@ -79,22 +76,3 @@ class ProfileTest(TestCase):
 		before_time = self.user.profile.last_vote_update_time
 		self.user.profile.update_available_votes()
 		self.assertEqual(self.user.profile.last_vote_update_time, before_time)
-
-	def test_use_blueprint_ok(self):
-		blueprint = ItemInfo.objects.get(name="Apple Blueprint").id
-		self.user.profile.use_blueprint(blueprint)
-		self.assertTrue(self.user.inventory.filter(item_id=self.APPLE, qty=1).exists())
-
-	def test_use_blueprint_not_a_blueprint(self):
-		self.user.profile.add_inv_item(self.APPLE)
-		with self.assertRaises(ValueError):
-			self.user.profile.use_blueprint(self.APPLE)
-
-	def test_use_blueprint_not_exists(self):
-		with self.assertRaises(RuntimeError):
-			self.user.profile.use_blueprint(self.APPLE_PIE_BLUEPRINT)
-
-	def test_use_blueprint_requirements_not_met(self):
-		self.user.profile.add_inv_item(self.APPLE_PIE_BLUEPRINT)
-		with self.assertRaises(RuntimeError):
-			self.user.profile.use_blueprint(self.APPLE_PIE_BLUEPRINT)
