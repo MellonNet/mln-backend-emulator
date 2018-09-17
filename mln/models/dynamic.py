@@ -54,7 +54,7 @@ class Profile(models.Model):
 	rank = models.PositiveSmallIntegerField(default=0)
 	available_votes = models.PositiveSmallIntegerField(default=20)
 	last_vote_update_time = models.DateTimeField(default=now)
-	page_skin = models.ForeignKey(ItemInfo, null=True, blank=True, related_name="+", on_delete=models.PROTECT, limit_choices_to={"type": ItemType.SKIN.value})
+	page_skin = models.ForeignKey(ItemInfo, null=True, blank=True, related_name="+", on_delete=models.PROTECT, limit_choices_to={"type": ItemType.SKIN})
 	page_color = models.ForeignKey(Color, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
 	page_column_color_id = models.PositiveSmallIntegerField(null=True, blank=True) # hardcoded for some reason
 	friends = models.ManyToManyField("self", through="Friendship", symmetrical=False)
@@ -137,7 +137,7 @@ class Friendship(models.Model):
 	"""
 	from_profile = models.ForeignKey(Profile, related_name="outgoing_friendships", on_delete=models.CASCADE) # invite sender
 	to_profile = models.ForeignKey(Profile, related_name="incoming_friendships", on_delete=models.CASCADE) # invite recipient
-	status = EnumField(FriendshipStatus, default=FriendshipStatus.PENDING.value)
+	status = EnumField(FriendshipStatus, default=FriendshipStatus.PENDING)
 
 	def __str__(self):
 		return "%s -> %s: %s" % (self.from_profile.user, self.to_profile.user, self.get_status_display())

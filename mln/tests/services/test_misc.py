@@ -5,11 +5,11 @@ from mln.tests.test_profile import item, networker, one_user
 
 @cls_setup
 def module(cls):
-	cls.MODULE_ITEM_ID = ItemInfo.objects.create(name="Module Item", type=ItemType.MODULE.value).id
+	cls.MODULE_ITEM_ID = ItemInfo.objects.create(name="Module Item", type=ItemType.MODULE).id
 
 @cls_setup
 def module_2(cls):
-	cls.MODULE_ITEM_2_ID = ItemInfo.objects.create(name="Module Item 2", type=ItemType.MODULE.value).id
+	cls.MODULE_ITEM_2_ID = ItemInfo.objects.create(name="Module Item 2", type=ItemType.MODULE).id
 
 @setup
 @requires(module, one_user)
@@ -19,8 +19,8 @@ def has_module(self):
 @cls_setup
 @requires(item)
 def item_blueprint(cls):
-	cls.REQUIREMENT_ID = ItemInfo.objects.create(name="Requirement", type=ItemType.ITEM.value).id
-	cls.BLUEPRINT_ID = ItemInfo.objects.create(name="Test Item Blueprint", type=ItemType.BLUEPRINT.value).id
+	cls.REQUIREMENT_ID = ItemInfo.objects.create(name="Requirement", type=ItemType.ITEM).id
+	cls.BLUEPRINT_ID = ItemInfo.objects.create(name="Test Item Blueprint", type=ItemType.BLUEPRINT).id
 	BlueprintInfo.objects.create(item_id=cls.BLUEPRINT_ID, build_id=cls.ITEM_ID)
 	BlueprintRequirement.objects.create(blueprint_item_id=cls.BLUEPRINT_ID, item_id=cls.REQUIREMENT_ID, qty=1)
 

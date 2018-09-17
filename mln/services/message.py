@@ -13,7 +13,7 @@ def _get_message(user, message_id):
 	return message
 
 def _is_friend(user, friend_id):
-	return user.profile.outgoing_friendships.filter(to_profile_id=friend_id, status=FriendshipStatus.FRIEND.value).exists() or user.profile.incoming_friendships.filter(from_profile_id=friend_id, status=FriendshipStatus.FRIEND.value).exists()
+	return user.profile.outgoing_friendships.filter(to_profile_id=friend_id, status=FriendshipStatus.FRIEND).exists() or user.profile.incoming_friendships.filter(from_profile_id=friend_id, status=FriendshipStatus.FRIEND).exists()
 
 def create_attachment(message, item_id, qty):
 	"""Remove items from the user's inventory and attach it to the message."""

@@ -8,7 +8,7 @@ from mln.tests.test_profile import item, one_user, two_users
 @cls_setup
 @requires(item)
 def harvestable_module(cls):
-	cls.HARVESTABLE_MODULE_ID = ItemInfo.objects.create(name="Harvestable Module", type=ItemType.MODULE.value).id
+	cls.HARVESTABLE_MODULE_ID = ItemInfo.objects.create(name="Harvestable Module", type=ItemType.MODULE).id
 	cls.MODULE_INFO = ModuleInfo.objects.create(item_id=cls.HARVESTABLE_MODULE_ID, is_executable=False, is_setupable=False, href_editor="/upload5F35F258-650A-46E6-A4F3-07C4823F51EA.swf")
 	cls.MODULE_YIELD_INFO = ModuleYieldInfo.objects.create(item_id=cls.HARVESTABLE_MODULE_ID, yield_item_id=cls.ITEM_ID, max_yield=10, yield_per_day=5, clicks_per_yield=20)
 
@@ -20,7 +20,7 @@ def has_harvestable_module(self):
 @cls_setup
 @requires(item)
 def setupable_module(cls):
-	cls.SETUPABLE_MODULE_ID = ItemInfo.objects.create(name="Setupable Module", type=ItemType.MODULE.value).id
+	cls.SETUPABLE_MODULE_ID = ItemInfo.objects.create(name="Setupable Module", type=ItemType.MODULE).id
 	ModuleInfo.objects.create(item_id=cls.SETUPABLE_MODULE_ID, is_executable=True, is_setupable=True, href_editor="/upload5F35F258-650A-46E6-A4F3-07C4823F51EA.swf")
 	ModuleSetupCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=10)
 	ModuleExecutionCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=1)
@@ -38,10 +38,10 @@ def setup_setupable_module(self):
 
 @cls_setup
 def arcade_module(cls):
-	cls.ARCADE_MODULE_ID = ItemInfo.objects.create(name="Delivery Arcade Game", type=ItemType.MODULE.value).id
+	cls.ARCADE_MODULE_ID = ItemInfo.objects.create(name="Delivery Arcade Game", type=ItemType.MODULE).id
 	cls.ARCADE_PRIZE_IDS = []
 	for i in range(5):
-		prize_id = ItemInfo.objects.create(name="Arcade Prize %i" % i, type=ItemType.ITEM.value).id
+		prize_id = ItemInfo.objects.create(name="Arcade Prize %i" % i, type=ItemType.ITEM).id
 		ArcadePrize.objects.create(module_item_id=cls.ARCADE_MODULE_ID, item_id=prize_id, qty=i, success_rate=20)
 		cls.ARCADE_PRIZE_IDS.append(prize_id)
 

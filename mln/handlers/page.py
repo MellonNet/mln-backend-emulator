@@ -19,14 +19,14 @@ def handle_page_get_new(viewing_user, request):
 	for friendlist, is_from in ((page_owner.profile.outgoing_friendships.all(), True), (page_owner.profile.incoming_friendships.all(), False)):
 		for friendship in friendlist:
 			if not is_private_view:
-				if friendship.status != FriendshipStatus.FRIEND.value:
+				if friendship.status != FriendshipStatus.FRIEND:
 					continue
 			if is_from:
 				friend = friendship.to_profile.user
 			else:
 				friend = friendship.from_profile.user
 
-			if friendship.status == FriendshipStatus.PENDING.value:
+			if friendship.status == FriendshipStatus.PENDING:
 				if is_from:
 					status = "Pending Out"
 				else:
@@ -62,7 +62,7 @@ def handle_page_get_new(viewing_user, request):
 	}
 
 	if not is_private_view:
-		context["badges"] = page_owner.inventory.filter(item__type=ItemType.BADGE.value)
+		context["badges"] = page_owner.inventory.filter(item__type=ItemType.BADGE)
 
 	return context
 

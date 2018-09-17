@@ -7,7 +7,7 @@ from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 
 @cls_setup
 def item(cls):
-	cls.ITEM_ID = ItemInfo.objects.create(name="Test Item", type=ItemType.ITEM.value).id
+	cls.ITEM_ID = ItemInfo.objects.create(name="Test Item", type=ItemType.ITEM).id
 
 @setup
 def one_user(self):

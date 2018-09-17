@@ -11,7 +11,7 @@ def has_harvestable_module_stack(self):
 
 @cls_setup
 def skin_and_color(cls):
-	cls.SKIN_ID = ItemInfo.objects.create(name="Skin Item", type=ItemType.SKIN.value).id
+	cls.SKIN_ID = ItemInfo.objects.create(name="Skin Item", type=ItemType.SKIN).id
 	cls.COLOR_ID = Color.objects.create(color=0).id
 
 class PageSaveLayoutTest(TestCase):

@@ -136,11 +136,11 @@ def get_setup_templates(module):
 
 @register.filter
 def is_background(sticker):
-	return sticker.item.type == ItemType.BACKGROUND.value
+	return sticker.item.type == ItemType.BACKGROUND
 
 @register.filter
 def replyable(message):
 	if message.body.easy_replies.exists():
-		return MessageReplyType.NORMAL_AND_EASY_REPLY.value
+		return MessageReplyType.NORMAL_AND_EASY_REPLY
 	else:
-		return MessageReplyType.NORMAL_REPLY_ONLY.value
+		return MessageReplyType.NORMAL_REPLY_ONLY

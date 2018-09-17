@@ -3,7 +3,7 @@ from ..models.static import ItemInfo, ItemType
 
 def handle_get_module_bgs(user, request):
 	item_id = int(request.get("id")) # todo: do something with this
-	backgrounds = [info.id for info in ItemInfo.objects.filter(type=ItemType.BACKGROUND.value)]
+	backgrounds = [info.id for info in ItemInfo.objects.filter(type=ItemType.BACKGROUND)]
 	return {"backgrounds": backgrounds}
 
 def module_handler(func):

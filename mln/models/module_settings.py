@@ -44,7 +44,7 @@ class ModuleSaveSoundtrack(models.Model):
 # this looks weird but it's the simplest way to do this
 for i in range(4):
 	for j in range(4):
-		ModuleSaveSoundtrack.add_to_class("sound_%i_%i" % (i, j), models.ForeignKey(ItemInfo, null=True, blank=True, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.LOOP.value}))
+		ModuleSaveSoundtrack.add_to_class("sound_%i_%i" % (i, j), models.ForeignKey(ItemInfo, null=True, blank=True, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.LOOP}))
 		ModuleSaveSoundtrack.add_to_class("sound_%i_%i_pan" % (i, j), models.SmallIntegerField())
 
 class ModuleSaveSticker(models.Model):
@@ -54,7 +54,7 @@ class ModuleSaveSticker(models.Model):
 	Networker picture modules are actually just sticker modules as well, and their pictures are stickers.
 	"""
 	module = models.ForeignKey(Module, related_name="save_sticker", on_delete=models.CASCADE)
-	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BACKGROUND.value) | Q(type=ItemType.STICKER.value))
+	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BACKGROUND) | Q(type=ItemType.STICKER))
 	x = models.FloatField()
 	y = models.FloatField()
 	scale_x = models.SmallIntegerField()
