@@ -15,7 +15,7 @@ def harvestable_module(cls):
 @setup
 @requires(harvestable_module, one_user)
 def has_harvestable_module(self):
-	self.module = self.user.modules.create(item_id=self.HARVESTABLE_MODULE_ID, pos_x=0, pos_y=0)
+	self.h_module = self.user.modules.create(item_id=self.HARVESTABLE_MODULE_ID, pos_x=0, pos_y=0)
 
 @cls_setup
 @requires(item)
@@ -28,12 +28,13 @@ def setupable_module(cls):
 @setup
 @requires(setupable_module, one_user)
 def has_setupable_module(self):
-	self.module = self.user.modules.create(item_id=self.SETUPABLE_MODULE_ID, pos_x=0, pos_y=0)
+	self.s_module = self.user.modules.create(item_id=self.SETUPABLE_MODULE_ID, pos_x=0, pos_y=1)
 
 @setup
 @requires(has_setupable_module)
 def setup_setupable_module(self):
-	self.module.is_setup = True
+	self.s_module.is_setup = True
+	self.s_module.save()
 
 @cls_setup
 def arcade_module(cls):
@@ -47,76 +48,76 @@ def arcade_module(cls):
 @setup
 @requires(arcade_module, one_user)
 def has_arcade_module(self):
-	self.module = self.user.modules.create(item_id=self.ARCADE_MODULE_ID, pos_x=0, pos_y=0)
+	self.a_module = self.user.modules.create(item_id=self.ARCADE_MODULE_ID, pos_x=0, pos_y=2)
 
 class HarvestTest(TestCase):
 	SETUP = has_harvestable_module,
 
 	def test_get_info(self):
-		self.assertEqual(self.module.get_info(), self.MODULE_INFO)
+		self.assertEqual(self.h_module.get_info(), self.MODULE_INFO)
 
 	def test_calc_yield_qty_time(self):
-		self.assertEqual(self.module.calc_yield_qty(), 0)
-		self.module.last_harvest_time = self.module.last_harvest_time - timedelta(days=1)
-		self.assertEqual(self.module.calc_yield_qty(), self.MODULE_YIELD_INFO.yield_per_day)
+		self.assertEqual(self.h_module.calc_yield_qty(), 0)
+		self.h_module.last_harvest_time = self.h_module.last_harvest_time - timedelta(days=1)
+		self.assertEqual(self.h_module.calc_yield_qty(), self.MODULE_YIELD_INFO.yield_per_day)
 
 	def test_calc_yield_qty_clicks(self):
 		clicks = 42
-		self.assertEqual(self.module.calc_yield_qty(), 0)
-		self.module.clicks_since_last_harvest = clicks
-		self.assertEqual(self.module.calc_yield_qty(), clicks//self.MODULE_YIELD_INFO.clicks_per_yield)
+		self.assertEqual(self.h_module.calc_yield_qty(), 0)
+		self.h_module.clicks_since_last_harvest = clicks
+		self.assertEqual(self.h_module.calc_yield_qty(), clicks//self.MODULE_YIELD_INFO.clicks_per_yield)
 
 	def test_calc_yield_qty_max(self):
 		info = self.MODULE_YIELD_INFO
 		clicks = info.clicks_per_yield * info.max_yield * 10
-		self.assertEqual(self.module.calc_yield_qty(), 0)
-		self.module.clicks_since_last_harvest = clicks
-		self.assertEqual(self.module.calc_yield_qty(), info.max_yield)
+		self.assertEqual(self.h_module.calc_yield_qty(), 0)
+		self.h_module.clicks_since_last_harvest = clicks
+		self.assertEqual(self.h_module.calc_yield_qty(), info.max_yield)
 
 	def test_get_yield_item_id(self):
-		self.assertEqual(self.module.get_yield_item_id(), self.MODULE_YIELD_INFO.yield_item_id)
+		self.assertEqual(self.h_module.get_yield_item_id(), self.MODULE_YIELD_INFO.yield_item_id)
 
 	def test_harvest(self):
 		clicks = 42
-		now = self.module.last_harvest_time
-		self.module.last_harvest_time = self.module.last_harvest_time - timedelta(hours=5)
-		self.module.clicks_since_last_harvest = clicks
+		now = self.h_module.last_harvest_time
+		self.h_module.last_harvest_time = self.h_module.last_harvest_time - timedelta(hours=5)
+		self.h_module.clicks_since_last_harvest = clicks
 		with patch("mln.models.module.now", return_value=now):
-			harvest_qty, time_remainder, click_remainder = self.module._calc_yield_info()
-			self.module.harvest()
-		self.assertTrue(self.user.inventory.filter(item_id=self.module.get_yield_item_id(), qty=harvest_qty).exists())
-		self.assertEqual(self.module.last_harvest_time, now - time_remainder)
-		self.assertEqual(self.module.clicks_since_last_harvest, click_remainder)
-		self.assertFalse(self.module.is_setup)
+			harvest_qty, time_remainder, click_remainder = self.h_module._calc_yield_info()
+			self.h_module.harvest()
+		self.assertTrue(self.user.inventory.filter(item_id=self.h_module.get_yield_item_id(), qty=harvest_qty).exists())
+		self.assertEqual(self.h_module.last_harvest_time, now - time_remainder)
+		self.assertEqual(self.h_module.clicks_since_last_harvest, click_remainder)
+		self.assertFalse(self.h_module.is_setup)
 
 class VoteExecuteTest(TestCase):
 	SETUP = two_users, setupable_module, setup_setupable_module
 
 	def test_vote_ok(self):
 		av_votes = self.other_user.profile.available_votes
-		self.module.vote(self.other_user)
-		self.assertEqual(self.module.clicks_since_last_harvest, 1)
-		self.assertEqual(self.module.total_clicks, 1)
+		self.s_module.vote(self.other_user)
+		self.assertEqual(self.s_module.clicks_since_last_harvest, 1)
+		self.assertEqual(self.s_module.total_clicks, 1)
 		self.assertEqual(self.other_user.profile.available_votes, av_votes - 1)
 
 	def test_vote_self(self):
 		with self.assertRaises(ValueError):
-			self.module.vote(self.user)
+			self.s_module.vote(self.user)
 
 	def test_vote_no_votes_left(self):
 		self.other_user.profile.available_votes = 0
 		with self.assertRaises(RuntimeError):
-			self.module.vote(self.other_user)
+			self.s_module.vote(self.other_user)
 
 	def test_execute_no_items(self):
 		with self.assertRaises(RuntimeError):
-			self.module.execute(self.other_user)
+			self.s_module.execute(self.other_user)
 
 	def test_execute_ok(self):
-		for cost in ModuleExecutionCost.objects.filter(module_item_id=self.module.item_id):
+		for cost in ModuleExecutionCost.objects.filter(module_item_id=self.s_module.item_id):
 			self.other_user.profile.add_inv_item(cost.item_id, cost.qty)
-		self.module.execute(self.other_user)
-		for cost in ModuleExecutionCost.objects.filter(module_item_id=self.module.item_id):
+		self.s_module.execute(self.other_user)
+		for cost in ModuleExecutionCost.objects.filter(module_item_id=self.s_module.item_id):
 			self.assertFalse(self.other_user.inventory.filter(item_id=cost.item_id, qty=cost.qty).exists())
 
 class SetupableTest(TestCase):
@@ -124,48 +125,48 @@ class SetupableTest(TestCase):
 
 	def test_setup_no_items(self):
 		with self.assertRaises(RuntimeError):
-			self.module.setup()
+			self.s_module.setup()
 
 	def test_setup_ok(self):
-		costs = ModuleSetupCost.objects.filter(module_item_id=self.module.item_id)
+		costs = ModuleSetupCost.objects.filter(module_item_id=self.s_module.item_id)
 		for cost in costs:
 			self.user.profile.add_inv_item(cost.item_id, cost.qty)
-		self.module.setup()
+		self.s_module.setup()
 		for cost in costs:
 			self.assertFalse(self.user.inventory.filter(item_id=cost.item_id).exists())
-		self.assertTrue(self.module.is_setup)
+		self.assertTrue(self.s_module.is_setup)
 
 	def test_setup_already_setup(self):
-		self.module.is_setup = True
-		costs = ModuleSetupCost.objects.filter(module_item_id=self.module.item_id)
+		self.s_module.is_setup = True
+		costs = ModuleSetupCost.objects.filter(module_item_id=self.s_module.item_id)
 		for cost in costs:
 			self.user.profile.add_inv_item(cost.item_id, cost.qty)
-		self.module.setup()
+		self.s_module.setup()
 		for cost in costs:
 			self.assertTrue(self.user.inventory.filter(item_id=cost.item_id, qty=cost.qty).exists())
-		self.assertTrue(self.module.is_setup)
+		self.assertTrue(self.s_module.is_setup)
 
 	def test_teardown_ok(self):
-		self.module.is_setup = True
-		self.module.teardown()
-		costs = ModuleSetupCost.objects.filter(module_item_id=self.module.item_id)
+		self.s_module.is_setup = True
+		self.s_module.teardown()
+		costs = ModuleSetupCost.objects.filter(module_item_id=self.s_module.item_id)
 		for cost in costs:
 			self.assertTrue(self.user.inventory.filter(item_id=cost.item_id, qty=cost.qty).exists())
-		self.assertFalse(self.module.is_setup)
+		self.assertFalse(self.s_module.is_setup)
 
 	def test_teardown_not_setup(self):
-		self.module.is_setup = False
-		self.module.teardown()
-		costs = ModuleSetupCost.objects.filter(module_item_id=self.module.item_id)
+		self.s_module.is_setup = False
+		self.s_module.teardown()
+		costs = ModuleSetupCost.objects.filter(module_item_id=self.s_module.item_id)
 		for cost in costs:
 			self.assertFalse(self.user.inventory.filter(item_id=cost.item_id).exists())
-		self.assertFalse(self.module.is_setup)
+		self.assertFalse(self.s_module.is_setup)
 
 class ArcadeTest(TestCase):
 	SETUP = has_arcade_module, two_users
 
 	def test_select_arcade_prize(self):
 		with patch("random.randrange", return_value=0):
-			self.module.select_arcade_prize(self.other_user)
-		prize = ArcadePrize.objects.filter(module_item_id=self.module.item_id)[0]
+			self.a_module.select_arcade_prize(self.other_user)
+		prize = ArcadePrize.objects.filter(module_item_id=self.a_module.item_id)[0]
 		self.assertTrue(self.other_user.inventory.filter(item_id=prize.item_id, qty=prize.qty).exists())

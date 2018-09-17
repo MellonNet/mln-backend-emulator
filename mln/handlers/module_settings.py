@@ -1,7 +1,6 @@
 """Handlers for module specific save data updates."""
 from ..models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance, RocketGameTheme
 from ..models.module_settings_arcade import DestructoidBlockSkin, DestructoidCharacterSkin, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
-from .page import get_or_create_module
 
 def create_or_update(cls, module, attrs):
 	save_obj, created = cls.objects.get_or_create(module=module, defaults=attrs)
@@ -214,6 +213,17 @@ SETTINGS_HANDLERS = {
 	ModuleSetupTrade: deserialize_trade,
 	ModuleSetupTrioPerformance: deserialize_trio_performance,
 }
+
+def get_or_create_module(user, elem):
+	instance_id = elem.get("instanceID")
+	if instance_id == "00000000-0000-0000-0000-000000000000":
+		item_id = int(elem.get("itemID"))
+		if not user.profile.is_networker:
+			user.profile.remove_inv_item(item_id)
+		module = user.modules.create(item_id=item_id, pos_x=0, pos_y=0)
+	else:
+		module = user.modules.get(id=int(instance_id))
+	return module
 
 def handle_module_save_settings(user, request):
 	module = get_or_create_module(user, request)
