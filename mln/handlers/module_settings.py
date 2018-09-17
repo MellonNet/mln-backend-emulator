@@ -60,8 +60,8 @@ def deserialize_destructoid_arcade(module, save, setup):
 	else:
 		attrs["energy_used"] = int(game_setting.get("energyUsed"))
 	character, block, background = game_setting.get("skins").split(",")
-	attrs["character_skin"] = DestructoidCharacterSkin[character[2:].upper()].value
-	attrs["block_skin"] = DestructoidBlockSkin[block[2:].upper()].value
+	attrs["character_skin"] = DestructoidCharacterSkin[character[2:].upper()]
+	attrs["block_skin"] = DestructoidBlockSkin[block[2:].upper()]
 	attrs["background_skin"] = int(background[5:])
 	rows = [0, 0, 0]
 	for i, column in enumerate(game_setting.findall("column")):
@@ -134,7 +134,7 @@ def deserialize_networker_text(module, save, setup):
 
 def deserialize_rocket_game(module, save, setup):
 	attrs = {}
-	attrs["theme"] = RocketGameTheme[save.find("theme").text.upper()].value
+	attrs["theme"] = RocketGameTheme[save.find("theme").text.upper()]
 
 	create_or_update(ModuleSaveRocketGame, module, attrs)
 

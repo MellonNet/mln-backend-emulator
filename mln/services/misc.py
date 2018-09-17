@@ -7,10 +7,10 @@ def inventory_module_get(user):
 	"""
 	module_stacks = []
 	if user.profile.is_networker:
-		for module in ItemInfo.objects.filter(type=ItemType.MODULE.value):
+		for module in ItemInfo.objects.filter(type=ItemType.MODULE):
 			module_stacks.append((module.id, 1))
 	else:
-		for stack in user.inventory.filter(item__type=ItemType.MODULE.value).all():
+		for stack in user.inventory.filter(item__type=ItemType.MODULE).all():
 			module_stacks.append((stack.item_id, stack.qty))
 	return module_stacks
 

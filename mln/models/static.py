@@ -43,9 +43,24 @@ class ItemType(Enum):
 	SKIN = auto()
 	STICKER = auto()
 
-def EnumField(enum, **kwargs):
-	"""Utility function to automatically create a field with choices from a python enum."""
-	return models.PositiveSmallIntegerField(choices=[(member.value, member.name.lower()) for member in enum], **kwargs)
+class EnumField(models.PositiveSmallIntegerField):
+	def __init__(self, enum, *args, **kwargs):
+		self.enum = enum
+		super().__init__(*args, choices=[(member.value, member.name.lower()) for member in enum], **kwargs)
+
+	def deconstruct(self):
+		name, path, args, kwargs = super().deconstruct()
+		args = self.enum, *args
+		del kwargs["choices"]
+		return name, path, args, kwargs
+
+	def from_db_value(self, value, expression, connection):
+		if value is None:
+			return None
+		return self.enum(value)
+
+	def get_prep_value(self, value):
+		return value.value
 
 class ItemInfo(models.Model):
 	"""
@@ -80,7 +95,7 @@ class Stack(models.Model):
 class BlueprintInfo(models.Model):
 	"""Stores which item the blueprint produces."""
 	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
-	build = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BADGE.value) | Q(type=ItemType.ITEM.value) | Q(type=ItemType.MASTERPIECE.value) | Q(type=ItemType.MODULE.value) | Q(type=ItemType.MOVIE.value) | Q(type=ItemType.SKIN.value))
+	build = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BADGE) | Q(type=ItemType.ITEM) | Q(type=ItemType.MASTERPIECE) | Q(type=ItemType.MODULE) | Q(type=ItemType.MOVIE) | Q(type=ItemType.SKIN))
 
 	def __str__(self):
 		return str(self.item)
@@ -88,7 +103,7 @@ class BlueprintInfo(models.Model):
 class BlueprintRequirement(Stack):
 	"""Stores how many of an item a blueprint needs to produce an item."""
 	blueprint_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE)
-	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BADGE.value) | Q(type=ItemType.ITEM.value))
+	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BADGE) | Q(type=ItemType.ITEM))
 
 	def __str__(self):
 		return "%s needs %s" % (self.blueprint_item, super().__str__())

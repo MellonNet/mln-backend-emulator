@@ -13,7 +13,7 @@ class Module(models.Model):
 	A module instance on a user's page.
 	This does not represent a stack of modules in the user's inventory, for that, see InventoryStack.
 	"""
-	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.MODULE.value})
+	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.MODULE})
 	pos_x = models.PositiveSmallIntegerField()
 	pos_y = models.PositiveSmallIntegerField()
 	last_harvest_time = models.DateTimeField(default=now)

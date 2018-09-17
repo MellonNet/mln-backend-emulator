@@ -48,9 +48,9 @@ def make_inline(inliner, *inlinees, get_inlines=None):
 make_inline(Question, Answer)
 
 def get_item_info_inlines(obj):
-	if obj.type == ItemType.BLUEPRINT.value:
+	if obj.type == ItemType.BLUEPRINT:
 		return BlueprintInfo, BlueprintRequirement
-	elif obj.type == ItemType.MODULE.value:
+	elif obj.type == ItemType.MODULE:
 		return ModuleInfo, ModuleYieldInfo, ArcadePrize, ModuleExecutionCost, ModuleSetupCost
 	else:
 		return ()

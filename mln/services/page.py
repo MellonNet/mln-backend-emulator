@@ -50,7 +50,7 @@ def page_save_options(user, skin_id, color_id, column_color_id):
 	Raise RuntimeError if the page skin ID is not the ID of a skin item.
 	Raise ValueError if the column color ID is not in the correct range.
 	"""
-	if skin_id is not None and not ItemInfo.objects.filter(id=skin_id, type=ItemType.SKIN.value).exists():
+	if skin_id is not None and not ItemInfo.objects.filter(id=skin_id, type=ItemType.SKIN).exists():
 		raise RuntimeError("Skin ID %i does not belong to a skin item" % skin_id)
 	if column_color_id < 0 or column_color_id > 4:
 		raise ValueError("Column Color ID %i does not exist" % column_color_id)
