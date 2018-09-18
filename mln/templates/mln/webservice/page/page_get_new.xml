@@ -78,7 +78,7 @@
 	<inventory>
 		<items>
 		{% for stack in viewing_user.inventory.all %}
-			<item id="{{ stack.item_id }}" qty="{{ stack.qty }}" type="{{ stack.item|get_item_type_name }}" />
+			<item id="{{ stack.item_id }}" qty="{{ stack.qty }}" type="{{ stack.item.type.name.lower }}" />
 		{% endfor %}
 		</items>
 	</inventory>
