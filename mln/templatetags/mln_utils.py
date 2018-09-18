@@ -95,10 +95,6 @@ def get_generic_settings(module):
 	return getattr(module, "save_generic", None)
 
 @register.filter
-def get_item_type_name(item_info):
-	return ItemType(item_info.type).name.lower()
-
-@register.filter
 def get_or_none(obj, name):
 	return getattr(obj, name, None)
 
@@ -141,6 +137,6 @@ def is_background(sticker):
 @register.filter
 def replyable(message):
 	if message.body.easy_replies.exists():
-		return MessageReplyType.NORMAL_AND_EASY_REPLY
+		return MessageReplyType.NORMAL_AND_EASY_REPLY.value
 	else:
-		return MessageReplyType.NORMAL_REPLY_ONLY
+		return MessageReplyType.NORMAL_REPLY_ONLY.value
