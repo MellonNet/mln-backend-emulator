@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.contrib.auth.models import User
 
-from mln.models.static import ItemInfo, ItemType
+from mln.models.static import ItemInfo, ItemType, StartingStack
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 
 @cls_setup
@@ -23,7 +23,32 @@ def two_users(self):
 def networker(self):
 	self.user.profile.is_networker = True
 
+@cls_setup
+@requires(item)
+def starting_item(cls):
+	StartingStack.objects.create(item_id=cls.ITEM_ID, qty=10)
+
 class ProfileTest(TestCase):
+	SETUP = one_user,
+
+	def test_update_available_votes_update(self):
+		before = self.user.profile.available_votes
+		self.user.profile.available_votes = 0
+		before_time = self.user.profile.last_vote_update_time - timedelta(days=1)
+		self.user.profile.last_vote_update_time = before_time
+		self.user.profile.update_available_votes()
+		self.assertEqual(self.user.profile.available_votes, before)
+		self.assertNotEqual(self.user.profile.last_vote_update_time, before_time)
+
+	def test_update_available_votes_no_update(self):
+		before_time = self.user.profile.last_vote_update_time
+		self.user.profile.update_available_votes()
+		self.assertEqual(self.user.profile.last_vote_update_time, before_time)
+
+	def test_starting_item(self):
+		self.assertFalse(self.user.inventory.exists())
+
+class ProfileInventoryTest(TestCase):
 	SETUP = item, one_user
 
 	def test_add_inv_item_empty(self):
@@ -63,16 +88,8 @@ class ProfileTest(TestCase):
 		with self.assertRaises(RuntimeError):
 			self.user.profile.remove_inv_item(self.ITEM_ID, remove_qty)
 
-	def test_update_available_votes_update(self):
-		before = self.user.profile.available_votes
-		self.user.profile.available_votes = 0
-		before_time = self.user.profile.last_vote_update_time - timedelta(days=1)
-		self.user.profile.last_vote_update_time = before_time
-		self.user.profile.update_available_votes()
-		self.assertEqual(self.user.profile.available_votes, before)
-		self.assertNotEqual(self.user.profile.last_vote_update_time, before_time)
+class ProfileStartingItemTest(TestCase):
+	SETUP = starting_item, one_user
 
-	def test_update_available_votes_no_update(self):
-		before_time = self.user.profile.last_vote_update_time
-		self.user.profile.update_available_votes()
-		self.assertEqual(self.user.profile.last_vote_update_time, before_time)
+	def test_starting_item(self):
+		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=10).exists())
