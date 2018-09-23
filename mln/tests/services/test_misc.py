@@ -153,6 +153,13 @@ class UserSaveMyStatementsTest(TestCase):
 		with self.assertRaises(ValueError):
 			user_save_my_statements(self.user, statements)
 
+	def test_user_save_my_statements_duplicate_questions(self):
+		question_id = next(iter(self.STATEMENTS))
+		answer_id = self.STATEMENTS[question_id][0]
+		statements = ((question_id, answer_id),) * 6
+		with self.assertRaises(ValueError):
+			user_save_my_statements(self.user, statements)
+
 	def test_user_save_my_statements_mandatory_not_supplied(self):
 		statements = []
 		i = 0
