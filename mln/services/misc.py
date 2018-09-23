@@ -62,16 +62,17 @@ def user_save_my_statements(user, statements):
 	"""
 	if len(statements) != 6:
 		raise ValueError("Incorrect number of statements")
-	mandatory = set(q.id for q in Question.objects.filter(mandatory=True))
-	i = 0
+	provided = set()
 	for question, answer in statements:
-		if question in mandatory:
-			mandatory.remove(question)
+		provided.add(question)
 		if not Answer.objects.filter(id=answer, question_id=question).exists():
 			raise ValueError("Answer %i is not an answer to Question %i" % (answer, question))
-		i += 1
-	if mandatory:
-		raise ValueError("Mandatory questions %s not supplied" % mandatory)
+	if len(provided) != 6:
+		raise ValueError("Duplicate questions provided")
+	mandatory = set(q.id for q in Question.objects.filter(mandatory=True))
+	mandatory_provided = mandatory & provided
+	if mandatory_provided != mandatory:
+		raise ValueError("Mandatory questions %s not provided" % (mandatory - mandatory_provided))
 	i = 0
 	for question, answer in statements:
 		setattr(user.profile, "statement_%s_question_id" % i, question)
