@@ -6,7 +6,7 @@ from django.db import models
 from django.utils.timezone import now
 
 from .dynamic import DAY, get_or_none
-from .static import ArcadePrize, ItemInfo, ItemType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
+from .static import ArcadePrize, ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
 
 class Module(models.Model):
 	"""
@@ -153,41 +153,35 @@ class Module(models.Model):
 	def get_settings_classes(self):
 		"""Get the save data classes for this module."""
 		info = self.get_info()
-		href = info.href_editor
-		href = href[href.rindex("/")+1:href.rindex(".")]
-		if href in module_settings_classes:
-			return module_settings_classes[href]
-		print("warning: no classes defined for", href)
-		return ()
-
+		return module_settings_classes[info.editor_type]
 
 from .module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
 from .module_settings_arcade import ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
 
-"""Settings class registry. This links module types to settings classes."""
+"""Settings class registry. This links module editor types to settings classes."""
 module_settings_classes = {
-	"upload6BE2047F-A1E7-46FE-ABE9-CD910C6EF59D": (ModuleSaveGeneric, ModuleSaveUGC),
-	"uploadE79A5782-F4CC-4FA6-B71B-5266E2830236": (ModuleSaveUGC,),
-	"upload5F35F258-650A-46E6-A4F3-07C4823F51EA": (ModuleSaveGeneric,),
-	"upload94145C71-2215-40F4-BC55-705F8CA24ACA": (ModuleSaveGeneric, ModuleSaveUGC),
-	"upload6FE45D31-426C-41DC-96F0-04C16BDAC640": (ModuleSaveUGC,),
-	"upload5E54C1F7-9D69-4089-A28B-C9A6054C2482": (ModuleSaveGeneric, ModuleSetupFriendShare),
-	"uploadBD27CDD3-01AB-4A14-B065-44AD7295987F": (ModuleSaveGeneric, ModuleSetupGroupPerformance),
-	"upload2ADB5931-F7EE-4363-9AFB-EBA8E45C6FB8": (ModuleSaveGeneric, ModuleSetupTrade),
-	"uploadC85FF476-57A7-41EE-BA1A-45D259F438A8": (ModuleSaveGeneric, ModuleSaveNetworkerText),
-	"upload66F5B629-AEB6-4C04-B56C-BC1BCA22ABF5": (ModuleSaveGeneric, ModuleSetupTrade),
-	"upload5CD17986-C326-4A56-9094-552F275D5906": (ModuleSaveGeneric, ModuleSaveSoundtrack),
-	"upload617A0D10-FA99-42AA-8B44-6534997F8819": (ModuleSaveSticker,),
-	"upload28814700-1EEA-458C-A494-6C4797739455": (ModuleSetupTrade,),
-	"uploadB58AC317-A0A2-41C4-8AA7-2086AB69CE9A": (ModuleSaveGeneric, ModuleSetupTrade),
-	"uploadF10B502A-8D24-43E3-BA33-84C183B5D857": (ModuleSaveGeneric, ModuleSetupTrioPerformance),
-	"uploadD668BCBE-4B58-406B-91C8-3C09AC4216DF": (ModuleSaveUGC,),
-	"upload3B10831D-FEBE-4C44-B964-6D69B49EA1C6": (ModuleSaveSticker, ModuleSaveRocketGame),
-	"download124C900AD0613F3B0E8683473AC6B267": (ModuleSaveConcertArcade,),
-	"download16F9FFF4A1719FF27AA4E4BD59ACAC27": (ModuleSaveHopArcade,),
-	"download3C08891ADDFAF741ECF73F38FB40B2A3": (ModuleSaveConcertArcade,),
-	"download6308BE1BFE39A4E7A3ADC4D112807016": (ModuleSaveDestructoidArcade,),
-	"download65E88EEE1750F1FF25361D8A52651BF1": (ModuleSaveDestructoidArcade,),
-	"download7BBDE1968863AF36A4723D79CEBE817E": (ModuleSaveDeliveryArcade,),
-	"download8D2D8E39CFEEF2BE409F2557F48F810C": (ModuleSaveConcertArcade,),
+	ModuleEditorType.CONCERT_I_ARCADE: (ModuleSaveConcertArcade,),
+	ModuleEditorType.CONCERT_II_ARCADE: (ModuleSaveConcertArcade,),
+	ModuleEditorType.DELIVERY_ARCADE: (ModuleSaveDeliveryArcade,),
+	ModuleEditorType.DESTRUCTOID_ARCADE: (ModuleSaveDestructoidArcade,),
+	ModuleEditorType.DR_INFERNO_ROBOT_SIM: (ModuleSaveDestructoidArcade,),
+	ModuleEditorType.FACTORY_GENERIC: (ModuleSaveGeneric, ModuleSaveUGC),
+	ModuleEditorType.FACTORY_NON_GENERIC: (ModuleSaveUGC,),
+	ModuleEditorType.FRIEND_SHARE: (ModuleSaveGeneric, ModuleSetupFriendShare),
+	ModuleEditorType.FRIENDLY_FELIX_CONCERT: (ModuleSaveConcertArcade,),
+	ModuleEditorType.GALLERY_GENERIC: (ModuleSaveGeneric, ModuleSaveUGC),
+	ModuleEditorType.GALLERY_NON_GENERIC: (ModuleSaveUGC,),
+	ModuleEditorType.GENERIC: (ModuleSaveGeneric,),
+	ModuleEditorType.GROUP_PERFORMANCE: (ModuleSaveGeneric, ModuleSetupGroupPerformance),
+	ModuleEditorType.HOP_ARCADE: (ModuleSaveHopArcade,),
+	ModuleEditorType.LOOP_SHOPPE: (ModuleSaveGeneric, ModuleSetupTrade),
+	ModuleEditorType.NETWORKER_TEXT: (ModuleSaveGeneric, ModuleSaveNetworkerText),
+	ModuleEditorType.NETWORKER_TRADE: (ModuleSaveGeneric, ModuleSetupTrade),
+	ModuleEditorType.PLASTIC_PELLET_INDUCTOR: (ModuleSaveUGC,),
+	ModuleEditorType.ROCKET_GAME: (ModuleSaveSticker, ModuleSaveRocketGame),
+	ModuleEditorType.SOUNDTRACK: (ModuleSaveGeneric, ModuleSaveSoundtrack),
+	ModuleEditorType.STICKER: (ModuleSaveSticker,),
+	ModuleEditorType.STICKER_SHOPPE: (ModuleSetupTrade,),
+	ModuleEditorType.TRADE: (ModuleSaveGeneric, ModuleSetupTrade),
+	ModuleEditorType.TRIO_PERFORMANCE: (ModuleSaveGeneric, ModuleSetupTrioPerformance),
 }

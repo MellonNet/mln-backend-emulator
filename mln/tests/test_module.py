@@ -1,7 +1,7 @@
 from datetime import timedelta
 from unittest.mock import patch
 
-from mln.models.static import ArcadePrize, ItemInfo, ItemType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
+from mln.models.static import ArcadePrize, ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.test_profile import item, one_user, two_users
 
@@ -9,7 +9,7 @@ from mln.tests.test_profile import item, one_user, two_users
 @requires(item)
 def harvestable_module(cls):
 	cls.HARVESTABLE_MODULE_ID = ItemInfo.objects.create(name="Harvestable Module", type=ItemType.MODULE).id
-	cls.MODULE_INFO = ModuleInfo.objects.create(item_id=cls.HARVESTABLE_MODULE_ID, is_executable=False, is_setupable=False, href_editor="/upload5F35F258-650A-46E6-A4F3-07C4823F51EA.swf")
+	cls.MODULE_INFO = ModuleInfo.objects.create(item_id=cls.HARVESTABLE_MODULE_ID, is_executable=False, is_setupable=False, editor_type=ModuleEditorType.GENERIC)
 	cls.MODULE_YIELD_INFO = ModuleYieldInfo.objects.create(item_id=cls.HARVESTABLE_MODULE_ID, yield_item_id=cls.ITEM_ID, max_yield=10, yield_per_day=5, clicks_per_yield=20)
 
 @setup
@@ -21,7 +21,7 @@ def has_harvestable_module(self):
 @requires(item)
 def setupable_module(cls):
 	cls.SETUPABLE_MODULE_ID = ItemInfo.objects.create(name="Setupable Module", type=ItemType.MODULE).id
-	ModuleInfo.objects.create(item_id=cls.SETUPABLE_MODULE_ID, is_executable=True, is_setupable=True, href_editor="/upload5F35F258-650A-46E6-A4F3-07C4823F51EA.swf")
+	ModuleInfo.objects.create(item_id=cls.SETUPABLE_MODULE_ID, is_executable=True, is_setupable=True, editor_type=ModuleEditorType.GENERIC)
 	ModuleSetupCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=10)
 	ModuleExecutionCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=1)
 
