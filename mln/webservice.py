@@ -36,7 +36,7 @@ handlers = {
 	"FriendRemoveMember": handle_friend_remove_member,
 	"FriendSendInvitation": handle_friend_send_invitation,
 	"getModuleBgs": (handle_get_module_bgs, "mln/webservice/module/get_module_bgs.xml"),
-	"InventoryModuleGet": (handle_inventory_module_get, "mln/webservice/inventory/inventory_module_get.xml"),
+	"InventoryModuleGet": (handle_inventory_module_get, "mln/webservice/misc/inventory_module_get.xml"),
 	"PageGetNew": (handle_page_get_new, "mln/webservice/page/page_get_new.xml"),
 	"PageSaveLayout": (handle_page_save_layout, "mln/webservice/page/page_save_layout.xml"),
 	"PageSaveOptions": handle_page_save_options,
@@ -56,7 +56,7 @@ handlers = {
 	"ModuleSetup": handle_module_setup,
 	"ModuleVote": (handle_module_vote, "mln/webservice/module/module_vote.xml"),
 	"ModuleTeardown": handle_module_teardown,
-	"UserGetMyAvatar": (handle_user_get_my_avatar, "mln/webservice/user/user_get_my_avatar.xml"),
+	"UserGetMyAvatar": (handle_user_get_my_avatar, "mln/webservice/misc/user_get_my_avatar.xml"),
 	"UserSaveMyAvatar": handle_user_save_my_avatar,
 	"UserSaveMyStatements": handle_user_save_my_statements,
 }
