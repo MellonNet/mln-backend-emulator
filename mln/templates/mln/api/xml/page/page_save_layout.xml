@@ -1,0 +1,5 @@
+{% extends "../base.xml" %}
+{% load mln_utils %}
+{% block content %}
+{% include "./write_page_modules.xml" with page_owner=user %}
+{% endblock %}

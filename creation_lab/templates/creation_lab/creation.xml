@@ -1,4 +1,4 @@
-{% extends "mln/webservice/base.xml" %}
+{% extends "mln/api/xml/base.xml" %}
 {% load static %}
 {% block content %}
 <item id="{{ creation.id }}" title="{{ creation.title }}" description="{{ creation.description }}" thumbnail="{{ creation.image.url }}" category="todo" DownloadLink="todo" />

@@ -1,0 +1,9 @@
+{% extends "../base.xml" %}
+{% load mln_utils %}
+{% block content %}
+<item itemID="{{ module.item_id }}" instanceID="{{ module.id }}" >
+	<settings>
+		{% include "./settings/base.xml" with module=module %}
+	</settings>
+</item>
+{% endblock %}

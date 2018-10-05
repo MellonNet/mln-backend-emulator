@@ -4,7 +4,7 @@ from mln.models.dynamic import FriendshipStatus
 from mln.models.static import MLNError
 from mln.services.friend import block_friend, handle_friend_invite_response, remove_friend, send_friend_invite, unblock_friend
 from mln.tests.setup_testcase import requires, setup, TestCase
-from mln.tests.test_profile import one_user, two_users
+from mln.tests.models.test_profile import one_user, two_users
 
 @setup
 @requires(two_users)

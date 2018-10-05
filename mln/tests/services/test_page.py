@@ -1,8 +1,8 @@
 from mln.models.static import Color, ItemInfo, ItemType
 from mln.services.page import page_save_layout, page_save_options
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-from mln.tests.test_module import harvestable_module, has_harvestable_module, has_harvestable_module_stack, has_setupable_module, setup_setupable_module
-from mln.tests.test_profile import item, one_user
+from mln.tests.models.test_module import harvestable_module, has_harvestable_module, has_harvestable_module_stack, has_setupable_module, setup_setupable_module
+from mln.tests.models.test_profile import item, one_user
 
 @cls_setup
 def skin_and_color(cls):

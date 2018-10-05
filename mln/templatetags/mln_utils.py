@@ -124,13 +124,13 @@ def get_save_soundtrack(module):
 def get_save_templates(module):
 	for cls in module.get_settings_classes():
 		if cls in SAVE_TEMPLATES:
-			yield "mln/webservice/module/settings/"+SAVE_TEMPLATES[cls]+".xml"
+			yield "mln/api/xml/module/settings/"+SAVE_TEMPLATES[cls]+".xml"
 
 @register.filter
 def get_setup_templates(module):
 	for cls in module.get_settings_classes():
 		if cls in SETUP_TEMPLATES:
-			yield "mln/webservice/module/settings/"+SETUP_TEMPLATES[cls]+".xml"
+			yield "mln/api/xml/module/settings/"+SETUP_TEMPLATES[cls]+".xml"
 
 @register.filter
 def is_background(sticker):

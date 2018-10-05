@@ -1,8 +1,8 @@
 from mln.models.static import MessageBody
 from mln.services.message import create_attachment, delete_message, detach_attachments, easy_reply, open_message, send_message
+from mln.tests.models.test_profile import item, two_users
 from mln.tests.services.test_friend import friends
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-from mln.tests.test_profile import item, two_users
 
 @cls_setup
 def body(cls):
