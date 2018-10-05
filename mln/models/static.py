@@ -46,7 +46,7 @@ class ItemType(Enum):
 class EnumField(models.PositiveSmallIntegerField):
 	def __init__(self, enum, *args, **kwargs):
 		self.enum = enum
-		super().__init__(*args, choices=[(member.value, member.name.lower()) for member in enum], **kwargs)
+		super().__init__(*args, choices=[(member, member.name.lower().replace("_", " ")) for member in enum], **kwargs)
 
 	def deconstruct(self):
 		name, path, args, kwargs = super().deconstruct()
@@ -60,7 +60,18 @@ class EnumField(models.PositiveSmallIntegerField):
 		return self.enum(value)
 
 	def get_prep_value(self, value):
+		if value is None:
+			return None
+		if isinstance(value, str):
+			return self.enum[value[value.index(".")+1:]].value
 		return value.value
+
+	def to_python(self, value):
+		if value is None:
+			return None
+		if isinstance(value, str):
+			return self.enum[value[value.index(".")+1:]]
+		return value
 
 class ItemInfo(models.Model):
 	"""
