@@ -2,7 +2,7 @@
 from django import template
 
 from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupTrade
-from mln.models.module_settings_arcade import DestructoidBlockSkin, DestructoidCharacterSkin, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
+from mln.models.module_settings_arcade import ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
 from mln.models.static import ItemType, MessageReplyType
 
 SAVE_TEMPLATES = {
@@ -59,8 +59,8 @@ def get_delivery_tile_name(tile):
 
 @register.filter
 def get_destructoid_arcade_skins(module):
-	char = DestructoidCharacterSkin(module.save_destructoid_arcade.character_skin).name.lower()
-	block = DestructoidBlockSkin(module.save_destructoid_arcade.character_skin).name.lower()
+	char = module.save_destructoid_arcade.character_skin.name.lower()
+	block = module.save_destructoid_arcade.block_skin.name.lower()
 	return "m_%s,m_%s,m_bg_%i" % (char, block, module.save_destructoid_arcade.background_skin)
 
 @register.filter
