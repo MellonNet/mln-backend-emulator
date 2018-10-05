@@ -17,6 +17,11 @@ def harvestable_module(cls):
 def has_harvestable_module(self):
 	self.h_module = self.user.modules.create(item_id=self.HARVESTABLE_MODULE_ID, pos_x=0, pos_y=0)
 
+@setup
+@requires(harvestable_module, one_user)
+def has_harvestable_module_stack(self):
+	self.user.profile.add_inv_item(self.HARVESTABLE_MODULE_ID)
+
 @cls_setup
 @requires(item)
 def setupable_module(cls):
