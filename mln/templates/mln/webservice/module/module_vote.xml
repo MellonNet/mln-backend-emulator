@@ -1,6 +1,6 @@
 {% extends "mln/webservice/base.xml" %}
 {% block content %}
-<votes remaining="{{ user.profile.available_votes }}" />
+<votes remaining="{{ available_votes }}" />
 {% block content2 %}
 {% endblock %}
 {% endblock %}

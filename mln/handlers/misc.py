@@ -9,7 +9,7 @@ def handle_inventory_module_get(user, request):
 
 def handle_user_get_my_avatar(user, result):
 	"""Doesn't actually seem to be necessary since the avatar is already included in the page?"""
-	return
+	return {"user": user}
 
 def handle_user_save_my_avatar(user, request):
 	profile = request.find("result/userProfile")
