@@ -119,12 +119,38 @@ class BlueprintRequirement(Stack):
 	def __str__(self):
 		return "%s needs %s" % (self.blueprint_item, super().__str__())
 
+class ModuleEditorType(Enum):
+	CONCERT_I_ARCADE = auto()
+	CONCERT_II_ARCADE = auto()
+	DELIVERY_ARCADE = auto()
+	DESTRUCTOID_ARCADE = auto()
+	DR_INFERNO_ROBOT_SIM = auto()
+	FACTORY_GENERIC = auto()
+	FACTORY_NON_GENERIC = auto()
+	FRIEND_SHARE = auto()
+	FRIENDLY_FELIX_CONCERT = auto()
+	GALLERY_GENERIC = auto()
+	GALLERY_NON_GENERIC = auto()
+	GENERIC = auto()
+	GROUP_PERFORMANCE = auto()
+	HOP_ARCADE = auto()
+	LOOP_SHOPPE = auto()
+	NETWORKER_TEXT = auto()
+	NETWORKER_TRADE = auto()
+	PLASTIC_PELLET_INDUCTOR = auto()
+	ROCKET_GAME = auto()
+	SOUNDTRACK = auto()
+	STICKER = auto()
+	STICKER_SHOPPE = auto()
+	TRADE = auto()
+	TRIO_PERFORMANCE = auto()
+
 class ModuleInfo(models.Model):
 	"""Stores whether the module is executable, setupable, and its editor type. The editor type defines which save data the module uses."""
 	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
 	is_executable = models.BooleanField()
 	is_setupable = models.BooleanField()
-	href_editor = models.CharField(max_length=256, null=True, blank=True)
+	editor_type = EnumField(ModuleEditorType, null=True, blank=True)
 
 	def __str__(self):
 		return str(self.item)
