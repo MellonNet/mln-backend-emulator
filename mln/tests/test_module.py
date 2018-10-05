@@ -27,13 +27,23 @@ def has_harvestable_module_stack(self):
 def setupable_module(cls):
 	cls.SETUPABLE_MODULE_ID = ItemInfo.objects.create(name="Setupable Module", type=ItemType.MODULE).id
 	ModuleInfo.objects.create(item_id=cls.SETUPABLE_MODULE_ID, is_executable=True, is_setupable=True, editor_type=ModuleEditorType.GENERIC)
-	ModuleSetupCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=10)
-	ModuleExecutionCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=1)
+	cls.SETUP_COST = ModuleSetupCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=10)
+	cls.EXECUTION_COST = ModuleExecutionCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=1)
 
 @setup
 @requires(setupable_module, one_user)
 def has_setupable_module(self):
 	self.s_module = self.user.modules.create(item_id=self.SETUPABLE_MODULE_ID, pos_x=0, pos_y=1)
+
+@setup
+@requires(setupable_module, one_user)
+def has_setup_cost(self):
+	self.user.profile.add_inv_item(self.SETUP_COST.item_id, self.SETUP_COST.qty)
+
+@setup
+@requires(setupable_module, one_user)
+def has_execution_cost(self):
+	self.other_user.profile.add_inv_item(self.EXECUTION_COST.item_id, self.EXECUTION_COST.qty)
 
 @setup
 @requires(has_setupable_module)
@@ -96,7 +106,7 @@ class HarvestTest(TestCase):
 		self.assertFalse(self.h_module.is_setup)
 
 class VoteExecuteTest(TestCase):
-	SETUP = two_users, setupable_module, setup_setupable_module
+	SETUP = two_users, setup_setupable_module
 
 	def test_vote_ok(self):
 		av_votes = self.other_user.profile.available_votes
@@ -118,12 +128,12 @@ class VoteExecuteTest(TestCase):
 		with self.assertRaises(RuntimeError):
 			self.s_module.execute(self.other_user)
 
+class ExecuteOkTest(TestCase):
+	SETUP = two_users, setup_setupable_module, has_execution_cost
+
 	def test_execute_ok(self):
-		for cost in ModuleExecutionCost.objects.filter(module_item_id=self.s_module.item_id):
-			self.other_user.profile.add_inv_item(cost.item_id, cost.qty)
 		self.s_module.execute(self.other_user)
-		for cost in ModuleExecutionCost.objects.filter(module_item_id=self.s_module.item_id):
-			self.assertFalse(self.other_user.inventory.filter(item_id=cost.item_id, qty=cost.qty).exists())
+		self.assertFalse(self.other_user.inventory.filter(item_id=self.EXECUTION_COST.item_id, qty=self.EXECUTION_COST.qty).exists())
 
 class SetupableTest(TestCase):
 	SETUP = has_setupable_module,
@@ -131,15 +141,6 @@ class SetupableTest(TestCase):
 	def test_setup_no_items(self):
 		with self.assertRaises(RuntimeError):
 			self.s_module.setup()
-
-	def test_setup_ok(self):
-		costs = ModuleSetupCost.objects.filter(module_item_id=self.s_module.item_id)
-		for cost in costs:
-			self.user.profile.add_inv_item(cost.item_id, cost.qty)
-		self.s_module.setup()
-		for cost in costs:
-			self.assertFalse(self.user.inventory.filter(item_id=cost.item_id).exists())
-		self.assertTrue(self.s_module.is_setup)
 
 	def test_setup_already_setup(self):
 		self.s_module.is_setup = True
@@ -166,6 +167,14 @@ class SetupableTest(TestCase):
 		for cost in costs:
 			self.assertFalse(self.user.inventory.filter(item_id=cost.item_id).exists())
 		self.assertFalse(self.s_module.is_setup)
+
+class SetupOkTest(TestCase):
+	SETUP = has_setup_cost, has_setupable_module
+
+	def test_setup_ok(self):
+		self.s_module.setup()
+		self.assertFalse(self.user.inventory.filter(item_id=self.SETUP_COST.item_id).exists())
+		self.assertTrue(self.s_module.is_setup)
 
 class ArcadeTest(TestCase):
 	SETUP = has_arcade_module, two_users
