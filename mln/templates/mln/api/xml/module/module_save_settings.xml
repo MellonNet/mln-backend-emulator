@@ -1,0 +1,5 @@
+{% extends "../base.xml" %}
+{% load mln_utils %}
+{% block content %}
+<moduleInstance instanceID="{{ module.id }}" />
+{% endblock %}

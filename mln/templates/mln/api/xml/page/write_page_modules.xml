@@ -1,0 +1,20 @@
+{% load mln_utils %}
+{% for module in page_owner.modules.all %}
+	<item type="module" itemID="{{ module.item_id }}" instanceID="{{ module.id }}"
+		{% if module.is_setup %}
+		isSetup="True"
+		{% endif %}
+	>
+		<details posx="{{ module.pos_x }}" posy="{{ module.pos_y }}" />
+		{% if calc_yield %}
+			{% with yield_item_qty=module.calc_yield_qty %}
+				{% if yield_item_qty > 0 %}
+					<items>
+						<item itemID="{{ module.get_yield_item_id }}" qty="{{ yield_item_qty }}" />
+					</items>
+				{% endif %}
+			{% endwith %}
+		{% endif %}
+		{% include "../module/settings/base.xml" with module=module %}
+	</item>
+{% endfor %}

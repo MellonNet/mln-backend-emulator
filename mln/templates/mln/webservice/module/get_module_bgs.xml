@@ -1,7 +1,0 @@
-{% extends "mln/webservice/base.xml" %}
-{% load mln_utils %}
-{% block content %}
-	{% for id in backgrounds %}
-		<item id="{{ id }}" />
-	{% endfor %}
-{% endblock %}

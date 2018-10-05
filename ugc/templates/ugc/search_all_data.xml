@@ -1,4 +1,4 @@
-{% extends "mln/webservice/base.xml" %}
+{% extends "mln/api/xml/base.xml" %}
 {% load static %}
 {% block content %}
 {% for image in user.gallery_images.all %}

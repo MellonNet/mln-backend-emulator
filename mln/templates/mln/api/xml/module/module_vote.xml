@@ -1,0 +1,6 @@
+{% extends "../base.xml" %}
+{% block content %}
+<votes remaining="{{ available_votes }}" />
+{% block content2 %}
+{% endblock %}
+{% endblock %}

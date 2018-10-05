@@ -1,0 +1,87 @@
+{% extends "../base.xml" %}
+{% load mln_utils %}
+{% block content %}
+
+{# modules currently displayed on the page #}
+<items>
+	{% include "./write_page_modules.xml" %}
+</items>
+{# needed to save settings about the page (both private and public) #}
+<settings>
+	<color
+	{% if page_owner.profile.page_skin_id is not None %}
+		skinID="{{ page_owner.profile.page_skin_id }}"
+	{% endif %}
+	{% if page_owner.profile.page_color is not None %}
+		colorID="{{ page_owner.profile.page_color_id }}"
+	{% endif %}
+	{% if page_owner.profile.page_column_color_id is not None %}
+		columnColorID="{{ page_owner.profile.page_column_color_id }}"
+	{% endif %}
+	/>
+</settings>
+{# the user the page belongs to #}
+{# needed to display username, avatar and rank on pages #}
+<userProfile userName="{{ page_owner.username }}" gameRank="{{ page_owner.profile.rank }}" avatar="{{ page_owner.profile|get_avatar }}" >
+	{# needed to save statements (both private and public) #}
+	<statements>
+		{% if page_owner.profile.statement_0_question_id is not None %}
+		<statement question="{{ page_owner.profile.statement_0_question_id }}" answer="{{ page_owner.profile.statement_0_answer_id }}" />
+		<statement question="{{ page_owner.profile.statement_1_question_id }}" answer="{{ page_owner.profile.statement_1_answer_id }}" />
+		<statement question="{{ page_owner.profile.statement_2_question_id }}" answer="{{ page_owner.profile.statement_2_answer_id }}" />
+		<statement question="{{ page_owner.profile.statement_3_question_id }}" answer="{{ page_owner.profile.statement_3_answer_id }}" />
+		<statement question="{{ page_owner.profile.statement_4_question_id }}" answer="{{ page_owner.profile.statement_4_answer_id }}" />
+		<statement question="{{ page_owner.profile.statement_5_question_id }}" answer="{{ page_owner.profile.statement_5_answer_id }}" />
+		{% endif %}
+	</statements>
+</userProfile>
+{# needed to display friend list (both private and public) #}
+<friends>
+{% for friendship, friend, status in friends %}
+	<friend friendUserName="{{ friend.username }}" avatar="{{ friend.profile|get_avatar }}" rank="{{ friend.profile.rank }}" status="{{ status }}"
+	{# needed for message send (private), bff module (public) #}
+	friendID="{{ friend.id }}"
+	{% if is_private_view %}
+		{# needed for accept, block, etc messages #}
+		relationID="{{ friendship.id }}"
+	{% endif %}
+	/>
+{% endfor %}
+</friends>
+{# needed to display stats #}
+{% if is_private_view %}
+	<personalStats>
+		<page votes="42" daysSinceSignUp="42" />
+	</personalStats>
+{% endif %}
+{# needed to display badges #}
+{% if not is_private_view %}
+	<badges>
+	{% for badge in badges %}
+		<badge id="{{ badge.item_id }}" />
+	{% endfor %}
+	</badges>
+{% endif %}
+{% if viewing_user.is_authenticated %}
+	<user>
+	{% if not is_private_view %}
+		{# needed to display own username, available votes and calculate max votes #}
+		<userProfile userName="{{ viewing_user.username }}" gameRank="{{ viewing_user.profile.rank }}" votesAvailable="{{ viewing_user.profile.available_votes }}" />
+		{# needed to display friend status on other people's pages #}
+		<friends>
+			{% if friendship_status is not None %}
+				<friend friendUserName="{{ page_owner.username }}" status="{{ friendship_status }}"/>
+			{% endif %}
+		</friends>
+	{% endif %}
+	{# needed to display inventory (private) and for trade modules (public) #}
+	<inventory>
+		<items>
+		{% for stack in viewing_user.inventory.all %}
+			<item id="{{ stack.item_id }}" qty="{{ stack.qty }}" type="{{ stack.item.type.name.lower }}" />
+		{% endfor %}
+		</items>
+	</inventory>
+	</user>
+{% endif %}
+{% endblock %}

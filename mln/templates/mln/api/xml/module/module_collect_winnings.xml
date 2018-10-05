@@ -1,0 +1,9 @@
+{% extends "../base.xml" %}
+{% load mln_utils %}
+{% block content %}
+{% if won %}
+<inventory>
+	<added itemid="{{ prize.item_id }}" qty="{{ prize.qty }}" />
+</inventory>
+{% endif %}
+{% endblock %}

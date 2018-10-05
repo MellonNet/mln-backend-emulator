@@ -1,7 +1,7 @@
 from mln.models.static import Answer, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, Question
 from mln.services.misc import inventory_module_get, use_blueprint, user_save_my_avatar, user_save_my_statements
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-from mln.tests.test_profile import item, networker, one_user
+from mln.tests.models.test_profile import item, networker, one_user
 
 @cls_setup
 def module(cls):

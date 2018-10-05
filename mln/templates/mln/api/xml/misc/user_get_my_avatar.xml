@@ -1,0 +1,5 @@
+{% extends "../base.xml" %}
+{% load mln_utils %}
+{% block content %}
+<userProfile avatar="{{ user.profile|get_avatar }}" />
+{% endblock %}
