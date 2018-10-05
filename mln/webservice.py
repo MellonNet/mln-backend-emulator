@@ -63,8 +63,13 @@ handlers = {
 
 @csrf_exempt
 def webservice(request):
-	user = request.user
 	data = _decrypt(request.POST["input"])
+	out = _webservice_unencrypted(request.user, data)
+	out = out.encode()
+	out = _encrypt(out)
+	return HttpResponse(out)
+
+def _webservice_unencrypted(user, data):
 	if settings.DEBUG:
 		print(data)
 	xml_request = et.fromstring(data)
@@ -97,13 +102,11 @@ def webservice(request):
 			context.update(extra_context)
 	else:
 		template = "mln/webservice/base.xml"
-	out = loader.get_template(template).render(context, request)
+	out = loader.get_template(template).render(context)
 
 	if settings.DEBUG:
 		print(out)
-	out = out.encode()
-	out = _encrypt(out)
-	return HttpResponse(out)
+	return out
 
 ENCRYPTION_KEY = b"0e0 t00e0-0 i etiaonmld"
 

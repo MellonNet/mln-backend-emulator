@@ -1,5 +1,7 @@
 """Various utility functions for accessing or formatting data for templates that would be too complex to do in the templates themselves."""
+import re
 from django import template
+from django.template.base import DebugLexer, Lexer, tag_re, TextNode
 
 from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupTrade
 from mln.models.module_settings_arcade import ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
@@ -140,3 +142,58 @@ def replyable(message):
 		return MessageReplyType.NORMAL_AND_EASY_REPLY.value
 	else:
 		return MessageReplyType.NORMAL_REPLY_ONLY.value
+
+# Fix for Django template compilation, to remove whitespace from templates.
+# The two tokenize functions are changed to avoid generating a TextNode when the text content is only whitespace.
+# The TextNode constructor is changed to remove as much whitespace as possible from the content.
+
+def tokenize_fix(self):
+	in_tag = False
+	lineno = 1
+	result = []
+	for bit in tag_re.split(self.template_string):
+		if bit.strip():
+			result.append(self.create_token(bit, None, lineno, in_tag))
+		in_tag = not in_tag
+		lineno += bit.count('\n')
+	return result
+
+Lexer.tokenize = tokenize_fix
+
+def debug_tokenize_fix(self):
+	lineno = 1
+	result = []
+	upto = 0
+	for match in tag_re.finditer(self.template_string):
+		start, end = match.span()
+		if start > upto:
+			token_string = self.template_string[upto:start]
+			if token_string.strip():
+				result.append(self.create_token(token_string, (upto, start), lineno, in_tag=False))
+			lineno += token_string.count('\n')
+			upto = start
+		token_string = self.template_string[start:end]
+		if token_string.strip():
+			result.append(self.create_token(token_string, (start, end), lineno, in_tag=True))
+		lineno += token_string.count('\n')
+		upto = end
+	last_bit = self.template_string[upto:]
+	if last_bit.strip():
+		result.append(self.create_token(last_bit, (upto, upto + len(last_bit)), lineno, in_tag=False))
+	return result
+
+DebugLexer.tokenize = debug_tokenize_fix
+
+def whitespace_fix(self, s):
+	"""
+	Remove whitespace surrounding XML tags (same as standard django tag "spaceless") and also remove whitespace surrounding django template language constructs.
+	The result should be XML as much whitespace removed as possible.
+	Also, since this is done at template compilation time and not at template rendering time (which is where "spaceless" executes for some reason), it's also faster than "spaceless".
+	"""
+	s = re.sub(r"(^\s+)|(\s+$)", " ", s) # if the string starts or ends with whitespace replace it with a single space (needed for some edge cases)
+	# remove whitespace near tag boundaries
+	s = re.sub(r"\s*(/?>)\s*", r"\1", s)
+	s = re.sub(r"\s+<", "<", s)
+	self.s = s
+
+TextNode.__init__ = whitespace_fix

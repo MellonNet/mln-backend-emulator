@@ -80,6 +80,7 @@ def handle_page_save_layout(user, request):
 		pos_y = int(details.get("posy"))
 		modules.append((instance_id, item_id, pos_x, pos_y))
 	page_save_layout(user, modules)
+	return {"user": user}
 
 def handle_page_save_options(user, request):
 	settings = request.find("result/settings/color")

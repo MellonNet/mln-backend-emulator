@@ -31,7 +31,7 @@ def handle_module_details(user, module):
 @module_handler
 def handle_module_execute(user, module):
 	module.execute(user)
-	return {"module": module}
+	return {"module": module, "available_votes": user.profile.available_votes}
 
 @module_handler
 def handle_module_harvest(user, module):
@@ -48,3 +48,4 @@ def handle_module_teardown(user, module):
 @module_handler
 def handle_module_vote(voter, module):
 	module.vote(voter)
+	return {"available_votes": voter.profile.available_votes}
