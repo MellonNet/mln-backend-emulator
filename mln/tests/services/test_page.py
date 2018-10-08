@@ -9,6 +9,11 @@ def skin_and_color(cls):
 	cls.SKIN_ID = ItemInfo.objects.create(name="Skin Item", type=ItemType.SKIN).id
 	cls.COLOR_ID = Color.objects.create(color=0).id
 
+@setup
+@requires(skin_and_color, one_user)
+def has_skin(self):
+	self.user.profile.add_inv_item(self.SKIN_ID)
+
 class PageSaveLayoutTest(TestCase):
 	SETUP = harvestable_module, one_user
 
@@ -83,7 +88,7 @@ class PageSaveLayoutTransactionTest(TestCase):
 		self.assertTrue(self.user.modules.filter(id=self.h_module.id, pos_x=0, pos_y=0).exists())
 		self.assertTrue(self.user.modules.filter(id=self.s_module.id, pos_x=0, pos_y=1).exists())
 
-class PageSaveOptionsTest(TestCase):
+class PageSaveOptionsNoSkinTest(TestCase):
 	SETUP = item, one_user, skin_and_color
 
 	def test_page_save_options_wrong_skin_id(self):
@@ -92,16 +97,23 @@ class PageSaveOptionsTest(TestCase):
 
 	def test_page_save_options_wrong_column_color_id(self):
 		with self.assertRaises(ValueError):
-			page_save_options(self.user, self.SKIN_ID, self.COLOR_ID, 20)
-
-	def test_page_save_options_ok(self):
-		page_save_options(self.user, self.SKIN_ID, self.COLOR_ID, 0)
-		self.assertEqual(self.user.profile.page_skin_id, self.SKIN_ID)
-		self.assertEqual(self.user.profile.page_color_id, self.COLOR_ID)
-		self.assertEqual(self.user.profile.page_column_color_id, 0)
+			page_save_options(self.user, None, None, 20)
 
 	def test_page_save_options_none_ok(self):
 		page_save_options(self.user, None, None, 0)
 		self.assertEqual(self.user.profile.page_skin_id, None)
 		self.assertEqual(self.user.profile.page_color_id, None)
+		self.assertEqual(self.user.profile.page_column_color_id, 0)
+
+	def test_page_save_options_no_skin(self):
+		with self.assertRaises(RuntimeError):
+			page_save_options(self.user, self.SKIN_ID, self.COLOR_ID, 0)
+
+class PageSaveOptionsHasSkinTest(TestCase):
+	SETUP = item, has_skin
+
+	def test_page_save_options_ok(self):
+		page_save_options(self.user, self.SKIN_ID, self.COLOR_ID, 0)
+		self.assertEqual(self.user.profile.page_skin_id, self.SKIN_ID)
+		self.assertEqual(self.user.profile.page_color_id, self.COLOR_ID)
 		self.assertEqual(self.user.profile.page_column_color_id, 0)
