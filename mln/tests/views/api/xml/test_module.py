@@ -3,7 +3,7 @@ from unittest.mock import patch
 from mln.models.static import ItemInfo, ItemType
 from mln.tests.views.api.xml.handler_testcase import req_resp
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-from mln.tests.models.test_module import arcade_module, harvestable_module, has_harvestable_module, has_setupable_module, has_setup_cost, setup_setupable_module, setupable_module
+from mln.tests.models.test_module import arcade_module, arcade_prizes, harvestable_module, has_harvestable_module, has_setupable_module, has_setup_cost, setup_setupable_module, setupable_module
 from mln.tests.models.test_profile import one_user, two_users
 
 @cls_setup
@@ -36,7 +36,7 @@ class GetModuleBgsTest(TestCase, metaclass=req_resp):
 	TESTS = "get_module_bgs",
 
 class ModuleCollectWinningsTest(TestCase, metaclass=req_resp):
-	SETUP = other_user_has_arcade_module,
+	SETUP = other_user_has_arcade_module, arcade_prizes
 	DIR = "module"
 	TESTS = "module_collect_winnings_not_won", "module_collect_winnings_won",
 

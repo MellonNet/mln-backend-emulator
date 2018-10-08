@@ -126,9 +126,10 @@ class Module(models.Model):
 		self.vote(executer)
 		if ModuleSetupTrade in self.get_settings_classes():
 			trade = ModuleSetupTrade.objects.get(module=self)
-			executer.profile.remove_inv_item(trade.request_item, trade.request_qty)
+			executer.profile.remove_inv_item(trade.request_item_id, trade.request_qty)
 			executer.profile.add_inv_item(trade.give_item_id, trade.give_qty)
-			self.owner.profile.add_inv_item(trade.request_item, trade.request_qty)
+			self.owner.profile.add_inv_item(trade.request_item_id, trade.request_qty)
+			self.is_setup = False
 			# give item was already taken from owner at setup
 		else:
 			costs = ModuleExecutionCost.objects.filter(module_item_id=self.item_id)

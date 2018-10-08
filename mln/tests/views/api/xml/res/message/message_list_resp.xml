@@ -1,1 +1,1 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?><response type="MessageList" ><result><messages><message messageID="1" username="other" bodyID="1" read="False" hasAttachment="False" replyAble="0" /></messages></result></response>
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?><response type="MessageList" ><result><messages><message messageID="1" username="other" bodyID="1" read="False" hasAttachment="True" replyAble="0"  replyBodyID="1" /></messages></result></response>

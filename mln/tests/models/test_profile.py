@@ -28,6 +28,16 @@ def networker(self):
 def starting_item(cls):
 	StartingStack.objects.create(item_id=cls.ITEM_ID, qty=10)
 
+@setup
+@requires(item, one_user)
+def user_has_item(self):
+	self.user.profile.add_inv_item(self.ITEM_ID, 1)
+
+@setup
+@requires(item, two_users)
+def other_user_has_item(self):
+	self.other_user.profile.add_inv_item(self.ITEM_ID, 1)
+
 class ProfileTest(TestCase):
 	SETUP = one_user,
 
