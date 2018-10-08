@@ -1,14 +1,16 @@
 from unittest.mock import patch
 
-from mln.models.static import ItemInfo, ItemType
-from mln.tests.views.api.xml.handler_testcase import req_resp
-from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
+from mln.models.static import ItemInfo, ItemType, ModuleEditorType, ModuleInfo, ModuleSkin
+from mln.models.module_settings import ModuleSaveGeneric
 from mln.tests.models.test_module import arcade_module, arcade_prizes, harvestable_module, has_harvestable_module, has_setupable_module, has_setup_cost, setup_setupable_module, setupable_module
 from mln.tests.models.test_profile import one_user, two_users
+from mln.tests.services.test_page import color
+from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
+from mln.tests.views.api.xml.handler_testcase import req_resp
 
 @cls_setup
 def background_item(cls):
-	ItemInfo.objects.create(name="Background", type=ItemType.BACKGROUND)
+	cls.BACKGROUND_ID = ItemInfo.objects.create(name="Background", type=ItemType.BACKGROUND).id
 
 @setup
 @requires(arcade_module, two_users)
@@ -30,6 +32,25 @@ def other_user_has_setupable_module(self):
 def user_has_execution_cost(self):
 	self.user.profile.add_inv_item(self.EXECUTION_COST.item_id, self.EXECUTION_COST.qty)
 
+@cls_setup
+def generic_module(cls):
+	cls.GENERIC_MODULE_ID = ItemInfo.objects.create(name="Generic Module", type=ItemType.MODULE).id
+	ModuleInfo.objects.create(item_id=cls.GENERIC_MODULE_ID, is_executable=False, is_setupable=False, editor_type=ModuleEditorType.GENERIC)
+
+@setup
+@requires(generic_module, one_user)
+def has_generic_module(self):
+	self.module = self.user.modules.create(item_id=self.GENERIC_MODULE_ID, pos_x=0, pos_y=0)
+
+@cls_setup
+def module_skin(cls):
+	cls.MODULE_SKIN_ID = ModuleSkin.objects.create(name="Module Skin").id
+
+@setup
+@requires(module_skin, color, has_generic_module)
+def configured_generic_module(self):
+	ModuleSaveGeneric.objects.create(module=self.module, skin_id=self.MODULE_SKIN_ID, color_id=self.COLOR_ID)
+
 class GetModuleBgsTest(TestCase, metaclass=req_resp):
 	SETUP = background_item, one_user
 	DIR = "module"
@@ -48,6 +69,11 @@ def patched(*args, **kwargs):
 
 ModuleCollectWinningsTest.test_module_collect_winnings_won = patched
 
+class ModuleDetailsTest(TestCase, metaclass=req_resp):
+	SETUP = configured_generic_module,
+	DIR = "module"
+	TESTS = "module_details",
+
 class ModuleExecuteTest(TestCase, metaclass=req_resp):
 	SETUP = other_user_has_setupable_module, user_has_execution_cost
 	DIR = "module"
@@ -57,6 +83,11 @@ class ModuleHarvestTest(TestCase, metaclass=req_resp):
 	SETUP = has_harvestable_module,
 	DIR = "module"
 	VOID_TESTS = "module_harvest",
+
+class ModuleSaveSettingsTest(TestCase, metaclass=req_resp):
+	SETUP = has_generic_module,
+	DIR = "module"
+	TESTS = "module_save_settings",
 
 class ModuleSetupTest(TestCase, metaclass=req_resp):
 	SETUP = has_setup_cost, has_setupable_module

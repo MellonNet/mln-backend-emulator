@@ -1,18 +1,12 @@
 """Handlers for module specific save data updates."""
 from ....models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance, RocketGameTheme
 from ....models.module_settings_arcade import DestructoidBlockSkin, DestructoidCharacterSkin, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
+from ....services.module_settings import create_or_update
+from ....services.page import get_or_create_module
 
-def create_or_update(cls, module, attrs):
-	save_obj, created = cls.objects.get_or_create(module=module, defaults=attrs)
-	if not created:
-		for key, value in attrs.items():
-			setattr(save_obj, key, value)
-		save_obj.save()
-
-def deserialize_concert_arcade(module, save, setup):
-	game_setting = save.find("gameSetting")
-	deserialize_soundtrack(module, game_setting, setup)
+def _deserialize_concert_arcade(save, setup):
 	attrs = {}
+	game_setting = save.find("gameSetting")
 	attrs["owner_played"] = game_setting.get("ownerPlayed") == "true"
 	bg, arrowset = game_setting.get("skins").split(",")
 	attrs["background_skin"] = int(bg[bg.rindex("_")+1:])
@@ -26,9 +20,9 @@ def deserialize_concert_arcade(module, save, setup):
 				arrows |= 1 << i
 			i += 1
 	attrs["arrows"] = arrows
-	create_or_update(ModuleSaveConcertArcade, module, attrs)
+	return attrs
 
-def deserialize_delivery_arcade(module, save, setup):
+def _deserialize_delivery_arcade(module, save, setup):
 	game_setting = save.find("gameSetting")
 	attrs = {}
 	attrs["owner_played"] = game_setting.get("ownerPlayed") == "true"
@@ -49,9 +43,9 @@ def deserialize_delivery_arcade(module, save, setup):
 		x = int(tile.get("x"))
 		y = int(tile.get("y"))
 		module.tiles.create(tile_id=t_id, x=x, y=y)
-	create_or_update(ModuleSaveDeliveryArcade, module, attrs)
+	return attrs
 
-def deserialize_destructoid_arcade(module, save, setup):
+def _deserialize_destructoid_arcade(save, setup):
 	game_setting = save.find("gameSetting")
 	attrs = {}
 	attrs["owner_played"] = game_setting.get("ownerPlayed") == "true"
@@ -72,17 +66,15 @@ def deserialize_destructoid_arcade(module, save, setup):
 	attrs["top"] = rows[0]
 	attrs["middle"] = rows[1]
 	attrs["bottom"] = rows[2]
+	return attrs
 
-	create_or_update(ModuleSaveDestructoidArcade, module, attrs)
-
-def deserialize_friend_share(module, save, setup):
+def _deserialize_friend_share(save, setup):
 	friend_id = int(setup.find("friend").get("friendID"))
 	attrs = {}
 	attrs["friend_id"] = friend_id
+	return attrs
 
-	create_or_update(ModuleSetupFriendShare, module, attrs)
-
-def deserialize_generic(module, save, setup):
+def _deserialize_generic(save, setup):
 	attrs = {}
 	skin_id = save.get("skin")
 	if skin_id is not None:
@@ -92,10 +84,9 @@ def deserialize_generic(module, save, setup):
 	if color_id is not None:
 		color_id = int(color_id)
 		attrs["color_id"] = color_id
+	return attrs
 
-	create_or_update(ModuleSaveGeneric, module, attrs)
-
-def deserialize_group_performance(module, save, setup):
+def _deserialize_group_performance(save, setup):
 	friends = setup.findall("friend")
 	friend_0_id = int(friends[0].get("friendID"))
 	friend_1_id = int(friends[1].get("friendID"))
@@ -104,10 +95,9 @@ def deserialize_group_performance(module, save, setup):
 	attrs["friend_0_id"] = friend_0_id
 	attrs["friend_1_id"] = friend_1_id
 	attrs["friend_2_id"] = friend_2_id
+	return attrs
 
-	create_or_update(ModuleSetupGroupPerformance, module, attrs)
-
-def deserialize_hop_arcade(module, save, setup):
+def _deserialize_hop_arcade(save, setup):
 	game_setting = save.find("gameSetting")
 	attrs = {}
 	attrs["owner_played"] = game_setting.get("ownerPlayed") == "true"
@@ -123,22 +113,19 @@ def deserialize_hop_arcade(module, save, setup):
 	attrs["top"] = rows[0]
 	attrs["middle"] = rows[1]
 	attrs["bottom"] = rows[2]
+	return attrs
 
-	create_or_update(ModuleSaveHopArcade, module, attrs)
-
-def deserialize_networker_text(module, save, setup):
+def _deserialize_networker_text(save, setup):
 	attrs = {}
 	attrs["text"] = save.find("text").text
+	return attrs
 
-	create_or_update(ModuleSaveNetworkerText, module, attrs)
-
-def deserialize_rocket_game(module, save, setup):
+def _deserialize_rocket_game(save, setup):
 	attrs = {}
 	attrs["theme"] = RocketGameTheme[save.find("theme").text.upper()]
+	return attrs
 
-	create_or_update(ModuleSaveRocketGame, module, attrs)
-
-def deserialize_soundtrack(module, save, setup):
+def _deserialize_soundtrack(save, setup):
 	attrs = {}
 	for i, track in enumerate(save.findall("track")):
 		for j, sound in enumerate(track):
@@ -150,10 +137,9 @@ def deserialize_soundtrack(module, save, setup):
 			pan = int(sound.get("pan"))
 			attrs["sound_%i_%i_id" % (i, j)] = id
 			attrs["sound_%i_%i_pan" % (i, j)] = pan
+	return attrs
 
-	create_or_update(ModuleSaveSoundtrack, module, attrs)
-
-def deserialize_sticker(module, save, setup):
+def _deserialize_sticker(module, save, setup):
 	# easiest way of doing things
 	module.save_sticker.all().delete()
 	for movieclip in save.findall("Movieclip"):
@@ -165,12 +151,9 @@ def deserialize_sticker(module, save, setup):
 		attrs["scale_y"] = int(movieclip.get("_yscale"))
 		attrs["rotation"] = int(movieclip.get("_rotation"))
 		attrs["depth"] = int(movieclip.get("depth"))
+		module.save_sticker.create(**attrs)
 
-		module.save_sticker.create(module=module, **attrs)
-
-def deserialize_trade(module, save, setup):
-	if module.is_setup:
-		module.teardown()
+def _deserialize_trade(save, setup):
 	attrs = {}
 	give = setup.find("item[@type='Give']")
 	request = setup.find("item[@type='Request']")
@@ -178,57 +161,67 @@ def deserialize_trade(module, save, setup):
 	attrs["give_qty"] = int(give.get("qty"))
 	attrs["request_item_id"] = int(request.get("itemID"))
 	attrs["request_qty"] = int(request.get("qty"))
+	return attrs
 
-	create_or_update(ModuleSetupTrade, module, attrs)
-
-def deserialize_trio_performance(module, save, setup):
+def _deserialize_trio_performance(save, setup):
 	friends = setup.findall("friend")
 	friend_0_id = int(friends[0].get("friendID"))
 	friend_1_id = int(friends[1].get("friendID"))
 	attrs = {}
 	attrs["friend_0_id"] = friend_0_id
 	attrs["friend_1_id"] = friend_1_id
+	return attrs
 
-	create_or_update(ModuleSetupTrioPerformance, module, attrs)
-
-def deserialize_ugc(module, save, setup):
+def _deserialize_ugc(save, setup):
 	attrs = {}
 	attrs["ref"] = int(save.find("Movieclip").get("id"))
-
-	create_or_update(ModuleSaveUGC, module, attrs)
+	return attrs
 
 SETTINGS_HANDLERS = {
-	ModuleSaveConcertArcade: deserialize_concert_arcade,
-	ModuleSaveDestructoidArcade: deserialize_destructoid_arcade,
-	ModuleSaveDeliveryArcade: deserialize_delivery_arcade,
-	ModuleSaveGeneric: deserialize_generic,
-	ModuleSaveHopArcade: deserialize_hop_arcade,
-	ModuleSaveNetworkerText: deserialize_networker_text,
-	ModuleSaveRocketGame: deserialize_rocket_game,
-	ModuleSaveSoundtrack: deserialize_soundtrack,
-	ModuleSaveSticker: deserialize_sticker,
-	ModuleSaveUGC: deserialize_ugc,
-	ModuleSetupFriendShare: deserialize_friend_share,
-	ModuleSetupGroupPerformance: deserialize_group_performance,
-	ModuleSetupTrade: deserialize_trade,
-	ModuleSetupTrioPerformance: deserialize_trio_performance,
+	ModuleSaveConcertArcade: _deserialize_concert_arcade,
+	ModuleSaveDestructoidArcade: _deserialize_destructoid_arcade,
+	ModuleSaveGeneric: _deserialize_generic,
+	ModuleSaveHopArcade: _deserialize_hop_arcade,
+	ModuleSaveNetworkerText: _deserialize_networker_text,
+	ModuleSaveRocketGame: _deserialize_rocket_game,
+	ModuleSaveSoundtrack: _deserialize_soundtrack,
+	ModuleSaveUGC: _deserialize_ugc,
+	ModuleSetupFriendShare: _deserialize_friend_share,
+	ModuleSetupGroupPerformance: _deserialize_group_performance,
+	ModuleSetupTrade: _deserialize_trade,
+	ModuleSetupTrioPerformance: _deserialize_trio_performance,
 }
 
-def get_or_create_module(user, elem):
-	instance_id = elem.get("instanceID")
-	if instance_id == "00000000-0000-0000-0000-000000000000":
-		item_id = int(elem.get("itemID"))
-		if not user.profile.is_networker:
-			user.profile.remove_inv_item(item_id)
-		module = user.modules.create(item_id=item_id, pos_x=0, pos_y=0)
+def _deserialize_cls(cls, module, save, setup):
+	# unfortunately the settings system is not very cleanly made and there are some anomalies
+	if cls == ModuleSetupTrade:
+		if module.is_setup:
+			module.teardown()
+	if cls == ModuleSaveSticker:
+		_deserialize_sticker(module, save, setup)
+	elif cls == ModuleSaveDeliveryArcade:
+		attrs = _deserialize_delivery_arcade(module, save, setup)
+		create_or_update(cls, module, attrs)
 	else:
-		module = user.modules.get(id=int(instance_id))
-	return module
+		attrs = SETTINGS_HANDLERS[cls](save, setup)
+		create_or_update(cls, module, attrs)
+		if cls == ModuleSaveConcertArcade:
+			game_setting = save.find("gameSetting")
+			attrs = _deserialize_soundtrack(game_setting, setup)
+			create_or_update(cls, module, attrs)
 
 def handle_module_save_settings(user, request):
-	module = get_or_create_module(user, request)
+	instance_id = request.get("instanceID")
+	if instance_id == "00000000-0000-0000-0000-000000000000":
+		instance_id = None
+	else:
+		instance_id = int(instance_id)
+	item_id = int(request.get("itemID"))
+	module = get_or_create_module(user, instance_id, item_id)
+	save = request.find("result/save")
+	setup = request.find("result/setup")
 	for cls in module.get_settings_classes():
-		SETTINGS_HANDLERS[cls](module, request.find("result/save"), request.find("result/setup"))
+		_deserialize_cls(cls, module, save, setup)
 
 	info = module.get_info()
 	if info.is_executable and not info.is_setupable:
