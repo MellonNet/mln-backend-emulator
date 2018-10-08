@@ -61,10 +61,14 @@ def trade_module(cls):
 @requires(item, trade_module, one_user)
 def has_trade_module(self):
 	self.t_module = self.user.modules.create(item_id=self.TRADE_MODULE_ID, pos_x=0, pos_y=1)
-	ModuleSetupTrade.objects.create(module=self.t_module, give_item_id=self.ITEM_ID, give_qty=1, request_item_id=self.ITEM_ID, request_qty=1)
 
 @setup
 @requires(has_trade_module)
+def configured_trade_module(self):
+	ModuleSetupTrade.objects.create(module=self.t_module, give_item_id=self.ITEM_ID, give_qty=1, request_item_id=self.ITEM_ID, request_qty=1)
+
+@setup
+@requires(configured_trade_module)
 def setup_trade_module(self):
 	self.t_module.is_setup = True
 	self.t_module.save()
@@ -198,14 +202,14 @@ class SetupOkTest(TestCase):
 		self.assertTrue(self.s_module.is_setup)
 
 class TradeNotSetupTest(TestCase):
-	SETUP = has_trade_module,
+	SETUP = configured_trade_module,
 
 	def test_setup_no_item(self):
 		with self.assertRaises(RuntimeError):
 			self.t_module.setup()
 
 class TradeSetupOkTest(TestCase):
-	SETUP = has_trade_module, user_has_item
+	SETUP = configured_trade_module, user_has_item
 
 	def test_setup_ok(self):
 		self.t_module.setup()

@@ -5,12 +5,15 @@ from mln.tests.models.test_module import harvestable_module, has_harvestable_mod
 from mln.tests.models.test_profile import item, one_user
 
 @cls_setup
-def skin_and_color(cls):
-	cls.SKIN_ID = ItemInfo.objects.create(name="Skin Item", type=ItemType.SKIN).id
+def color(cls):
 	cls.COLOR_ID = Color.objects.create(color=0).id
 
+@cls_setup
+def page_skin(cls):
+	cls.SKIN_ID = ItemInfo.objects.create(name="Skin Item", type=ItemType.SKIN).id
+
 @setup
-@requires(skin_and_color, one_user)
+@requires(page_skin, one_user)
 def has_skin(self):
 	self.user.profile.add_inv_item(self.SKIN_ID)
 
@@ -89,7 +92,7 @@ class PageSaveLayoutTransactionTest(TestCase):
 		self.assertTrue(self.user.modules.filter(id=self.s_module.id, pos_x=0, pos_y=1).exists())
 
 class PageSaveOptionsNoSkinTest(TestCase):
-	SETUP = item, one_user, skin_and_color
+	SETUP = item, one_user, color, page_skin
 
 	def test_page_save_options_wrong_skin_id(self):
 		with self.assertRaises(RuntimeError):
@@ -110,7 +113,7 @@ class PageSaveOptionsNoSkinTest(TestCase):
 			page_save_options(self.user, self.SKIN_ID, self.COLOR_ID, 0)
 
 class PageSaveOptionsHasSkinTest(TestCase):
-	SETUP = item, has_skin
+	SETUP = item, color, has_skin
 
 	def test_page_save_options_ok(self):
 		page_save_options(self.user, self.SKIN_ID, self.COLOR_ID, 0)

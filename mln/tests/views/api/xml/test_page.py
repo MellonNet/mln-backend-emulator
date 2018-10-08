@@ -4,7 +4,7 @@ from mln.tests.models.test_profile import one_user, two_users
 from mln.tests.models.test_module import has_harvestable_module, has_harvestable_module_stack
 from mln.tests.services.test_friend import friends, pending_friends
 from mln.tests.services.test_misc import statements
-from mln.tests.services.test_page import has_skin
+from mln.tests.services.test_page import color, has_skin
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.views.api.xml.handler_testcase import req_resp
 
@@ -18,7 +18,7 @@ def pending_friends_other_way(self):
 	self.other_user.profile.outgoing_friendships.create(to_profile=self.user.profile, status=FriendshipStatus.PENDING)
 
 @setup
-@requires(badge, statements, has_skin)
+@requires(badge, color, statements, has_skin)
 def user_extra_data(self):
 	self.user.profile.add_inv_item(self.BADGE_ID)
 	self.user.profile.page_skin_id = self.SKIN_ID
