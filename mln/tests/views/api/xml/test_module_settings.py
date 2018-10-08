@@ -76,7 +76,7 @@ class FriendShareSettingsTest(TestCase, metaclass=settings_meta):
 
 class SoundtrackSettingsTest(TestCase, metaclass=settings_meta):
 	SETUP = has_module, has_loop
-	CLASSES = ModuleSaveSoundtrack,
+	CLASSES = ModuleSaveSoundtrack, ModuleSaveConcertArcade
 
 class StickerSettingsTest(TestCase, metaclass=settings_meta):
 	SETUP = has_module, has_stickers,

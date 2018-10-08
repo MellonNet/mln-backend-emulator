@@ -11,15 +11,16 @@ def _deserialize_concert_arcade(save, setup):
 	bg, arrowset = game_setting.get("skins").split(",")
 	attrs["background_skin"] = int(bg[bg.rindex("_")+1:])
 	attrs["arrowset_skin"] = int(arrowset[arrowset.rindex("_")+1:])
-	arrows = 0
-	i = 0
-	for lines in game_setting.findall("concertLines"):
-		for arrow in lines.findall("arrow")[3::4]:
+	for arrows_name, line in zip(("arrows_left", "arrows_down", "arrows_up", "arrows_right"), game_setting.findall("concertLines")):
+		arrows = 0
+		i = 0
+		for arrow in line.findall("arrow"):
 			bit = arrow.get("type") != "noArrow"
 			if bit:
 				arrows |= 1 << i
 			i += 1
-	attrs["arrows"] = arrows
+		arrows = int.from_bytes(arrows.to_bytes(8, "big"), "big", signed=True) # unsigned signed conversion
+		attrs[arrows_name] = arrows
 	return attrs
 
 def _deserialize_delivery_arcade(module, save, setup):
@@ -208,7 +209,7 @@ def _deserialize_cls(cls, module, save, setup):
 		if cls == ModuleSaveConcertArcade:
 			game_setting = save.find("gameSetting")
 			attrs = _deserialize_soundtrack(game_setting, setup)
-			create_or_update(cls, module, attrs)
+			create_or_update(ModuleSaveSoundtrack, module, attrs)
 
 def handle_module_save_settings(user, request):
 	instance_id = request.get("instanceID")

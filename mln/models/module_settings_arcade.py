@@ -21,12 +21,15 @@ class ModuleSaveConcertArcade(ModuleSaveArcade):
 	"""
 	Save data for concert arcade modules.
 	Saves the background and arrow skin, and the arrows for the game.
-	Since the game consists of a 16 x 4 grid of arrows, and each arrow is either there or not, I use a 64-bit integer for compact storage of arrows.
+	Since the game consists of a 64 x 4 grid of arrows, and each arrow is either there or not, I use a 64-bit integer for each column.
 	"""
 	module = models.OneToOneField(Module, related_name="save_concert_arcade", on_delete=models.CASCADE)
 	background_skin = models.PositiveSmallIntegerField()
 	arrowset_skin = models.PositiveSmallIntegerField()
-	arrows = models.BigIntegerField()
+	arrows_left = models.BigIntegerField()
+	arrows_down = models.BigIntegerField()
+	arrows_up = models.BigIntegerField()
+	arrows_right = models.BigIntegerField()
 
 class DeliveryArcadeTile(models.Model):
 	"""
