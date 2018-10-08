@@ -6,6 +6,7 @@ All responses have <response> as the root XML element, which provides exception 
 This module is responsible for decrypting requests, dispatching the requests to the appropriate handlers, rendering a response XML (if any), catching any handler exceptions and rendering exception info, encrypting the response and sending it to the client.
 """
 import base64
+import logging
 import xml.etree.ElementTree as et
 
 from django.conf import settings
@@ -20,6 +21,8 @@ from .misc import handle_blueprint_use, handle_inventory_module_get, handle_user
 from .message import handle_message_delete, handle_message_detach, handle_message_easy_reply, handle_message_easy_reply_with_attachments, handle_message_get, handle_message_list, handle_message_send, handle_message_send_with_attachment
 from .module import handle_get_module_bgs, handle_module_collect_winnings, handle_module_details, handle_module_execute, handle_module_harvest, handle_module_setup, handle_module_teardown, handle_module_vote
 from .module_settings import handle_module_save_settings
+
+log = logging.getLogger(__name__)
 
 """
 Handler registry.
@@ -70,13 +73,12 @@ def webservice(request):
 	return HttpResponse(out)
 
 def _webservice_unencrypted(user, data):
-	if settings.DEBUG:
-		print(data)
+	log.debug(data)
 	xml_request = et.fromstring(data)
 	assert xml_request.tag == "request"
 	request_type = xml_request.get("type")
 
-	print("Request type", request_type)
+	log.info("Request type %s", request_type)
 
 	template = None
 	extra_context = None
@@ -92,8 +94,7 @@ def _webservice_unencrypted(user, data):
 	except MLNError as e:
 		error_msg = e.id
 	except Exception as e:
-		import traceback
-		traceback.print_exc()
+		log.exception("Error in handler for %s", request_type)
 		error_msg = MLNError.OPERATION_FAILED
 
 	context = {"request_type": request_type, "error_msg": error_msg}
@@ -104,8 +105,7 @@ def _webservice_unencrypted(user, data):
 		template = "mln/api/xml/base.xml"
 	out = loader.get_template(template).render(context)
 
-	if settings.DEBUG:
-		print(out)
+	log.debug(out)
 	return out
 
 ENCRYPTION_KEY = b"0e0 t00e0-0 i etiaonmld"

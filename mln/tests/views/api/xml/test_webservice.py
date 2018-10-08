@@ -1,10 +1,14 @@
+import logging
+
 from django.urls import reverse
 
 from mln.models.static import MLNError
 from mln.tests.models.test_profile import one_user
 from mln.tests.setup_testcase import TestCase
 from mln.tests.views.api.xml.handler_testcase import req_resp
-from mln.views.api.xml.webservice import _webservice_unencrypted, handlers
+from mln.views.api.xml.webservice import _webservice_unencrypted, log, handlers
+
+log.setLevel(logging.CRITICAL) # disable error messages for expected exceptions
 
 def raise_mln_error(user, request):
 	raise MLNError(MLNError.OPERATION_FAILED)
