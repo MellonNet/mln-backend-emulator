@@ -1,9 +1,10 @@
 from datetime import timedelta
 from unittest.mock import patch
 
+from mln.models.module_settings import ModuleSetupTrade
 from mln.models.static import ArcadePrize, ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-from mln.tests.models.test_profile import item, one_user, two_users
+from mln.tests.models.test_profile import item, one_user, other_user_has_item, two_users, user_has_item
 
 @cls_setup
 @requires(item)
@@ -52,8 +53,28 @@ def setup_setupable_module(self):
 	self.s_module.save()
 
 @cls_setup
+def trade_module(cls):
+	cls.TRADE_MODULE_ID = ItemInfo.objects.create(name="Trade Module", type=ItemType.MODULE).id
+	ModuleInfo.objects.create(item_id=cls.TRADE_MODULE_ID, is_executable=True, is_setupable=True, editor_type=ModuleEditorType.TRADE)
+
+@setup
+@requires(item, trade_module, one_user)
+def has_trade_module(self):
+	self.t_module = self.user.modules.create(item_id=self.TRADE_MODULE_ID, pos_x=0, pos_y=1)
+	ModuleSetupTrade.objects.create(module=self.t_module, give_item_id=self.ITEM_ID, give_qty=1, request_item_id=self.ITEM_ID, request_qty=1)
+
+@setup
+@requires(has_trade_module)
+def setup_trade_module(self):
+	self.t_module.is_setup = True
+	self.t_module.save()
+
+@cls_setup
 def arcade_module(cls):
 	cls.ARCADE_MODULE_ID = ItemInfo.objects.create(name="Delivery Arcade Game", type=ItemType.MODULE).id
+
+@cls_setup
+def arcade_prizes(cls):
 	cls.ARCADE_PRIZE_IDS = []
 	for i in range(5):
 		prize_id = ItemInfo.objects.create(name="Arcade Prize %i" % i, type=ItemType.ITEM).id
@@ -176,8 +197,53 @@ class SetupOkTest(TestCase):
 		self.assertFalse(self.user.inventory.filter(item_id=self.SETUP_COST.item_id).exists())
 		self.assertTrue(self.s_module.is_setup)
 
-class ArcadeTest(TestCase):
+class TradeNotSetupTest(TestCase):
+	SETUP = has_trade_module,
+
+	def test_setup_no_item(self):
+		with self.assertRaises(RuntimeError):
+			self.t_module.setup()
+
+class TradeSetupOkTest(TestCase):
+	SETUP = has_trade_module, user_has_item
+
+	def test_setup_ok(self):
+		self.t_module.setup()
+		self.assertFalse(self.user.inventory.filter(item_id=self.ITEM_ID).exists())
+		self.assertTrue(self.t_module.is_setup)
+
+class TradeTeardownTest(TestCase):
+	SETUP = setup_trade_module,
+
+	def test_teardown(self):
+		self.t_module.teardown()
+		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=1).exists())
+		self.assertFalse(self.t_module.is_setup)
+
+class TradeExecuteNoItemTest(TestCase):
+	SETUP = setup_trade_module, two_users
+
+	def test_execute_no_item(self):
+		with self.assertRaises(RuntimeError):
+			self.t_module.execute(self.other_user)
+
+class TradeExecuteOkTest(TestCase):
+	SETUP = setup_trade_module, two_users, other_user_has_item
+
+	def test_execute_ok(self):
+		self.t_module.execute(self.other_user)
+		self.assertTrue(self.other_user.inventory.filter(item_id=self.ITEM_ID, qty=1).exists())
+		self.assertFalse(self.t_module.is_setup)
+
+class ArcadeNoPrizesTest(TestCase):
 	SETUP = has_arcade_module, two_users
+
+	def test_select_arcade_prize(self):
+		with self.assertRaises(RuntimeError):
+			self.a_module.select_arcade_prize(self.other_user)
+
+class ArcadeOkTest(TestCase):
+	SETUP = has_arcade_module, arcade_prizes, two_users
 
 	def test_select_arcade_prize(self):
 		with patch("random.randrange", return_value=0):

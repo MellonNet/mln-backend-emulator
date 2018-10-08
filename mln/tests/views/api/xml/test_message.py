@@ -1,16 +1,17 @@
-from mln.tests.models.test_profile import item, one_user
+from mln.tests.models.test_profile import item, one_user, user_has_item
 from mln.tests.services.test_message import attachment, easy_reply_body, message
 from mln.tests.setup_testcase import requires, setup, TestCase
 from mln.tests.services.test_friend import friends
 from mln.tests.views.api.xml.handler_testcase import req_resp
 
 @setup
-@requires(item, one_user)
-def user_has_item(self):
-	self.user.profile.add_inv_item(self.ITEM_ID, 1)
+@requires(attachment)
+def message_extra_data(self):
+	self.message.reply_body = self.BODY
+	self.message.save()
 
 class MessageTest(TestCase, metaclass=req_resp):
-	SETUP = message,
+	SETUP = message_extra_data,
 	DIR = "message"
 	TESTS = "message_get", "message_list"
 	VOID_TESTS = "message_delete",
