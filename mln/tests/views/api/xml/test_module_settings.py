@@ -68,7 +68,7 @@ def has_trade_module(self):
 
 class SettingsTest(TestCase, metaclass=settings_meta):
 	SETUP = has_module,
-	CLASSES = ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveNetworkerText, ModuleSaveRocketGame
+	CLASSES = ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade, ModuleSaveNetworkerText, ModuleSaveRocketGame
 
 class FriendShareSettingsTest(TestCase, metaclass=settings_meta):
 	SETUP = has_module, two_users

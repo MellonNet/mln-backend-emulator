@@ -97,30 +97,28 @@ class ModuleSaveDestructoidArcade(ModuleSaveArcade):
 	middle = models.BigIntegerField()
 	bottom = models.BigIntegerField()
 
-class HopArcadeTopElement(Enum):
-	"""Possible game elements in the top row of hop arcade games."""
-	BIRD = auto()
-	SNAKE = auto()
-
-class HopArcadeMiddleElement(Enum):
-	"""Possible game elements in the middle row of hop arcade games."""
+class HopArcadeElement(Enum):
+	"""Game elements in hop arcade games."""
 	POWERUP_1 = auto()
 	POWERUP_2 = auto()
-
-class HopArcadeBottomElement(Enum):
-	"""Possible game elements in the bottom row of hop arcade games."""
+	BIRD = auto()
+	SNAKE = auto()
 	BRICKS = auto()
 	ROCKS = auto()
 
 class ModuleSaveHopArcade(ModuleSaveArcade):
 	"""
 	Save data for the hop arcade game.
-	The hop arcade game grid consists of 30 x 3 x 2 bits, which makes it possible to store it efficiently as 3 64-bit integers, one for each row.
+	The hop arcade game grid consists of 30 x 3 x 3 bits, which makes it possible to store it efficiently as 3 32-bit integers in each row.
 	This also makes serialization easier, as the entire grid is serialized, including grid entries without a set game element.
 	"""
 	module = models.OneToOneField(Module, related_name="save_hop_arcade", on_delete=models.CASCADE)
-	top = models.BigIntegerField()
-	middle = models.BigIntegerField()
-	bottom = models.BigIntegerField()
-
-	HOP_ELEMENT_ENUMS = HopArcadeTopElement, HopArcadeMiddleElement, HopArcadeBottomElement
+	top_0 = models.IntegerField()
+	top_1 = models.IntegerField()
+	top_2 = models.IntegerField()
+	middle_0 = models.IntegerField()
+	middle_1 = models.IntegerField()
+	middle_2 = models.IntegerField()
+	bottom_0 = models.IntegerField()
+	bottom_1 = models.IntegerField()
+	bottom_2 = models.IntegerField()

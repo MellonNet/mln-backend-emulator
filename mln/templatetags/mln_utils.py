@@ -4,7 +4,7 @@ from django import template
 from django.template.base import DebugLexer, Lexer, tag_re, TextNode
 
 from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupTrade
-from mln.models.module_settings_arcade import ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
+from mln.models.module_settings_arcade import HopArcadeElement, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
 from mln.models.static import ItemType, MessageReplyType
 
 SAVE_TEMPLATES = {
@@ -79,16 +79,18 @@ def get_destructoid_arcade_grid(module):
 
 @register.filter
 def get_hop_arcade_grid(module):
-	rows = [module.save_hop_arcade.top, module.save_hop_arcade.middle, module.save_hop_arcade.bottom]
+	save = module.save_hop_arcade
+	rows = "top", "middle", "bottom"
 	for i in range(30):
 		column = []
 		for j in range(3):
-			value = rows[j] & 0x03
-			if value == 0:
+			value = getattr(save, "%s_%i" % (rows[j], i // 10))
+			elem_value = value & 0x07
+			if elem_value == 0:
 				column.append("0")
 			else:
-				column.append("m_"+ModuleSaveHopArcade.HOP_ELEMENT_ENUMS[j](value).name.lower())
-			rows[j] >>= 2
+				column.append("m_"+HopArcadeElement(elem_value).name.lower())
+			setattr(save, "%s_%i" % (rows[j], i // 10), value >> 3)
 		yield column
 
 @register.filter

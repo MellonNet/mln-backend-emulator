@@ -1,6 +1,6 @@
 """Handlers for module specific save data updates."""
 from ....models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance, RocketGameTheme
-from ....models.module_settings_arcade import DestructoidBlockSkin, DestructoidCharacterSkin, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
+from ....models.module_settings_arcade import DestructoidBlockSkin, DestructoidCharacterSkin, HopArcadeElement, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
 from ....services.module_settings import create_or_update
 from ....services.page import get_or_create_module
 
@@ -108,12 +108,12 @@ def _deserialize_hop_arcade(save, setup):
 			frame = row.get("frame")
 			if frame == "0":
 				continue
-			val = ModuleSaveHopArcade.HOP_ELEMENT_ENUMS[j][frame[2:].upper()].value
-			rows[j] |= val << i*2
+			val = HopArcadeElement[frame[2:].upper()].value
+			rows[j] |= val << i*3
 
-	attrs["top"] = rows[0]
-	attrs["middle"] = rows[1]
-	attrs["bottom"] = rows[2]
+	for i, name in enumerate(("top", "middle", "bottom")):
+		for j in range(3):
+			attrs["%s_%i" % (name, j)] = (rows[i] >> (j * 30)) & 0x3fffffff
 	return attrs
 
 def _deserialize_networker_text(save, setup):
