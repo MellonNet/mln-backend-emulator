@@ -4,16 +4,12 @@
 <gameSetting ownerPlayed="{% if save.owner_played %}true{% else %}false{% endif %}" skins="m_bg_{{ save.background_skin }},m_arrowSet_{{ save.arrowset_skin }}" >
 {% include "./soundtrack.xml" %}
 {% for line in module|get_concert_arcade_arrows %}
-<concertLines>
-{% for arrow in line %}
-{# junk because of quality webdev #}
-<arrow type="noArrow" />
-<arrow type="noArrow" />
-<arrow type="noArrow" />
-<arrow type="{{ arrow }}" />
-{% endfor %}
-</concertLines>
-{% endfor %}
+	<concertLines>
+	{% for arrow in line %}
+		<arrow type="{{ arrow }}" />
+	{% endfor %}
+	</concertLines>
+	{% endfor %}
 </gameSetting>
 {% endif %}
 {% endwith %}

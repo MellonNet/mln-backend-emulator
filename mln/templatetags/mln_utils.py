@@ -34,12 +34,13 @@ def get_avatar(profile):
 
 @register.filter
 def get_concert_arcade_arrows(module):
-	arrows = module.save_concert_arcade.arrows
-	for arrowtype in "-90", "180", "0", "90":
+
+	for arrows_name, arrows_type in (("arrows_left", "-90"), ("arrows_down", "180"), ("arrows_up", "0"), ("arrows_right", "90")):
+		arrows = getattr(module.save_concert_arcade, arrows_name)
 		line = []
-		for _ in range(16):
+		for _ in range(64):
 			if arrows & 1:
-				line.append(arrowtype)
+				line.append(arrows_type)
 			else:
 				line.append("noArrow")
 			arrows >>= 1
