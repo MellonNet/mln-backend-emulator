@@ -5,11 +5,12 @@ from django.template import loader
 
 import mln.views.api.xml.module_settings as module_settings
 from mln.models.static import ItemInfo, ItemType
-from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupTrade
+from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
 from mln.models.module_settings_arcade import ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
 from mln.services.module_settings import create_or_update
-from mln.tests.models.test_profile import one_user, two_users
+from mln.tests.models.test_profile import one_user
 from mln.tests.models.test_module import has_trade_module
+from mln.tests.services.test_friend import friends, two_friends, three_friends
 from mln.tests.services.test_misc import module
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.views.api.xml.test_module import background_item
@@ -71,8 +72,12 @@ class SettingsTest(TestCase, metaclass=settings_meta):
 	CLASSES = ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade, ModuleSaveNetworkerText, ModuleSaveRocketGame
 
 class FriendShareSettingsTest(TestCase, metaclass=settings_meta):
-	SETUP = has_module, two_users
+	SETUP = has_module, friends
 	CLASSES = ModuleSetupFriendShare,
+
+class GroupPerformanceSettingsTest(TestCase, metaclass=settings_meta):
+	SETUP = has_module, three_friends
+	CLASSES = ModuleSetupGroupPerformance,
 
 class SoundtrackSettingsTest(TestCase, metaclass=settings_meta):
 	SETUP = has_module, has_loop
@@ -85,6 +90,10 @@ class StickerSettingsTest(TestCase, metaclass=settings_meta):
 class TradeSettingsTest(TestCase, metaclass=settings_meta):
 	SETUP = has_trade_module,
 	CLASSES = ModuleSetupTrade,
+
+class TrioPerformanceSettingsTest(TestCase, metaclass=settings_meta):
+	SETUP = has_module, two_friends
+	CLASSES = ModuleSetupTrioPerformance,
 
 class UGCSettingsTest(TestCase, metaclass=settings_meta):
 	SETUP = has_module,

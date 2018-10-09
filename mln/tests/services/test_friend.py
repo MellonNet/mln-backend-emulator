@@ -4,12 +4,17 @@ from mln.models.dynamic import FriendshipStatus
 from mln.models.static import MLNError
 from mln.services.friend import block_friend, handle_friend_invite_response, remove_friend, send_friend_invite, unblock_friend
 from mln.tests.setup_testcase import requires, setup, TestCase
-from mln.tests.models.test_profile import one_user, two_users
+from mln.tests.models.test_profile import four_users, one_user, three_users, two_users
 
 @setup
 @requires(two_users)
 def pending_friends(self):
 	self.friendship_id = self.user.profile.outgoing_friendships.create(to_profile=self.other_user.profile, status=FriendshipStatus.PENDING).id
+
+@setup
+@requires(two_users)
+def pending_friends_other_way(self):
+	self.other_user.profile.outgoing_friendships.create(to_profile=self.user.profile, status=FriendshipStatus.PENDING)
 
 @setup
 @requires(two_users)
@@ -22,10 +27,19 @@ def blocked_friends(self):
 	self.friendship_id = self.user.profile.outgoing_friendships.create(to_profile=self.other_user.profile, status=FriendshipStatus.BLOCKED).id
 
 @setup
-@requires(friends)
-def three_friends(self):
-	self.third_user = User.objects.create(username="third")
+@requires(friends, three_users)
+def friend_of_friend(self):
 	self.other_friendship_id = self.other_user.profile.outgoing_friendships.create(to_profile=self.third_user.profile, status=FriendshipStatus.FRIEND).id
+
+@setup
+@requires(friends, three_users)
+def two_friends(self):
+	self.user.profile.outgoing_friendships.create(to_profile=self.third_user.profile, status=FriendshipStatus.FRIEND).id
+
+@setup
+@requires(two_friends, four_users)
+def three_friends(self):
+	self.user.profile.outgoing_friendships.create(to_profile=self.fourth_user.profile, status=FriendshipStatus.FRIEND).id
 
 class OneUserTest(TestCase):
 	SETUP = one_user,
@@ -147,7 +161,7 @@ class BlockedFriendTest(TestCase):
 			unblock_friend(self.other_user, self.friendship_id)
 
 class ThirdFriendTest(TestCase):
-	SETUP = three_friends,
+	SETUP = friend_of_friend,
 
 	def test_handle_friend_invite_response_unrelated(self):
 		with self.assertRaises(RuntimeError):

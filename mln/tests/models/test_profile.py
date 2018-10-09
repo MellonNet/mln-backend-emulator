@@ -19,6 +19,16 @@ def two_users(self):
 	self.other_user = User.objects.create(username="other")
 
 @setup
+@requires(two_users)
+def three_users(self):
+	self.third_user = User.objects.create(username="third")
+
+@setup
+@requires(three_users)
+def four_users(self):
+	self.fourth_user = User.objects.create(username="fourth")
+
+@setup
 @requires(one_user)
 def networker(self):
 	self.user.profile.is_networker = True
