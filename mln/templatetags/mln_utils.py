@@ -3,7 +3,7 @@ import re
 from django import template
 from django.template.base import DebugLexer, Lexer, tag_re, TextNode
 
-from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupTrade
+from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
 from mln.models.module_settings_arcade import HopArcadeElement, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
 from mln.models.static import ItemType, MessageReplyType
 
@@ -20,7 +20,9 @@ SAVE_TEMPLATES = {
 }
 SETUP_TEMPLATES = {
 	ModuleSetupFriendShare: "friend_share",
+	ModuleSetupGroupPerformance: "group_performance",
 	ModuleSetupTrade: "trade",
+	ModuleSetupTrioPerformance: "trio_performance",
 }
 
 register = template.Library()

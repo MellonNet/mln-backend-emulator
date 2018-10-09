@@ -1,0 +1,8 @@
+{% load mln_utils %}
+{% with setup=module|get_or_none:"setup_group_performance" %}
+{% if setup is not None %}
+<friend friendID="{{ setup.friend_0.id }}" />
+<friend friendID="{{ setup.friend_1.id }}" />
+<friend friendID="{{ setup.friend_2.id }}" />
+{% endif %}
+{% endwith %}
