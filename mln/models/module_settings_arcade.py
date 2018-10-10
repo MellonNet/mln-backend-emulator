@@ -36,7 +36,7 @@ class DeliveryArcadeTile(models.Model):
 	A tile in a delivery arcade game.
 	Saves the position of the tile as well as its tile ID.
 	I store both pathway and scenery tiles in the same ID field, unlike the flash files, which have separate tile_<id> and scen_<id> names for them.
-	To store them both in the same field without collisions, scenery tiles are get the 5th bit ( |= 32 ) set.
+	To store them both in the same field without collisions, scenery tiles get the 5th bit ( |= 32 ) set.
 	"""
 	module = models.ForeignKey(Module, related_name="tiles", on_delete=models.CASCADE)
 	x = models.PositiveSmallIntegerField()
