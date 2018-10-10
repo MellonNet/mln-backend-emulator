@@ -21,10 +21,15 @@ nav > a {
 	border-top-right-radius: 0.3em;
 	background-color: #3173a5;
 	color: white;
+	margin-right: 4px;
 	padding: 0.5rem 1rem;
 	text-decoration: none;
 }
 
 #accountinfo {
 	float: right;
+}
+
+#accountinfo > span {
+	margin-right: 4px;
 }
