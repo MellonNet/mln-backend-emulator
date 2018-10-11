@@ -1,9 +1,7 @@
 from mln.models.static import ItemInfo, ItemType
-from mln.tests.models.test_profile import one_user
+from mln.tests.models.test_profile import color, has_skin, one_user, statements
 from mln.tests.models.test_module import has_harvestable_module, has_harvestable_module_stack
 from mln.tests.services.test_friend import friends, pending_friends, pending_friends_other_way
-from mln.tests.services.test_misc import statements
-from mln.tests.services.test_page import color, has_skin
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.views.api.xml.handler_testcase import req_resp
 
@@ -58,6 +56,6 @@ class PageSaveOptionsOnlyColumnColorTest(TestCase, metaclass=req_resp):
 	VOID_TESTS = "only_column_color",
 
 class PageSaveOptionsSkinAndColorTest(TestCase, metaclass=req_resp):
-	SETUP = one_user, has_skin
+	SETUP = color, has_skin
 	DIR = "page/page_save_options"
 	VOID_TESTS = "skin_and_color",

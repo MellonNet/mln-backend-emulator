@@ -3,8 +3,7 @@ from unittest.mock import patch
 from mln.models.static import ItemInfo, ItemType, ModuleEditorType, ModuleInfo, ModuleSkin
 from mln.models.module_settings import ModuleSaveGeneric
 from mln.tests.models.test_module import arcade_module, arcade_prizes, harvestable_module, has_harvestable_module, has_setupable_module, has_setup_cost, setup_setupable_module, setupable_module
-from mln.tests.models.test_profile import one_user, two_users
-from mln.tests.services.test_page import color
+from mln.tests.models.test_profile import color, one_user, two_users
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.views.api.xml.handler_testcase import req_resp
 
@@ -85,7 +84,7 @@ class ModuleHarvestTest(TestCase, metaclass=req_resp):
 	VOID_TESTS = "module_harvest",
 
 class ModuleSaveSettingsTest(TestCase, metaclass=req_resp):
-	SETUP = has_generic_module,
+	SETUP = module_skin, color, has_generic_module,
 	DIR = "module"
 	TESTS = "module_save_settings",
 

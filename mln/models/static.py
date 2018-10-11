@@ -170,6 +170,7 @@ class ModuleExecutionCost(Stack):
 	The paid items are typically not transferred to the module owner, they are deleted from the system.
 	"""
 	module_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE)
+	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.ITEM})
 
 class ModuleSetupCost(Stack):
 	"""
@@ -177,11 +178,12 @@ class ModuleSetupCost(Stack):
 	This can be retrieved by the owner as long as the module isn't ready for harvest or hasn't been executed.
 	"""
 	module_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE)
+	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.ITEM})
 
 class ModuleYieldInfo(models.Model):
 	"""Defines the item the module "grows", its harvest cap, its growth rate, and the click growth rate."""
 	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
-	yield_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE)
+	yield_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BLUEPRINT) | Q(type=ItemType.ITEM))
 	max_yield = models.PositiveSmallIntegerField()
 	yield_per_day = models.PositiveSmallIntegerField()
 	clicks_per_yield = models.PositiveSmallIntegerField()

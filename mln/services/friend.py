@@ -99,3 +99,7 @@ def unblock_friend(user, relation_id):
 		raise MLNError(MLNError.YOU_ARE_BLOCKED)
 	relation.status = FriendshipStatus.FRIEND
 	relation.save()
+
+def are_friends(user, other_user_id):
+	"""Return whether the users are friends."""
+	return user.profile.outgoing_friendships.filter(to_profile_id=other_user_id, status=FriendshipStatus.FRIEND).exists() or user.profile.incoming_friendships.filter(from_profile_id=other_user_id, status=FriendshipStatus.FRIEND).exists()

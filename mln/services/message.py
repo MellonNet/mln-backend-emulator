@@ -1,9 +1,10 @@
 from ..models.dynamic import FriendshipStatus, Message
 from ..models.static import MessageBody
+from .friend import are_friends
 
 def _check_recipient(user, recipient_id):
 	if not user.profile.is_networker:
-		if not _is_friend(user, recipient_id):
+		if not are_friends(user, recipient_id):
 			raise RuntimeError("User with ID %i is not a friend of %s" % (recipient_id, user))
 
 def _get_message(user, message_id):
@@ -11,9 +12,6 @@ def _get_message(user, message_id):
 	if message.recipient != user:
 		raise RuntimeError("%s is not addressed to user %s" % (message, user))
 	return message
-
-def _is_friend(user, friend_id):
-	return user.profile.outgoing_friendships.filter(to_profile_id=friend_id, status=FriendshipStatus.FRIEND).exists() or user.profile.incoming_friendships.filter(from_profile_id=friend_id, status=FriendshipStatus.FRIEND).exists()
 
 def create_attachment(message, item_id, qty):
 	"""Remove items from the user's inventory and attach it to the message."""

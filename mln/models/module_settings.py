@@ -2,9 +2,13 @@
 from enum import auto, Enum
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Q
 
+from ..services.friend import are_friends
+from ..services.misc import assert_has_item
 from .module import Module
 from .static import Color, EnumField, ItemInfo, ItemType, ModuleSkin
 
@@ -41,11 +45,18 @@ class ModuleSaveSoundtrack(models.Model):
 	"""Save data for the soundtrack module, consisting of a 4 x 4 grid of loop item ids and pan values, added programmatically below."""
 	module = models.OneToOneField(Module, related_name="save_soundtrack", on_delete=models.CASCADE)
 
+	def clean(self):
+		for i in range(4):
+			for j in range(4):
+				item_id = getattr(self, "sound_%i_%i_id" % (i, j))
+				if item_id is not None:
+					assert_has_item(self.module.owner, item_id, field_name="sound_%i_%i" % (i, j))
+
 # this looks weird but it's the simplest way to do this
 for i in range(4):
 	for j in range(4):
 		ModuleSaveSoundtrack.add_to_class("sound_%i_%i" % (i, j), models.ForeignKey(ItemInfo, null=True, blank=True, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.LOOP}))
-		ModuleSaveSoundtrack.add_to_class("sound_%i_%i_pan" % (i, j), models.SmallIntegerField())
+		ModuleSaveSoundtrack.add_to_class("sound_%i_%i_pan" % (i, j), models.SmallIntegerField(validators=(MinValueValidator(-100), MaxValueValidator(100))))
 
 class ModuleSaveSticker(models.Model):
 	"""
@@ -62,6 +73,10 @@ class ModuleSaveSticker(models.Model):
 	rotation = models.SmallIntegerField()
 	depth = models.SmallIntegerField()
 
+	def clean(self):
+		if self.item.type == ItemType.STICKER:
+			assert_has_item(self.module.owner, self.item_id, field_name="item")
+
 class ModuleSaveUGC(models.Model):
 	"""
 	Save data for modules with user-generated content (UGC): gallery, factory, and creation lab.
@@ -75,12 +90,26 @@ class ModuleSetupFriendShare(models.Model):
 	module = models.OneToOneField(Module, related_name="setup_friend_share", on_delete=models.CASCADE)
 	friend = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
 
+	def clean(self):
+		if not are_friends(self.module.owner, self.friend_id):
+			raise ValidationError({"friend": "User with ID %i is not a friend of the module owner" % self.friend_id})
+
 class ModuleSetupGroupPerformance(models.Model):
 	"""Save data for the 4-person group performance module."""
 	module = models.OneToOneField(Module, related_name="setup_group_performance", on_delete=models.CASCADE)
 	friend_0 = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
 	friend_1 = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
 	friend_2 = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
+
+	def clean(self):
+		friends = set()
+		for name in ("friend_0", "friend_1", "friend_2"):
+			user_id = getattr(self, name+"_id")
+			if not are_friends(self.module.owner, user_id):
+				raise ValidationError({name: "User %s is not a friend of the module owner" % getattr(self, name)})
+			friends.add(user_id)
+		if len(friends) != 3:
+			raise ValidationError("Duplicate friends specified")
 
 class ModuleSetupTrade(models.Model):
 	"""
@@ -98,3 +127,13 @@ class ModuleSetupTrioPerformance(models.Model):
 	module = models.OneToOneField(Module, related_name="setup_trio_performance", on_delete=models.CASCADE)
 	friend_0 = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
 	friend_1 = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
+
+	def clean(self):
+		friends = set()
+		for name in ("friend_0", "friend_1"):
+			user_id = getattr(self, name+"_id")
+			if not are_friends(self.module.owner, user_id):
+				raise ValidationError({name: "User %s is not a friend of the module owner" % getattr(self, name)})
+			friends.add(user_id)
+		if len(friends) != 2:
+			raise ValidationError("Duplicate friends specified")

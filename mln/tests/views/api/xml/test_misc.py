@@ -1,5 +1,5 @@
-from mln.tests.models.test_profile import one_user
-from mln.tests.services.test_misc import has_item_blueprint, has_module, has_requirement, statements
+from mln.tests.models.test_profile import one_user, statements
+from mln.tests.services.test_misc import has_item_blueprint, has_module, has_requirement
 from mln.tests.setup_testcase import TestCase
 from mln.tests.views.api.xml.handler_testcase import req_resp
 

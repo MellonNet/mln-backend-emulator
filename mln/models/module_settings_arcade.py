@@ -1,6 +1,7 @@
 """Models for arcade module save data."""
 from enum import auto, Enum
 
+from django.core.validators import MaxValueValidator
 from django.db import models
 
 from .module import Module
@@ -24,12 +25,15 @@ class ModuleSaveConcertArcade(ModuleSaveArcade):
 	Since the game consists of a 64 x 4 grid of arrows, and each arrow is either there or not, I use a 64-bit integer for each column.
 	"""
 	module = models.OneToOneField(Module, related_name="save_concert_arcade", on_delete=models.CASCADE)
-	background_skin = models.PositiveSmallIntegerField()
-	arrowset_skin = models.PositiveSmallIntegerField()
+	background_skin = models.PositiveSmallIntegerField(validators=(MaxValueValidator(2),))
+	arrowset_skin = models.PositiveSmallIntegerField(validators=(MaxValueValidator(2),))
 	arrows_left = models.BigIntegerField()
 	arrows_down = models.BigIntegerField()
 	arrows_up = models.BigIntegerField()
 	arrows_right = models.BigIntegerField()
+
+def DeliveryPosField(*args, **kwargs):
+	return models.PositiveSmallIntegerField(validators=(MaxValueValidator(25),))
 
 class DeliveryArcadeTile(models.Model):
 	"""
@@ -39,8 +43,8 @@ class DeliveryArcadeTile(models.Model):
 	To store them both in the same field without collisions, scenery tiles get the 5th bit ( |= 32 ) set.
 	"""
 	module = models.ForeignKey(Module, related_name="tiles", on_delete=models.CASCADE)
-	x = models.PositiveSmallIntegerField()
-	y = models.PositiveSmallIntegerField()
+	x = DeliveryPosField()
+	y = DeliveryPosField()
 	tile_id = models.PositiveSmallIntegerField()
 
 	def __str__(self):
@@ -55,14 +59,14 @@ class ModuleSaveDeliveryArcade(ModuleSaveArcade):
 	"""
 	module = models.OneToOneField(Module, related_name="save_delivery_arcade", on_delete=models.CASCADE)
 	timer = models.PositiveSmallIntegerField()
-	house_0_x = models.PositiveSmallIntegerField(null=True, blank=True)
-	house_0_y = models.PositiveSmallIntegerField(null=True, blank=True)
-	house_1_x = models.PositiveSmallIntegerField(null=True, blank=True)
-	house_1_y = models.PositiveSmallIntegerField(null=True, blank=True)
-	house_2_x = models.PositiveSmallIntegerField(null=True, blank=True)
-	house_2_y = models.PositiveSmallIntegerField(null=True, blank=True)
-	start_x = models.PositiveSmallIntegerField(null=True, blank=True)
-	start_y = models.PositiveSmallIntegerField(null=True, blank=True)
+	house_0_x = DeliveryPosField(null=True, blank=True)
+	house_0_y = DeliveryPosField(null=True, blank=True)
+	house_1_x = DeliveryPosField(null=True, blank=True)
+	house_1_y = DeliveryPosField(null=True, blank=True)
+	house_2_x = DeliveryPosField(null=True, blank=True)
+	house_2_y = DeliveryPosField(null=True, blank=True)
+	start_x = DeliveryPosField(null=True, blank=True)
+	start_y = DeliveryPosField(null=True, blank=True)
 
 class DestructoidCharacterSkin(Enum):
 	"""

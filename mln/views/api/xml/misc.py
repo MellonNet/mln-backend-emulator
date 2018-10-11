@@ -1,4 +1,4 @@
-from ....services.misc import inventory_module_get, use_blueprint, user_save_my_avatar, user_save_my_statements
+from ....services.misc import inventory_module_get, use_blueprint
 
 def handle_blueprint_use(user, request):
 	blueprint_id = int(request.get("blueprintID"))
@@ -13,10 +13,14 @@ def handle_user_get_my_avatar(user, result):
 
 def handle_user_save_my_avatar(user, request):
 	profile = request.find("result/userProfile")
-	user_save_my_avatar(user, profile.get("avatar"))
+	user.profile.avatar = profile.get("avatar")
+	user.profile.save()
 
 def handle_user_save_my_statements(user, request):
-	statements = []
-	for statement in request.findall("statements/statement"):
-		statements.append((int(statement.get("question")), int(statement.get("answer"))))
-	user_save_my_statements(user, statements)
+	statements = request.findall("statements/statement")
+	if len(statements) != 6:
+		raise ValueError("Incorrect number of statements")
+	for statement in statements:
+		setattr(user.profile, "statement_%i_question", int(statement.get("question")))
+		setattr(user.profile, "statement_%i_answer", int(statement.get("answer")))
+	user.profile.save()

@@ -7,10 +7,12 @@ import datetime
 from enum import auto, Enum
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils.timezone import now
 
+from ..services.misc import assert_has_item
 from .static import Answer, Color, EnumField, ItemInfo, ItemType, MessageBody, Stack, Question
 
 DAY = datetime.timedelta(days=1)
@@ -56,11 +58,45 @@ class Profile(models.Model):
 	last_vote_update_time = models.DateTimeField(default=now)
 	page_skin = models.ForeignKey(ItemInfo, null=True, blank=True, related_name="+", on_delete=models.PROTECT, limit_choices_to={"type": ItemType.SKIN})
 	page_color = models.ForeignKey(Color, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-	page_column_color_id = models.PositiveSmallIntegerField(null=True, blank=True) # hardcoded for some reason
+	page_column_color_id = models.PositiveSmallIntegerField(null=True, blank=True, validators=(MaxValueValidator(4),)) # hardcoded for some reason
 	friends = models.ManyToManyField("self", through="Friendship", symmetrical=False)
 
 	def __str__(self):
 		return self.user.username
+
+	def clean(self):
+		parts = self.avatar.split("#")
+		if len(parts) not in (2, 3):
+			raise ValidationError({"avatar": "Avatar does not have the right number of parts"})
+		if (self.is_networker and parts[0] not in ("0", "1")) or (not self.is_networker and parts[0] != "0"):
+			raise ValidationError({"avatar": "First part of avatar should not be %s" % parts[0]})
+		avatar_data = parts[1].split(",")
+		if len(avatar_data) != 14:
+			raise ValidationError({"avatar": "Data part of avatar has %i values, should be 14" % len(avatar_data)})
+		self.avatar = parts[0]+"#"+parts[1]
+
+		max_votes = 20 + 8 * self.rank
+		if self.available_votes >	max_votes:
+			raise ValidationError({"available_votes": "Can't have more votes available than the maximum of %i at rank %i" % (max_votes, self.rank)})
+
+		if self.page_skin_id is not None:
+			assert_has_item(self.user, self.page_skin_id)
+
+		if self.statement_0_question_id is not None:
+			provided = set()
+			for i in range(6):
+				question_id = getattr(self, "statement_%i_question_id" % i)
+				answer_id = getattr(self, "statement_%i_answer_id" % i)
+				provided.add(question_id)
+				if not Answer.objects.filter(id=answer_id, question_id=question_id).exists():
+					answer = getattr(self, "statement_%i_answer" % i)
+					question = getattr(self, "statement_%i_question" % i)
+					raise ValidationError({"statement_%i_answer" % i: "Answer %s is not an answer to Question %s" % (answer, question)})
+			if len(provided) != 6:
+				raise ValidationError("Duplicate questions provided")
+			for question in Question.objects.filter(mandatory=True):
+				if question.id not in provided:
+					raise ValidationError("Mandatory question %s not provided" % question)
 
 	def add_inv_item(self, item_id, qty=1):
 		"""
