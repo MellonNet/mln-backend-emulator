@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 
 from ....models.dynamic import get_or_none, Friendship, FriendshipStatus
 from ....models.static import ItemType
-from ....services.page import page_save_layout, page_save_options
+from ....services.page import page_save_layout
 
 def handle_page_get_new(viewing_user, request):
 	page_owner_name = request.get("pageOwner")
@@ -93,4 +93,7 @@ def handle_page_save_options(user, request):
 	else:
 		color_id = int(settings.get("colorID"))
 	column_color_id = int(settings.get("columnColorID"))
-	page_save_options(user, skin_id, color_id, column_color_id)
+	user.profile.page_skin_id = skin_id
+	user.profile.page_color_id = color_id
+	user.profile.page_column_color_id = column_color_id
+	user.profile.save()

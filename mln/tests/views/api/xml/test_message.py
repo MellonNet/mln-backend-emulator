@@ -1,5 +1,5 @@
 from mln.tests.models.test_profile import item, one_user, user_has_item
-from mln.tests.services.test_message import attachment, easy_reply_body, message
+from mln.tests.services.test_message import attachment, body, easy_reply_body, message
 from mln.tests.setup_testcase import requires, setup, TestCase
 from mln.tests.services.test_friend import friends
 from mln.tests.views.api.xml.handler_testcase import req_resp
@@ -17,12 +17,12 @@ class MessageTest(TestCase, metaclass=req_resp):
 	VOID_TESTS = "message_delete",
 
 class MessageSendTest(TestCase, metaclass=req_resp):
-	SETUP = friends,
+	SETUP = body, friends
 	DIR = "message"
 	VOID_TESTS = "message_send",
 
 class MessageSendWithAttachmentTest(TestCase, metaclass=req_resp):
-	SETUP = friends, user_has_item
+	SETUP = body, friends, user_has_item
 	DIR = "message"
 	VOID_TESTS = "message_send_with_attachment",
 

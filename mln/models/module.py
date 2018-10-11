@@ -2,6 +2,8 @@
 import random
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils.timezone import now
 
@@ -14,16 +16,20 @@ class Module(models.Model):
 	This does not represent a stack of modules in the user's inventory, for that, see InventoryStack.
 	"""
 	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.MODULE})
-	pos_x = models.PositiveSmallIntegerField()
-	pos_y = models.PositiveSmallIntegerField()
+	owner = models.ForeignKey(User, related_name="modules", on_delete=models.CASCADE)
+	pos_x = models.PositiveSmallIntegerField(null=True, blank=True, validators=(MaxValueValidator(2),))
+	pos_y = models.PositiveSmallIntegerField(null=True, blank=True, validators=(MaxValueValidator(3),))
 	last_harvest_time = models.DateTimeField(default=now)
 	clicks_since_last_harvest = models.PositiveSmallIntegerField(default=0)
 	total_clicks = models.PositiveIntegerField(default=0)
 	is_setup = models.BooleanField(default=False) # this is actually only relevant for some modules, refactor?
-	owner = models.ForeignKey(User, related_name="modules", on_delete=models.CASCADE)
 
 	def __str__(self):
 		return "%s's %s at pos (%i, %i), %i clicks" % (self.owner, self.item.name, self.pos_x, self.pos_y, self.total_clicks)
+
+	def clean(self):
+		if self.owner.modules.filter(pos_x=self.pos_x, pos_y=self.pos_y).exclude(id=self.id).exists():
+			raise ValidationError("User %s already has a module at position %i %i" % (self.owner, self.pos_x, self.pos_y))
 
 	def get_info(self):
 		"""Get the ModuleInfo for this module."""
@@ -100,9 +106,6 @@ class Module(models.Model):
 		else:
 			costs = ModuleSetupCost.objects.filter(module_item_id=self.item_id)
 			for cost in costs:
-				if not self.owner.inventory.filter(item_id=cost.item_id, qty__gte=cost.qty).exists():
-					raise RuntimeError("Owner doesn't have setup requirement %s in inventory" % cost)
-			for cost in costs:
 				self.owner.profile.remove_inv_item(cost.item_id, cost.qty)
 		self.is_setup = True
 		self.last_harvest_time = now()
@@ -133,9 +136,6 @@ class Module(models.Model):
 			# give item was already taken from owner at setup
 		else:
 			costs = ModuleExecutionCost.objects.filter(module_item_id=self.item_id)
-			for cost in costs:
-				if not executer.inventory.filter(item_id=cost.item_id, qty__gte=cost.qty).exists():
-					raise RuntimeError("Executer doesn't have execution cost %s in inventory" % cost)
 			for cost in costs:
 				executer.profile.remove_inv_item(cost.item_id, cost.qty)
 		self.save()
