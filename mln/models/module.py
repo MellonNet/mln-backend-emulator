@@ -154,6 +154,8 @@ class Module(models.Model):
 	def get_settings_classes(self):
 		"""Get the save data classes for this module."""
 		info = self.get_info()
+		if info.editor_type is None:
+			return ()
 		return module_settings_classes[info.editor_type]
 
 from .module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
