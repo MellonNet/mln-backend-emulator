@@ -1,5 +1,8 @@
 {% extends "./base.html" %}
 {% load static %}
+{% block title %}
+{{ page_owner_name}}'s Public View
+{% endblock %}
 {% block content %}
 <embed type="application/x-shockwave-flash" src="{% static 'contentTemplating/MyLEGOMainFlashComponents/otherfiles/1033/download81DAA43FCBB6BBA27B99DE8A29881E8D.swf' %}" flashvars="OwnerName={{ page_owner_name }}&amp;s_mylegoPath={% url 'ugc' %}&amp;s_universePath={% url 'creation_lab' %}&amp;s_assetPath=&amp;s_webService={% url 'webservice' %}&amp;s_resourcePath={% static 'XMLCache/MLN/MLN_1033_20100211081940.xml' %}" width="950" height="933">
 {% endblock %}

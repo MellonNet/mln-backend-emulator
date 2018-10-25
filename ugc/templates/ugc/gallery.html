@@ -1,5 +1,8 @@
 {% extends "mln/ui/base.html" %}
 {% load static %}
+{% block title %}
+Gallery
+{% endblock %}
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'mln/page.css' %}" />
 <div>
@@ -17,4 +20,3 @@
 	<button type="submit">Upload</button>
 </form>
 {% endblock %}
-
