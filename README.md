@@ -20,7 +20,9 @@ Place the content folder in a directory specified by `STATICFILES_DIRS` in `mlns
 
 ### Server setup
 
-Initialize the database by running `python manage.py migrate`. This will create the database tables and import the data from the original MLN XML.
+Initialize the database by running `python manage.py migrate`. This will create the database tables.
+
+Included in the content files should be an XML at `XMLCache/MLN/MLN_1033_20100211081940.xml`. Run `python manage.py import_mln_xml <path>`, where <path> is the path to this file. This will import the original MLN data.
 
 ### Run the server
 
