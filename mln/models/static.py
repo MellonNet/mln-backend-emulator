@@ -199,7 +199,7 @@ class MessageBody(models.Model):
 	Some message texts have ready-made responses available, called easy replies.
 	A common example is an easy reply of "Thanks", used by various message texts.
 	"""
-	subject = models.CharField(max_length=64)
+	subject = models.CharField(max_length=128)
 	text = models.TextField()
 	easy_replies = models.ManyToManyField("self", related_name="+", symmetrical=False)
 
