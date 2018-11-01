@@ -33,7 +33,7 @@ class ModuleSaveConcertArcade(ModuleSaveArcade):
 	arrows_right = models.BigIntegerField()
 
 def DeliveryPosField(*args, **kwargs):
-	return models.PositiveSmallIntegerField(validators=(MaxValueValidator(25),))
+	return models.PositiveSmallIntegerField(*args, validators=(MaxValueValidator(25),), **kwargs)
 
 class DeliveryArcadeTile(models.Model):
 	"""
