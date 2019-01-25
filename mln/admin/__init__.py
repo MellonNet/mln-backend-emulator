@@ -8,13 +8,17 @@ from django.contrib import admin
 from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
 from ..models.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, StartingStack, Question
+from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerMessageTrigger, NetworkerMessageAttachment, StartingStack, Question
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
 
+has_trigger = lambda obj: NetworkerMessageTrigger.objects.filter(body=obj).exists()
+has_trigger.short_description = "has trigger"
+has_trigger.boolean = True
+
 class MessageBodyAdmin(admin.ModelAdmin):
-	list_display = "subject", "text"
+	list_display = "subject", "text", has_trigger
 	search_fields = list_display
 	filter_vertical = "easy_replies",
 
@@ -74,6 +78,10 @@ message_admin = make_inline(Message, Attachment)
 message_admin.list_display = "sender", "recipient", "body", "is_read"
 message_admin.list_display_links = "body",
 message_admin.list_filter = "recipient", "sender"
+
+trigger_admin = make_inline(NetworkerMessageTrigger, NetworkerMessageAttachment)
+trigger_admin.list_display = "networker", "body", "trigger", "source"
+trigger_admin.list_display_links = "body",
 
 # Item infos
 
