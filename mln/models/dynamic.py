@@ -39,7 +39,7 @@ class Message(models.Model):
 		return "Message from %s to %s, subject \"%s\", is read: %s" % (self.sender, self.recipient, subject, self.is_read)
 
 class Attachment(Stack):
-	"""An Attachment, a stack sent with a message."""
+	"""An attachment, a stack sent with a message."""
 	message = models.ForeignKey(Message, related_name="attachments", on_delete=models.CASCADE)
 
 	def __str__(self):

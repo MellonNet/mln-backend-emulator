@@ -4,6 +4,7 @@ These include items and associated info, "about me" questions & answers and mess
 """
 from enum import auto, Enum
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 
@@ -207,7 +208,10 @@ class MessageBody(models.Model):
 		verbose_name_plural = "Message bodies"
 
 	def __str__(self):
-		return "%s: %s" % (self.subject, self.text)
+		string = "%s: %s" % (self.subject, self.text)
+		if len(string) > 100:
+			string = string[:97]+"..."
+		return string
 
 class MessageReplyType(Enum):
 	"""
@@ -219,6 +223,20 @@ class MessageReplyType(Enum):
 	NORMAL_AND_EASY_REPLY = 1
 	EASY_REPLY_ONLY = 2
 	NO_REPLY = 3
+
+class NetworkerMessageTrigger(models.Model):
+	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""
+	networker = models.CharField(max_length=64)
+	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
+	trigger = models.TextField()
+	source = models.TextField()
+
+	def __str__(self):
+		return "From %s: %s" % (self.networker, self.body)
+
+class NetworkerMessageAttachment(Stack):
+	"""A stack to be attached to a networker message."""
+	trigger = models.ForeignKey(NetworkerMessageTrigger, related_name="attachments", on_delete=models.CASCADE)
 
 class Question(models.Model):
 	"""A question for the "About me" section."""
