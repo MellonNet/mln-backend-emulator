@@ -226,9 +226,9 @@ class MessageReplyType(Enum):
 
 class NetworkerMessageTrigger(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""
-	networker = models.CharField(max_length=64)
+	networker = models.CharField(max_length=64, blank=True, null=True)
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
-	trigger = models.TextField()
+	trigger = models.TextField(blank=True, null=True)
 	source = models.TextField()
 
 	def __str__(self):
