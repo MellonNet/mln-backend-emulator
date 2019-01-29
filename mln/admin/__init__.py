@@ -82,6 +82,7 @@ message_admin.list_filter = "recipient", "sender"
 trigger_admin = make_inline(NetworkerMessageTrigger, NetworkerMessageAttachment)
 trigger_admin.list_display = "networker", "body", "trigger", "source"
 trigger_admin.list_display_links = "body",
+trigger_admin.search_fields = "networker", "body__subject", "body__text", "trigger", "source"
 
 # Item infos
 
