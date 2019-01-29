@@ -19,7 +19,7 @@ has_trigger.boolean = True
 
 class MessageBodyAdmin(admin.ModelAdmin):
 	list_display = "subject", "text", has_trigger
-	search_fields = list_display
+	search_fields = "subject", "text"
 	filter_vertical = "easy_replies",
 
 custom[MessageBody] = MessageBodyAdmin
