@@ -205,6 +205,7 @@ class MessageBody(models.Model):
 	easy_replies = models.ManyToManyField("self", related_name="+", symmetrical=False)
 
 	class Meta:
+		ordering = "subject", "text"
 		verbose_name_plural = "Message bodies"
 
 	def __str__(self):
