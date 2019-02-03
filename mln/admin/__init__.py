@@ -8,10 +8,17 @@ from django.contrib import admin
 from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
 from ..models.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerMessageTrigger, NetworkerMessageAttachment, StartingStack, Question
+from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerMessageTrigger, NetworkerMessageAttachment, StartingStack, Question
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
+
+class NetworkerFriendshipConditionAdmin(admin.ModelAdmin):
+	list_display = "networker", "condition", "success_body", "failure_body", "success_source", "failure_source"
+	list_display_links = "condition",
+	search_fields = list_display
+
+custom[NetworkerFriendshipCondition] = NetworkerFriendshipConditionAdmin
 
 has_trigger = lambda obj: NetworkerMessageTrigger.objects.filter(body=obj).exists()
 has_trigger.short_description = "has trigger"
