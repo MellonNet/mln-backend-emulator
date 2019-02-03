@@ -4,6 +4,7 @@ Most of the code here is for displaying various settings models inline with the 
 """
 from django.apps import apps
 from django.contrib import admin
+from django.db.models import Q
 
 from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
@@ -16,11 +17,11 @@ from .make_inline import custom, inlines, make_inline
 class NetworkerFriendshipConditionAdmin(admin.ModelAdmin):
 	list_display = "networker", "condition", "success_body", "failure_body", "success_source", "failure_source"
 	list_display_links = "condition",
-	search_fields = list_display
+	search_fields = "networker", "condition", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "success_source", "failure_source"
 
 custom[NetworkerFriendshipCondition] = NetworkerFriendshipConditionAdmin
 
-has_trigger = lambda obj: NetworkerMessageTrigger.objects.filter(body=obj).exists()
+has_trigger = lambda obj: NetworkerMessageTrigger.objects.filter(body=obj).exists() or NetworkerFriendshipCondition.objects.filter(Q(success_body=obj) | Q(failure_body=obj)).exists()
 has_trigger.short_description = "has trigger"
 has_trigger.boolean = True
 
