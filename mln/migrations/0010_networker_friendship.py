@@ -19,7 +19,11 @@ def migrate_triggers(apps, schema_editor):
 			cond.failure_source = fail.source.strip()
 			cond.save()
 		except ObjectDoesNotExist:
-			NFC.objects.create(networker=fail.networker.strip(), condition="[import - todo]", success_body=None, success_source="[import - todo]", failure_body_id=fail.body_id, failure_source=fail.source.strip())
+			if fail.networker is None:
+				networker = None
+			else:
+				networker = fail.networker.strip()
+			NFC.objects.create(networker=networker, condition="[import - todo]", success_body=None, success_source="[import - todo]", failure_body_id=fail.body_id, failure_source=fail.source.strip())
 
 def reverse(apps, schema_editor):
 	NFC = apps.get_model("mln", "NetworkerFriendshipCondition")
