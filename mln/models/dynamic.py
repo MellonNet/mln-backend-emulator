@@ -48,7 +48,7 @@ class Attachment(Stack):
 class Profile(models.Model):
 	"""
 	MLN-specific user data.
-	This includes the avatar, user rank, available votes, page skin and page colors, as well as "About me" statements.
+	This includes the avatar, user rank, available votes, page skin and page colors.
 	"""
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	is_networker = models.BooleanField(default=False)
@@ -81,22 +81,6 @@ class Profile(models.Model):
 
 		if self.page_skin_id is not None:
 			assert_has_item(self.user, self.page_skin_id)
-
-		if self.statement_0_question_id is not None:
-			provided = set()
-			for i in range(6):
-				question_id = getattr(self, "statement_%i_question_id" % i)
-				answer_id = getattr(self, "statement_%i_answer_id" % i)
-				provided.add(question_id)
-				if not Answer.objects.filter(id=answer_id, question_id=question_id).exists():
-					answer = getattr(self, "statement_%i_answer" % i)
-					question = getattr(self, "statement_%i_question" % i)
-					raise ValidationError({"statement_%i_answer" % i: "Answer %s is not an answer to Question %s" % (answer, question)})
-			if len(provided) != 6:
-				raise ValidationError("Duplicate questions provided")
-			for question in Question.objects.filter(mandatory=True):
-				if question.id not in provided:
-					raise ValidationError("Mandatory question %s not provided" % question)
 
 	def add_inv_item(self, item_id, qty=1):
 		"""
@@ -144,9 +128,32 @@ class Profile(models.Model):
 			self.last_vote_update_time = now() - time_remainder
 			self.save()
 
+class AboutMe(models.Model):
+	"""Questions and answers the user can choose to display on their page as a bio/profile of themselves."""
+	user = models.OneToOneField(User, related_name="about_me", on_delete=models.CASCADE)
+
+	def __str__(self):
+		return "%s's about me" % self.user
+
+	def clean(self):
+		provided = set()
+		for i in range(6):
+			question_id = getattr(self, "question_%i_id" % i)
+			answer_id = getattr(self, "answer_%i_id" % i)
+			provided.add(question_id)
+			if not Answer.objects.filter(id=answer_id, question_id=question_id).exists():
+				answer = getattr(self, "answer_%i" % i)
+				question = getattr(self, "question_%i" % i)
+				raise ValidationError({"answer_%i" % i: "Answer %s is not an answer to Question %s" % (answer, question)})
+		if len(provided) != 6:
+			raise ValidationError("Duplicate questions provided")
+		for question in Question.objects.filter(mandatory=True):
+			if question.id not in provided:
+				raise ValidationError("Mandatory question %s not provided" % question)
+
 for i in range(6):
-	Profile.add_to_class("statement_%i_question" % i, models.ForeignKey(Question, null=True, blank=True, related_name="+", on_delete=models.PROTECT))
-	Profile.add_to_class("statement_%i_answer" % i, models.ForeignKey(Answer, null=True, blank=True, related_name="+", on_delete=models.PROTECT))
+	AboutMe.add_to_class("question_%i" % i, models.ForeignKey(Question, related_name="+", on_delete=models.PROTECT))
+	AboutMe.add_to_class("answer_%i" % i, models.ForeignKey(Answer, related_name="+", on_delete=models.PROTECT))
 
 class InventoryStack(Stack):
 	"""A stack of items in the user's inventory."""

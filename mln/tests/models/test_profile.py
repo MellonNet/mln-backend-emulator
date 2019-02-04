@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
 from mln.models.static import Answer, Color, ItemInfo, ItemType, Question, StartingStack
+from mln.models.dynamic import AboutMe
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 
 @cls_setup
@@ -127,41 +128,44 @@ class ProfileSaveStatementsTest(TestCase):
 	SETUP = statements, one_user
 
 	def test_wrong_answers(self):
+		about_me = AboutMe(user=self.user)
 		i = 0
 		first_question_id = None
 		for question_id, answers in self.STATEMENTS.items():
 			if first_question_id is None:
 				first_question_id = question_id
 				continue
-			setattr(self.user.profile, "statement_%i_question_id" % i, first_question_id)
-			setattr(self.user.profile, "statement_%i_answer_id" % i, answers[0])
+			setattr(about_me, "question_%i_id" % i, first_question_id)
+			setattr(about_me, "answer_%i_id" % i, answers[0])
 			i += 1
 			if i == 6:
 				break
 		with self.assertRaises(ValidationError):
-			self.user.profile.save()
+			about_me.save()
 
 	def test_duplicate_questions(self):
+		about_me = AboutMe(user=self.user)
 		question_id = next(iter(self.STATEMENTS))
 		answer_id = self.STATEMENTS[question_id][0]
 		for i in range(6):
-			setattr(self.user.profile, "statement_%i_question_id" % i, question_id)
-			setattr(self.user.profile, "statement_%i_answer_id" % i, answer_id)
+			setattr(about_me, "question_%i_id" % i, question_id)
+			setattr(about_me, "answer_%i_id" % i, answer_id)
 		with self.assertRaises(ValidationError):
-			self.user.profile.save()
+			about_me.save()
 
 	def test_mandatory_not_supplied(self):
+		about_me = AboutMe(user=self.user)
 		i = 0
 		for question_id, answers in self.STATEMENTS.items():
 			if question_id == 1:
 				continue
-			setattr(self.user.profile, "statement_%i_question_id" % i, question_id)
-			setattr(self.user.profile, "statement_%i_answer_id" % i, answers[0])
+			setattr(about_me, "question_%i_id" % i, question_id)
+			setattr(about_me, "answer_%i_id" % i, answers[0])
 			i += 1
 			if i == 6:
 				break
 		with self.assertRaises(ValidationError):
-			self.user.profile.save()
+			about_me.save()
 
 class ProfileSaveSkinHasNoSkinTest(TestCase):
 	SETUP = page_skin, one_user

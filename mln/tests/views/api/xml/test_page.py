@@ -1,4 +1,5 @@
 from mln.models.static import ItemInfo, ItemType
+from mln.models.dynamic import AboutMe
 from mln.tests.models.test_profile import color, has_skin, one_user, statements
 from mln.tests.models.test_module import has_harvestable_module, has_harvestable_module_stack
 from mln.tests.services.test_friend import friends, pending_friends, pending_friends_other_way
@@ -16,14 +17,16 @@ def user_extra_data(self):
 	self.user.profile.page_skin_id = self.SKIN_ID
 	self.user.profile.page_color_id = self.COLOR_ID
 	self.user.profile.page_column_color_id = 0
+	self.user.profile.save()
+	about_me = AboutMe(user=self.user)
 	i = 0
 	for question_id, answers in self.STATEMENTS.items():
-		setattr(self.user.profile, "statement_%s_question_id" % i, question_id)
-		setattr(self.user.profile, "statement_%s_answer_id" % i, answers[0])
+		setattr(about_me, "question_%s_id" % i, question_id)
+		setattr(about_me, "answer_%s_id" % i, answers[0])
 		i += 1
 		if i == 6:
 			break
-	self.user.profile.save()
+	about_me.save()
 
 class PageGetNewFriendsTest(TestCase, metaclass=req_resp):
 	SETUP = friends,

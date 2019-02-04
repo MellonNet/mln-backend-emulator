@@ -7,7 +7,6 @@ import mln.views.api.xml.module_settings as module_settings
 from mln.models.static import ItemInfo, ItemType
 from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
 from mln.models.module_settings_arcade import ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
-from mln.services.module_settings import create_or_update
 from mln.tests.models.test_profile import one_user
 from mln.tests.models.test_module import has_trade_module
 from mln.tests.services.test_friend import friends, two_friends, three_friends

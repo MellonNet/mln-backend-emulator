@@ -1,3 +1,4 @@
+from ....models.dynamic import AboutMe
 from ....services.misc import inventory_module_get, use_blueprint
 
 def handle_blueprint_use(user, request):
@@ -20,7 +21,12 @@ def handle_user_save_my_statements(user, request):
 	statements = request.findall("statements/statement")
 	if len(statements) != 6:
 		raise ValueError("Incorrect number of statements")
-	for statement in statements:
-		setattr(user.profile, "statement_%i_question", int(statement.get("question")))
-		setattr(user.profile, "statement_%i_answer", int(statement.get("answer")))
-	user.profile.save()
+	attrs = {}
+	for i, statement in enumerate(statements):
+		attrs["question_%i_id" % i] = int(statement.get("question"))
+		attrs["answer_%i_id" % i] = int(statement.get("answer"))
+	about_me, created = AboutMe.objects.get_or_create(user=user, defaults=attrs)
+	if not created:
+		for key, value in attrs.items():
+			setattr(about_me, key, value)
+		about_me.save()
