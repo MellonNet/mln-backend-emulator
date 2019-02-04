@@ -15,9 +15,9 @@ from .make_inline import custom, inlines, make_inline
 # Normal but customized admin interfaces
 
 class NetworkerFriendshipConditionAdmin(admin.ModelAdmin):
-	list_display = "networker", "condition", "success_body", "failure_body", "success_source", "failure_source"
-	list_display_links = "condition",
-	search_fields = "networker", "condition", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "success_source", "failure_source"
+	list_display = "networker", "condition", "success_body", "failure_body", "source"
+	list_display_links = "condition", "success_body", "failure_body"
+	search_fields = "networker", "condition", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source"
 
 custom[NetworkerFriendshipCondition] = NetworkerFriendshipConditionAdmin
 

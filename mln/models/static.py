@@ -228,11 +228,10 @@ class MessageReplyType(Enum):
 class NetworkerFriendshipCondition(models.Model):
 	"""Currently meant for devs to collect data on networker friendship conditions and messages, later to be properly integrated into the system."""
 	networker = models.CharField(max_length=64, blank=True, null=True)
-	condition = models.TextField()
-	success_body = models.ForeignKey(MessageBody, blank=True, null=True, related_name="+", on_delete=models.CASCADE)
-	failure_body = models.ForeignKey(MessageBody, blank=True, null=True, related_name="+", on_delete=models.CASCADE)
-	success_source = models.TextField()
-	failure_source = models.TextField()
+	condition = models.CharField(max_length=64)
+	success_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
+	failure_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
+	source = models.TextField()
 
 class NetworkerMessageTrigger(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""
