@@ -16,13 +16,13 @@
 
 Download this repository and place it where you like.
 Download the MLN content files - to avoid potential problems with copyright, they aren't included in the repo nor linked here, but it should be possible to find them if you search the web or ask someone involved in the MLN recreation effort.
-Place the content folder in a directory specified by `STATICFILES_DIRS` in `mlnserver/settings.py`. The default is `../content/`, so that the files should be in `../content/upload/`.
+Place the content folder in a directory specified by `STATICFILES_DIRS` in `mlnserver/settings.py`. The default is `/content/`, so that the editorial should be at `/content/editorial-redux-v3.xml`.
 
 ### Server setup
 
 Initialize the database by running `python manage.py migrate`. This will create the database tables.
 
-Included in the content files should be an XML at `XMLCache/MLN/MLN_1033_20100211081940.xml`. Run `python manage.py import_mln_xml <path>`, where <path> is the path to this file. This will import the original MLN data.
+Included in the content files should be an XML file called `editorial-redux-v3`. Run `python manage.py import_mln_xml <path>`, where <path> is the path to this file. This will import the original MLN data.
 
 ### Run the server
 
