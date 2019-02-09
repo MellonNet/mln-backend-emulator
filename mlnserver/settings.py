@@ -122,9 +122,8 @@ LOGIN_REDIRECT_URL = "/mln/private_view/default"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-# Currently set to /upload/ to support original paths, can be changed when the paths in the XML are changed.
-STATIC_URL = "/upload/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), os.path.join("..", "content", "upload")]
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), os.path.join(BASE_DIR, "content")]
 
 # Media upload directory for UGC.
 MEDIA_URL = "/media/"
