@@ -22,7 +22,7 @@ href_types = {
 	"Loop Shoppe": ModuleEditorType.LOOP_SHOPPE,
 	"Networker Text": ModuleEditorType.NETWORKER_TEXT,
 	"Trade (Networker)": ModuleEditorType.NETWORKER_TRADE,
-	"Pellet Inductor.swf": ModuleEditorType.PLASTIC_PELLET_INDUCTOR,
+	"Pellet Inductor": ModuleEditorType.PLASTIC_PELLET_INDUCTOR,
 	"Rocket Game Module": ModuleEditorType.ROCKET_GAME,
 	"Soundtrack Module": ModuleEditorType.SOUNDTRACK,
 	"Sticker": ModuleEditorType.STICKER,
