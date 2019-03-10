@@ -123,8 +123,8 @@ LOGIN_REDIRECT_URL = "/mln/private_view/default"
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), os.path.join(BASE_DIR, "content")]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 # Media upload directory for UGC.
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "..", "content", "media")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
