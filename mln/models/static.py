@@ -239,6 +239,7 @@ class NetworkerMessageTrigger(models.Model):
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
 	trigger = models.TextField(blank=True, null=True)
 	source = models.TextField()
+	notes = models.TextField(blank=True, null=True)
 
 	def __str__(self):
 		return "From %s: %s" % (self.networker, self.body)
