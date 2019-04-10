@@ -14,6 +14,14 @@ from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
 
+class FriendshipAdmin(admin.ModelAdmin):
+	list_display = "from_user", "to_user", "status"
+	list_display_links = "from_user", "to_user"
+	search_fields = "from_user__username", "to_user__username",
+	list_filter = "status",
+
+custom[Friendship] = FriendshipAdmin
+
 has_trigger = lambda obj: NetworkerMessageTrigger.objects.filter(body=obj).exists() or NetworkerFriendshipCondition.objects.filter(Q(success_body=obj) | Q(failure_body=obj)).exists()
 has_trigger.short_description = "has trigger"
 has_trigger.boolean = True
@@ -72,8 +80,6 @@ def get_settings_inlines(obj):
 # Misc inlines
 
 make_inline(Question, Answer)
-
-make_inline(Profile, (Friendship, {"fk_name": "to_profile"}), (Friendship, {"fk_name": "from_profile"}))
 
 message_admin = make_inline(Message, Attachment)
 message_admin.list_display = "sender", "recipient", "body", "is_read"

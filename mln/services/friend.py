@@ -9,7 +9,7 @@ def _get_friendship(user, relation_id):
 		friendship = Friendship.objects.get(id=relation_id)
 	except ObjectDoesNotExist:
 		raise RuntimeError("No friendship relation with ID %i exists" % relation_id)
-	if friendship.from_profile != user.profile and friendship.to_profile != user.profile:
+	if friendship.from_user != user and friendship.to_user != user:
 		raise RuntimeError("%s is not related to user %s" % (friendship, user))
 	return friendship
 
@@ -24,7 +24,7 @@ def send_friend_invite(user, invitee_name):
 	except ObjectDoesNotExist:
 		raise RuntimeError("No user with the username %s exists" % invitee_name)
 	try:
-		friendship = Friendship.objects.get(from_profile=user.profile, to_profile=invitee.profile)
+		friendship = Friendship.objects.get(from_user=user, to_user=invitee)
 		if friendship.status == FriendshipStatus.PENDING:
 			return
 		raise RuntimeError("Friendship to user %s already exists" % invitee_name)
@@ -38,13 +38,13 @@ def send_friend_invite(user, invitee_name):
 		else:
 			success = user.inventory.filter(item_id=cond.condition_id).exists()
 		if success:
-			Friendship.objects.create(from_profile=user.profile, to_profile=invitee.profile, status=FriendshipStatus.FRIEND)
+			Friendship.objects.create(from_user=user, to_user=invitee, status=FriendshipStatus.FRIEND)
 			user.messages.create(sender=invitee, body_id=cond.success_body_id)
 		else:
 			user.messages.create(sender=invitee, body_id=cond.failure_body_id)
 	except ObjectDoesNotExist:
 		# normal user
-		Friendship.objects.create(from_profile=user.profile, to_profile=invitee.profile, status=FriendshipStatus.PENDING)
+		Friendship.objects.create(from_user=user, to_user=invitee, status=FriendshipStatus.PENDING)
 
 def handle_friend_invite_response(user, relation_id, accept):
 	"""
@@ -55,7 +55,7 @@ def handle_friend_invite_response(user, relation_id, accept):
 	- the relation is not a pending relation.
 	"""
 	relation = _get_friendship(user, relation_id)
-	if relation.to_profile != user.profile:
+	if relation.to_user != user:
 		raise RuntimeError("%s is not related to this user" % relation)
 	if relation.status != FriendshipStatus.PENDING:
 		raise RuntimeError("%s is not a pending relation" % relation)
@@ -71,11 +71,14 @@ def remove_friend(user, relation_id):
 	Raise RuntimeError if
 	- the friendship does not exist
 	- the relation does not relate to this user, or
-	- the relation is not a friend relation.
+	- the relation is not a friend or blocked relation.
+	Raise MLNError if the the user is blocked.
 	"""
 	relation = _get_friendship(user, relation_id)
-	if relation.status != FriendshipStatus.FRIEND:
-		raise RuntimeError("%s is not a friend relation" % relation)
+	if relation.status not in (FriendshipStatus.FRIEND, FriendshipStatus.BLOCKED):
+		raise RuntimeError("%s is not a friend or blocked relation" % relation)
+	if relation.status == FriendshipStatus.BLOCKED and relation.from_user != user:
+		raise MLNError(MLNError.YOU_ARE_BLOCKED)
 	relation.delete()
 
 def block_friend(user, relation_id):
@@ -90,10 +93,10 @@ def block_friend(user, relation_id):
 	if relation.status != FriendshipStatus.FRIEND:
 		raise RuntimeError("%s is not a friend relation" % relation)
 	# the direction of the relation is important for blocked friends
-	if relation.to_profile == user.profile:
-		friend = relation.from_profile
-		relation.from_profile = user.profile
-		relation.to_profile = friend
+	if relation.to_user == user:
+		friend = relation.from_user
+		relation.from_user = user
+		relation.to_user = friend
 	relation.status = FriendshipStatus.BLOCKED
 	relation.save()
 
@@ -109,11 +112,11 @@ def unblock_friend(user, relation_id):
 	relation = _get_friendship(user, relation_id)
 	if relation.status != FriendshipStatus.BLOCKED:
 		raise RuntimeError("%s is not a blocked relation" % relation)
-	if relation.from_profile != user.profile:
+	if relation.from_user != user:
 		raise MLNError(MLNError.YOU_ARE_BLOCKED)
 	relation.status = FriendshipStatus.FRIEND
 	relation.save()
 
 def are_friends(user, other_user_id):
 	"""Return whether the users are friends."""
-	return user.profile.outgoing_friendships.filter(to_profile_id=other_user_id, status=FriendshipStatus.FRIEND).exists() or user.profile.incoming_friendships.filter(from_profile_id=other_user_id, status=FriendshipStatus.FRIEND).exists()
+	return user.outgoing_friendships.filter(to_user_id=other_user_id, status=FriendshipStatus.FRIEND).exists() or user.incoming_friendships.filter(from_user_id=other_user_id, status=FriendshipStatus.FRIEND).exists()
