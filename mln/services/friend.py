@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
 from ..models.dynamic import Friendship, FriendshipStatus
-from ..models.static import MLNError
+from ..models.static import MLNError, NetworkerFriendshipCondition
 
 def _get_friendship(user, relation_id):
 	try:
@@ -24,13 +24,27 @@ def send_friend_invite(user, invitee_name):
 	except ObjectDoesNotExist:
 		raise RuntimeError("No user with the username %s exists" % invitee_name)
 	try:
-		friendship = user.profile.outgoing_friendships.get(to_profile=invitee.profile)
+		friendship = Friendship.objects.get(from_profile=user.profile, to_profile=invitee.profile)
 		if friendship.status == FriendshipStatus.PENDING:
 			return
 		raise RuntimeError("Friendship to user %s already exists" % invitee_name)
 	except ObjectDoesNotExist:
 		pass
-	user.profile.outgoing_friendships.create(to_profile=invitee.profile)
+	try:
+		cond = NetworkerFriendshipCondition.objects.get(networker=invitee)
+		# networker
+		if cond.condition_id is None:
+			success = True
+		else:
+			success = user.inventory.filter(item_id=cond.condition_id).exists()
+		if success:
+			Friendship.objects.create(from_profile=user.profile, to_profile=invitee.profile, status=FriendshipStatus.FRIEND)
+			user.messages.create(sender=invitee, body_id=cond.success_body_id)
+		else:
+			user.messages.create(sender=invitee, body_id=cond.failure_body_id)
+	except ObjectDoesNotExist:
+		# normal user
+		Friendship.objects.create(from_profile=user.profile, to_profile=invitee.profile, status=FriendshipStatus.PENDING)
 
 def handle_friend_invite_response(user, relation_id, accept):
 	"""
