@@ -24,7 +24,7 @@ def send_friend_invite(user, invitee_name):
 	except ObjectDoesNotExist:
 		raise RuntimeError("No user with the username %s exists" % invitee_name)
 	try:
-		friendship = Friendship.objects.get(from_user=user, to_user=invitee)
+		friendship = user.outgoing_friendships.get(to_user=invitee)
 		if friendship.status == FriendshipStatus.PENDING:
 			return
 		raise RuntimeError("Friendship to user %s already exists" % invitee_name)
@@ -38,13 +38,13 @@ def send_friend_invite(user, invitee_name):
 		else:
 			success = user.inventory.filter(item_id=cond.condition_id).exists()
 		if success:
-			Friendship.objects.create(from_user=user, to_user=invitee, status=FriendshipStatus.FRIEND)
+			user.outgoing_friendships.create(to_user=invitee, status=FriendshipStatus.FRIEND)
 			user.messages.create(sender=invitee, body_id=cond.success_body_id)
 		else:
 			user.messages.create(sender=invitee, body_id=cond.failure_body_id)
 	except ObjectDoesNotExist:
 		# normal user
-		Friendship.objects.create(from_user=user, to_user=invitee, status=FriendshipStatus.PENDING)
+		user.outgoing_friendships.create(to_user=invitee, status=FriendshipStatus.PENDING)
 
 def handle_friend_invite_response(user, relation_id, accept):
 	"""
