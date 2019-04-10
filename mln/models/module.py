@@ -184,7 +184,7 @@ module_settings_classes = {
 	ModuleEditorType.ROCKET_GAME: (ModuleSaveSticker, ModuleSaveRocketGame),
 	ModuleEditorType.SOUNDTRACK: (ModuleSaveGeneric, ModuleSaveSoundtrack),
 	ModuleEditorType.STICKER: (ModuleSaveSticker,),
-	ModuleEditorType.STICKER_SHOPPE: (ModuleSetupTrade,),
+	ModuleEditorType.STICKER_SHOPPE: (ModuleSaveGeneric, ModuleSetupTrade),
 	ModuleEditorType.TRADE: (ModuleSaveGeneric, ModuleSetupTrade),
 	ModuleEditorType.TRIO_PERFORMANCE: (ModuleSaveGeneric, ModuleSetupTrioPerformance),
 }
