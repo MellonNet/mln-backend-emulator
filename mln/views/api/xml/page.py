@@ -16,15 +16,15 @@ def handle_page_get_new(viewing_user, request):
 
 	# needed to display friend list (both private and public)
 	friends = []
-	for friendlist, is_from in ((page_owner.profile.outgoing_friendships.all(), True), (page_owner.profile.incoming_friendships.all(), False)):
+	for friendlist, is_from in ((page_owner.outgoing_friendships.all(), True), (page_owner.incoming_friendships.all(), False)):
 		for friendship in friendlist:
 			if not is_private_view:
 				if friendship.status != FriendshipStatus.FRIEND:
 					continue
 			if is_from:
-				friend = friendship.to_profile.user
+				friend = friendship.to_user
 			else:
-				friend = friendship.from_profile.user
+				friend = friendship.from_user
 
 			if friendship.status == FriendshipStatus.PENDING:
 				if is_from:
@@ -40,14 +40,14 @@ def handle_page_get_new(viewing_user, request):
 		viewing_user.profile.update_available_votes()
 		if not is_private_view:
 			# needed to display friend status on other people's pages
-			friendship = get_or_none(Friendship, from_profile=viewing_user.profile, to_profile=page_owner.profile)
+			friendship = get_or_none(Friendship, from_user=viewing_user, to_user=page_owner)
 			if friendship is None:
-				friendship = get_or_none(Friendship, from_profile=page_owner.profile, to_profile=viewing_user.profile)
+				friendship = get_or_none(Friendship, from_user=page_owner, to_user=viewing_user)
 
 			if friendship:
 				friendship_status = FriendshipStatus(friendship.status).name.title()
 				if friendship_status == "Pending":
-					if friendship.from_profile == viewing_user.profile:
+					if friendship.from_user == viewing_user:
 						friendship_status = "Pending Out"
 					else:
 						friendship_status = "Pending In"

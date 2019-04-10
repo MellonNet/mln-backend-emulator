@@ -9,37 +9,37 @@ from mln.tests.models.test_profile import four_users, one_user, three_users, two
 @setup
 @requires(two_users)
 def pending_friends(self):
-	self.friendship_id = self.user.profile.outgoing_friendships.create(to_profile=self.other_user.profile, status=FriendshipStatus.PENDING).id
+	self.friendship_id = self.user.outgoing_friendships.create(to_user=self.other_user, status=FriendshipStatus.PENDING).id
 
 @setup
 @requires(two_users)
 def pending_friends_other_way(self):
-	self.other_user.profile.outgoing_friendships.create(to_profile=self.user.profile, status=FriendshipStatus.PENDING)
+	self.other_user.outgoing_friendships.create(to_user=self.user, status=FriendshipStatus.PENDING)
 
 @setup
 @requires(two_users)
 def friends(self):
-	self.friendship_id = self.user.profile.outgoing_friendships.create(to_profile=self.other_user.profile, status=FriendshipStatus.FRIEND).id
+	self.friendship_id = self.user.outgoing_friendships.create(to_user=self.other_user, status=FriendshipStatus.FRIEND).id
 
 @setup
 @requires(two_users)
 def blocked_friends(self):
-	self.friendship_id = self.user.profile.outgoing_friendships.create(to_profile=self.other_user.profile, status=FriendshipStatus.BLOCKED).id
+	self.friendship_id = self.user.outgoing_friendships.create(to_user=self.other_user, status=FriendshipStatus.BLOCKED).id
 
 @setup
 @requires(friends, three_users)
 def friend_of_friend(self):
-	self.other_friendship_id = self.other_user.profile.outgoing_friendships.create(to_profile=self.third_user.profile, status=FriendshipStatus.FRIEND).id
+	self.other_friendship_id = self.other_user.outgoing_friendships.create(to_user=self.third_user, status=FriendshipStatus.FRIEND).id
 
 @setup
 @requires(friends, three_users)
 def two_friends(self):
-	self.user.profile.outgoing_friendships.create(to_profile=self.third_user.profile, status=FriendshipStatus.FRIEND).id
+	self.user.outgoing_friendships.create(to_user=self.third_user, status=FriendshipStatus.FRIEND).id
 
 @setup
 @requires(two_friends, four_users)
 def three_friends(self):
-	self.user.profile.outgoing_friendships.create(to_profile=self.fourth_user.profile, status=FriendshipStatus.FRIEND).id
+	self.user.outgoing_friendships.create(to_user=self.fourth_user, status=FriendshipStatus.FRIEND).id
 
 class OneUserTest(TestCase):
 	SETUP = one_user,
@@ -69,13 +69,13 @@ class NoFriendTest(TestCase):
 
 	def test_send_friend_invite_ok(self):
 		send_friend_invite(self.user, "other")
-		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).count(), 1)
+		self.assertEqual(self.user.outgoing_friendships.filter(to_user=self.other_user).count(), 1)
 
 	def test_send_friend_invite_again(self):
 		send_friend_invite(self.user, "other")
-		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).count(), 1)
+		self.assertEqual(self.user.outgoing_friendships.filter(to_user=self.other_user).count(), 1)
 		send_friend_invite(self.user, "other")
-		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).count(), 1)
+		self.assertEqual(self.user.outgoing_friendships.filter(to_user=self.other_user).count(), 1)
 
 class PendingFriendTest(TestCase):
 	SETUP = pending_friends,
@@ -86,11 +86,11 @@ class PendingFriendTest(TestCase):
 
 	def test_handle_friend_invite_response_accept_ok(self):
 		handle_friend_invite_response(self.other_user, self.friendship_id, True)
-		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile, status=FriendshipStatus.FRIEND).count(), 1)
+		self.assertEqual(self.user.outgoing_friendships.filter(to_user=self.other_user, status=FriendshipStatus.FRIEND).count(), 1)
 
 	def test_handle_friend_invite_response_decline_ok(self):
 		handle_friend_invite_response(self.other_user, self.friendship_id, False)
-		self.assertFalse(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).exists())
+		self.assertFalse(self.user.outgoing_friendships.filter(to_user=self.other_user).exists())
 
 	def test_remove_friend_pending(self):
 		with self.assertRaises(RuntimeError):
@@ -117,17 +117,17 @@ class FriendTest(TestCase):
 
 	def test_remove_friend_ok(self):
 		remove_friend(self.user, self.friendship_id)
-		self.assertFalse(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).exists())
+		self.assertFalse(self.user.outgoing_friendships.filter(to_user=self.other_user).exists())
 
 	def test_block_friend_one_way_ok(self):
 		block_friend(self.user, self.friendship_id)
-		self.assertFalse(self.other_user.profile.outgoing_friendships.filter(to_profile=self.user.profile).exists())
-		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile, status=FriendshipStatus.BLOCKED).count(), 1)
+		self.assertFalse(self.other_user.outgoing_friendships.filter(to_user=self.user).exists())
+		self.assertEqual(self.user.outgoing_friendships.filter(to_user=self.other_user, status=FriendshipStatus.BLOCKED).count(), 1)
 
 	def test_block_friend_other_way_ok(self):
 		block_friend(self.other_user, self.friendship_id)
-		self.assertFalse(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile).exists())
-		self.assertEqual(self.other_user.profile.outgoing_friendships.filter(to_profile=self.user.profile, status=FriendshipStatus.BLOCKED).count(), 1)
+		self.assertFalse(self.user.outgoing_friendships.filter(to_user=self.other_user).exists())
+		self.assertEqual(self.other_user.outgoing_friendships.filter(to_user=self.user, status=FriendshipStatus.BLOCKED).count(), 1)
 
 	def test_unblock_friend_friend(self):
 		with self.assertRaises(RuntimeError):
@@ -144,9 +144,14 @@ class BlockedFriendTest(TestCase):
 		with self.assertRaises(RuntimeError):
 			handle_friend_invite_response(self.other_user, self.friendship_id, True)
 
-	def test_remove_friend_blocked(self):
-		with self.assertRaises(RuntimeError):
-			remove_friend(self.user, self.friendship_id)
+	def test_remove_friend_ok(self):
+		remove_friend(self.user, self.friendship_id)
+		self.assertEqual(self.user.outgoing_friendships.count(), 0)
+		self.assertEqual(self.user.incoming_friendships.count(), 0)
+
+	def test_remove_friend_wrong_direction(self):
+		with self.assertRaises(MLNError):
+			remove_friend(self.other_user, self.friendship_id)
 
 	def test_block_friend_blocked(self):
 		with self.assertRaises(RuntimeError):
@@ -154,7 +159,7 @@ class BlockedFriendTest(TestCase):
 
 	def test_unblock_friend_ok(self):
 		unblock_friend(self.user, self.friendship_id)
-		self.assertEqual(self.user.profile.outgoing_friendships.filter(to_profile=self.other_user.profile, status=FriendshipStatus.FRIEND).count(), 1)
+		self.assertEqual(self.user.outgoing_friendships.filter(to_user=self.other_user, status=FriendshipStatus.FRIEND).count(), 1)
 
 	def test_unblock_friend_wrong_direction(self):
 		with self.assertRaises(MLNError):

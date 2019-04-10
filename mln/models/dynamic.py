@@ -59,7 +59,6 @@ class Profile(models.Model):
 	page_skin = models.ForeignKey(ItemInfo, null=True, blank=True, related_name="+", on_delete=models.PROTECT, limit_choices_to={"type": ItemType.SKIN})
 	page_color = models.ForeignKey(Color, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
 	page_column_color_id = models.PositiveSmallIntegerField(null=True, blank=True, validators=(MaxValueValidator(4),)) # hardcoded for some reason
-	friends = models.ManyToManyField("self", through="Friendship", symmetrical=False)
 
 	def __str__(self):
 		return self.user.username
@@ -178,12 +177,12 @@ class Friendship(models.Model):
 	A friendship relation of two users.
 	This is also used for friend requests and blocked friends.
 	"""
-	from_profile = models.ForeignKey(Profile, related_name="outgoing_friendships", on_delete=models.CASCADE) # invite sender
-	to_profile = models.ForeignKey(Profile, related_name="incoming_friendships", on_delete=models.CASCADE) # invite recipient
+	from_user = models.ForeignKey(User, related_name="outgoing_friendships", on_delete=models.CASCADE) # invite sender
+	to_user = models.ForeignKey(User, related_name="incoming_friendships", on_delete=models.CASCADE) # invite recipient
 	status = EnumField(FriendshipStatus, default=FriendshipStatus.PENDING)
 
 	def __str__(self):
-		return "%s -> %s: %s" % (self.from_profile.user, self.to_profile.user, self.get_status_display())
+		return "%s -> %s: %s" % (self.from_user, self.to_user, self.get_status_display())
 
 def get_or_none(cls, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""
