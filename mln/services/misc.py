@@ -33,12 +33,18 @@ def use_blueprint(user, blueprint_id):
 	user.profile.add_inv_item(blueprint_info.build_id)
 
 def assert_has_item(user, item_id, qty=1, field_name=None):
-	"""Raise ValidationError if the user has less than qty items in their inventory."""
+	"""
+	Raise ValidationError if the user has less than qty items in their inventory.
+	Never raises an error for networkers.
+	"""
+	if user.profile.is_networker:
+		# networkers can do anything without needing items
+		return
 	if not user.inventory.filter(item_id=item_id, qty__gte=qty).exists():
 		if qty == 1:
-			message = "User %s does not have item %s" % (user, ItemInfo.objects.get(id=item_id))
+			message = "User does not have item %s" % ItemInfo.objects.get(id=item_id)
 		else:
-			message = "User %s does not have at least %i of item %s" % (user, qty, ItemInfo.objects.get(id=item_id))
+			message = "User does not have at least %i of item %s" % (qty, ItemInfo.objects.get(id=item_id))
 		if field_name is not None:
 			raise ValidationError({field_name: message})
 		raise ValidationError(message)
