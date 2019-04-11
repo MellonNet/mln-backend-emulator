@@ -34,6 +34,7 @@ def four_users(self):
 @requires(one_user)
 def networker(self):
 	self.user.profile.is_networker = True
+	self.user.profile.save()
 
 @cls_setup
 def statements(cls):

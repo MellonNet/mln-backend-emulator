@@ -16,7 +16,14 @@ def handle_page_get_new(viewing_user, request):
 
 	# needed to display friend list (both private and public)
 	friends = []
-	for friendlist, is_from in ((page_owner.outgoing_friendships.all(), True), (page_owner.incoming_friendships.all(), False)):
+	if page_owner.profile.is_networker:
+		incoming = page_owner.incoming_friendships.filter(from_user__profile__is_networker=True)
+		outgoing = page_owner.outgoing_friendships.filter(to_user__profile__is_networker=True)
+	else:
+		incoming = page_owner.incoming_friendships.all()
+		outgoing = page_owner.outgoing_friendships.all()
+
+	for friendlist, is_from in ((outgoing, True), (incoming, False)):
 		for friendship in friendlist:
 			if not is_private_view:
 				if friendship.status != FriendshipStatus.FRIEND:
