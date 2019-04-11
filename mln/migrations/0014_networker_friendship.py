@@ -16,7 +16,7 @@ def migrate_conditions(apps, schema_editor):
 		if cond.networker == "Echo":
 			cond.networker = str(User.objects.get(username="Echo").id)
 		else:
-			user = User.objects.create(username=cond.networker, password=password)
+			user = User.objects.create_user(username=cond.networker, password=password)
 			profile = Profile.objects.create(user=user, is_networker=True)
 			cond.networker = str(user.id)
 		if cond.condition == "None":
