@@ -10,33 +10,33 @@ def message_extra_data(self):
 	self.message.reply_body = self.BODY
 	self.message.save()
 
-class MessageTest(TestCase, metaclass=req_resp):
+class Message(TestCase, metaclass=req_resp):
 	SETUP = message_extra_data,
 	DIR = "message"
 	TESTS = "message_get", "message_list"
 	VOID_TESTS = "message_delete",
 
-class MessageSendTest(TestCase, metaclass=req_resp):
+class MessageSend(TestCase, metaclass=req_resp):
 	SETUP = body, friends
 	DIR = "message"
 	VOID_TESTS = "message_send",
 
-class MessageSendWithAttachmentTest(TestCase, metaclass=req_resp):
+class MessageSendWithAttachment(TestCase, metaclass=req_resp):
 	SETUP = body, friends, user_has_item
 	DIR = "message"
 	VOID_TESTS = "message_send_with_attachment",
 
-class MessageEasyReplyTest(TestCase, metaclass=req_resp):
+class MessageEasyReply(TestCase, metaclass=req_resp):
 	SETUP = easy_reply_body, message, friends
 	DIR = "message"
 	VOID_TESTS = "message_easy_reply",
 
-class MessageEasyReplyWithAttachmentTest(TestCase, metaclass=req_resp):
+class MessageEasyReplyWithAttachment(TestCase, metaclass=req_resp):
 	SETUP = easy_reply_body, message, friends, user_has_item
 	DIR = "message"
 	VOID_TESTS = "message_easy_reply_with_attachments",
 
-class MessageDetachTest(TestCase, metaclass=req_resp):
+class MessageDetach(TestCase, metaclass=req_resp):
 	SETUP = attachment,
 	DIR = "message"
 	VOID_TESTS = "message_detach",
