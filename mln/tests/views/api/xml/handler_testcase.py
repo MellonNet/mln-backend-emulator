@@ -1,7 +1,6 @@
 """Common code for tests that send in a request and compare the response to an expected one, to test request parsing and response generation."""
 import os.path
 
-from mln.tests.setup_testcase import TestCase
 from mln.views.api.xml.webservice import _webservice_unencrypted
 
 VOID_XML = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?><response type="%s" ><result></result></response>'

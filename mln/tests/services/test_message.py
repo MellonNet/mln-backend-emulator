@@ -28,21 +28,21 @@ def message(self):
 def attachment(self):
 	self.message.attachments.create(item_id=self.ITEM_ID, qty=1)
 
-class NoMessageTest(TestCase):
+class NoMessage(TestCase):
 	SETUP = body, two_users
 
 	def test_send_message_no_friend(self):
 		with self.assertRaises(RuntimeError):
 			send_message(self.user, self.other_user.id, self.BODY.id)
 
-class NoMessageFriendTest(TestCase):
+class NoMessage_Friend(TestCase):
 	SETUP = body, friends
 
 	def test_send_message_ok(self):
 		message = send_message(self.user, self.other_user.id, self.BODY.id)
 		self.assertTrue(self.other_user.messages.filter(id=message.id, sender_id=self.user.id, body_id=self.BODY.id).exists())
 
-class MessageTest(TestCase):
+class Message(TestCase):
 	SETUP = message,
 
 	def test_delete_message_wrong_user(self):
@@ -63,22 +63,22 @@ class MessageTest(TestCase):
 		open_message(self.user, self.message.id)
 		self.assertTrue(self.user.messages.get(id=self.message.id).is_read)
 
-class CreateAttachmentNoStackTest(TestCase):
+class CreateAttachment_NoStack(TestCase):
 	SETUP = message, item
 
-	def test_create_attachment_no_stack(self):
+	def test(self):
 		with self.assertRaises(RuntimeError):
 			create_attachment(self.message, self.ITEM_ID, 1)
 
-class CreateAttachmentExistingStackTest(TestCase):
+class CreateAttachment_ExistingStack(TestCase):
 	SETUP = other_user_has_item, message
 
-	def test_create_attachment_ok(self):
+	def test(self):
 		create_attachment(self.message, self.ITEM_ID, 1)
 		self.assertFalse(self.other_user.inventory.filter(id=self.ITEM_ID).exists())
 		self.assertTrue(self.message.attachments.filter(item_id=self.ITEM_ID, qty=1).exists())
 
-class ExistingAttachmentTest(TestCase):
+class ExistingAttachment(TestCase):
 	SETUP = attachment,
 
 	def check_detach_attachments(self):
@@ -94,30 +94,30 @@ class ExistingAttachmentTest(TestCase):
 		detach_attachments(self.user, self.message.id)
 		self.check_detach_attachments()
 
-class EasyReplyNoFriendTest(TestCase):
+class EasyReply_NoFriend(TestCase):
 	SETUP = easy_reply_body, message
 
-	def test_easy_reply_no_friend(self):
+	def test(self):
 		with self.assertRaises(RuntimeError):
 			easy_reply(self.user, self.other_user.id, self.BODY.id, self.REPLY_BODY.id)
 
-class EasyReplyNoMessageTest(TestCase):
+class EasyReply_NoMessage(TestCase):
 	SETUP = easy_reply_body, friends
 
-	def test_easy_reply_no_message(self):
+	def test(self):
 		with self.assertRaises(RuntimeError):
 			easy_reply(self.user, self.other_user.id, self.BODY.id, self.REPLY_BODY.id)
 
-class EasyReplyNotAnEasyReplyTest(TestCase):
+class EasyReply_NotAnEasyReply(TestCase):
 	SETUP = other_body, message, friends
 
-	def test_easy_reply_not_an_easy_reply(self):
+	def test(self):
 		with self.assertRaises(RuntimeError):
 			easy_reply(self.user, self.other_user.id, self.BODY.id, self.REPLY_BODY.id)
 
-class EasyReplyFriendTest(TestCase):
+class EasyReply_Friend(TestCase):
 	SETUP = easy_reply_body, message, friends
 
-	def test_easy_reply_ok(self):
+	def test(self):
 		easy_reply(self.user, self.other_user.id, self.BODY.id, self.REPLY_BODY.id)
 		self.assertTrue(self.other_user.messages.filter(sender=self.user, body=self.REPLY_BODY).exists())

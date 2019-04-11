@@ -41,7 +41,7 @@ def two_friends(self):
 def three_friends(self):
 	self.user.outgoing_friendships.create(to_user=self.fourth_user, status=FriendshipStatus.FRIEND).id
 
-class OneUserTest(TestCase):
+class OneUser(TestCase):
 	SETUP = one_user,
 
 	def test_send_friend_invite_no_user(self):
@@ -64,7 +64,7 @@ class OneUserTest(TestCase):
 		with self.assertRaises(RuntimeError):
 			unblock_friend(self.user, -1)
 
-class NoFriendTest(TestCase):
+class NoFriend(TestCase):
 	SETUP = two_users,
 
 	def test_send_friend_invite_ok(self):
@@ -77,7 +77,7 @@ class NoFriendTest(TestCase):
 		send_friend_invite(self.user, "other")
 		self.assertEqual(self.user.outgoing_friendships.filter(to_user=self.other_user).count(), 1)
 
-class PendingFriendTest(TestCase):
+class PendingFriend(TestCase):
 	SETUP = pending_friends,
 
 	def test_handle_friend_invite_response_wrong_direction(self):
@@ -104,7 +104,7 @@ class PendingFriendTest(TestCase):
 		with self.assertRaises(RuntimeError):
 			unblock_friend(self.user, self.friendship_id)
 
-class FriendTest(TestCase):
+class Friend(TestCase):
 	SETUP = friends,
 
 	def test_send_friend_invite_friend(self):
@@ -133,7 +133,7 @@ class FriendTest(TestCase):
 		with self.assertRaises(RuntimeError):
 			unblock_friend(self.other_user, self.friendship_id)
 
-class BlockedFriendTest(TestCase):
+class BlockedFriend(TestCase):
 	SETUP = blocked_friends,
 
 	def test_send_friend_invite_blocked(self):
@@ -165,7 +165,7 @@ class BlockedFriendTest(TestCase):
 		with self.assertRaises(MLNError):
 			unblock_friend(self.other_user, self.friendship_id)
 
-class ThirdFriendTest(TestCase):
+class ThirdFriend(TestCase):
 	SETUP = friend_of_friend,
 
 	def test_handle_friend_invite_response_unrelated(self):

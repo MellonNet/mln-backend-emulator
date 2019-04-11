@@ -74,7 +74,7 @@ def user_has_item(self):
 def other_user_has_item(self):
 	self.other_user.profile.add_inv_item(self.ITEM_ID, 1)
 
-class ProfileTest(TestCase):
+class Profile(TestCase):
 	SETUP = one_user,
 
 	def test_save_avatar_no_parts(self):
@@ -125,7 +125,7 @@ class ProfileTest(TestCase):
 	def test_starting_item(self):
 		self.assertFalse(self.user.inventory.exists())
 
-class ProfileSaveStatementsTest(TestCase):
+class ProfileSaveStatements(TestCase):
 	SETUP = statements, one_user
 
 	def test_wrong_answers(self):
@@ -168,31 +168,31 @@ class ProfileSaveStatementsTest(TestCase):
 		with self.assertRaises(ValidationError):
 			about_me.save()
 
-class ProfileSaveSkinHasNoSkinTest(TestCase):
+class ProfileSaveSkin_HasNoSkin(TestCase):
 	SETUP = page_skin, one_user
 
-	def test_has_no_skin(self):
+	def test(self):
 		self.user.profile.page_skin_id = self.SKIN_ID
 		with self.assertRaises(ValidationError):
 			self.user.profile.save()
 
-class ProfileSaveSkinWrongSkinTest(TestCase):
+class ProfileSaveSkin_WrongSkin(TestCase):
 	SETUP = page_skin, user_has_item
 
-	def test_wrong_skin(self):
+	def test(self):
 		self.user.profile.page_skin_id = self.ITEM_ID
 		with self.assertRaises(ValidationError):
 			self.user.profile.save()
 
-class ProfileSaveSkinHasSkinTest(TestCase):
+class ProfileSaveSkin_HasSkin(TestCase):
 	SETUP = has_skin,
 
-	def test_ok(self):
+	def test(self):
 		self.user.profile.page_skin_id = self.SKIN_ID
 		self.user.profile.save()
 		self.assertEqual(self.user.profile.page_skin_id, self.SKIN_ID)
 
-class ProfileInventoryTest(TestCase):
+class ProfileInventory(TestCase):
 	SETUP = item, one_user
 
 	def test_add_inv_item_empty(self):
@@ -232,8 +232,8 @@ class ProfileInventoryTest(TestCase):
 		with self.assertRaises(RuntimeError):
 			self.user.profile.remove_inv_item(self.ITEM_ID, remove_qty)
 
-class ProfileStartingItemTest(TestCase):
+class ProfileStartingItem(TestCase):
 	SETUP = starting_item, one_user
 
-	def test_starting_item(self):
+	def test(self):
 		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=10).exists())

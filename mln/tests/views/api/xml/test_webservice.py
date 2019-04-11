@@ -15,15 +15,15 @@ def raise_mln_error(user, request):
 
 handlers["RaiseMLNError"] = raise_mln_error
 
-class WebserviceTest(TestCase, metaclass=req_resp):
+class Webservice(TestCase, metaclass=req_resp):
 	SETUP = one_user,
 	DIR = "webservice"
 	TESTS = "unhandled_request_type", "raise_mln_error"
 
-class WebserviceEncryptionTest(TestCase):
+class WebserviceEncryption(TestCase):
 	SETUP = one_user,
 
-	def test_webservice(self):
+	def test(self):
 		# MessageList request
 		data = "DBdVUQFVQxEQWUlQDB1HOQwSHA8KCShZFkQCVB8O"
 		# Empty message list

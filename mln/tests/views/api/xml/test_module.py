@@ -50,55 +50,55 @@ def module_skin(cls):
 def configured_generic_module(self):
 	ModuleSaveGeneric.objects.create(module=self.module, skin_id=self.MODULE_SKIN_ID, color_id=self.COLOR_ID)
 
-class GetModuleBgsTest(TestCase, metaclass=req_resp):
+class GetModuleBgs(TestCase, metaclass=req_resp):
 	SETUP = background_item, one_user
 	DIR = "module"
 	TESTS = "get_module_bgs",
 
-class ModuleCollectWinningsTest(TestCase, metaclass=req_resp):
+class ModuleCollectWinnings(TestCase, metaclass=req_resp):
 	SETUP = other_user_has_arcade_module, arcade_prizes
 	DIR = "module"
 	TESTS = "module_collect_winnings_not_won", "module_collect_winnings_won",
 
-func = ModuleCollectWinningsTest.test_module_collect_winnings_won
+func = ModuleCollectWinnings.test_module_collect_winnings_won
 
 def patched(*args, **kwargs):
 	with patch("random.randrange", return_value=0):
 		func(*args, **kwargs)
 
-ModuleCollectWinningsTest.test_module_collect_winnings_won = patched
+ModuleCollectWinnings.test_module_collect_winnings_won = patched
 
-class ModuleDetailsTest(TestCase, metaclass=req_resp):
+class ModuleDetails(TestCase, metaclass=req_resp):
 	SETUP = configured_generic_module,
 	DIR = "module"
 	TESTS = "module_details",
 
-class ModuleExecuteTest(TestCase, metaclass=req_resp):
+class ModuleExecute(TestCase, metaclass=req_resp):
 	SETUP = other_user_has_setupable_module, user_has_execution_cost
 	DIR = "module"
 	TESTS = "module_execute",
 
-class ModuleHarvestTest(TestCase, metaclass=req_resp):
+class ModuleHarvest(TestCase, metaclass=req_resp):
 	SETUP = has_harvestable_module,
 	DIR = "module"
 	VOID_TESTS = "module_harvest",
 
-class ModuleSaveSettingsTest(TestCase, metaclass=req_resp):
+class ModuleSaveSettings(TestCase, metaclass=req_resp):
 	SETUP = module_skin, color, has_generic_module,
 	DIR = "module"
 	TESTS = "module_save_settings",
 
-class ModuleSetupTest(TestCase, metaclass=req_resp):
+class ModuleSetup(TestCase, metaclass=req_resp):
 	SETUP = has_setup_cost, has_setupable_module
 	DIR = "module"
 	VOID_TESTS = "module_setup",
 
-class ModuleTeardownTest(TestCase, metaclass=req_resp):
+class ModuleTeardown(TestCase, metaclass=req_resp):
 	SETUP = setup_setupable_module,
 	DIR = "module"
 	VOID_TESTS = "module_teardown",
 
-class ModuleVoteTest(TestCase, metaclass=req_resp):
+class ModuleVote(TestCase, metaclass=req_resp):
 	SETUP = other_user_has_harvestable_module,
 	DIR = "module"
 	TESTS = "module_vote",

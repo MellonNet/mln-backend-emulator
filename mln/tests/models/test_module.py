@@ -90,7 +90,7 @@ def arcade_prizes(cls):
 def has_arcade_module(self):
 	self.a_module = self.user.modules.create(item_id=self.ARCADE_MODULE_ID, pos_x=0, pos_y=2)
 
-class HarvestTest(TestCase):
+class Harvest(TestCase):
 	SETUP = has_harvestable_module,
 
 	def test_get_info(self):
@@ -130,7 +130,7 @@ class HarvestTest(TestCase):
 		self.assertEqual(self.h_module.clicks_since_last_harvest, click_remainder)
 		self.assertFalse(self.h_module.is_setup)
 
-class VoteExecuteTest(TestCase):
+class VoteExecute(TestCase):
 	SETUP = two_users, setup_setupable_module
 
 	def test_vote_ok(self):
@@ -153,14 +153,14 @@ class VoteExecuteTest(TestCase):
 		with self.assertRaises(RuntimeError):
 			self.s_module.execute(self.other_user)
 
-class ExecuteOkTest(TestCase):
+class Execute_Ok(TestCase):
 	SETUP = two_users, setup_setupable_module, has_execution_cost
 
-	def test_execute_ok(self):
+	def test(self):
 		self.s_module.execute(self.other_user)
 		self.assertFalse(self.other_user.inventory.filter(item_id=self.EXECUTION_COST.item_id, qty=self.EXECUTION_COST.qty).exists())
 
-class SetupableTest(TestCase):
+class Setupable(TestCase):
 	SETUP = has_setupable_module,
 
 	def test_setup_no_items(self):
@@ -193,63 +193,63 @@ class SetupableTest(TestCase):
 			self.assertFalse(self.user.inventory.filter(item_id=cost.item_id).exists())
 		self.assertFalse(self.s_module.is_setup)
 
-class SetupOkTest(TestCase):
+class Setup_HasItem(TestCase):
 	SETUP = has_setup_cost, has_setupable_module
 
-	def test_setup_ok(self):
+	def test(self):
 		self.s_module.setup()
 		self.assertFalse(self.user.inventory.filter(item_id=self.SETUP_COST.item_id).exists())
 		self.assertTrue(self.s_module.is_setup)
 
-class TradeNotSetupTest(TestCase):
+class Trade_Setup_NoItem(TestCase):
 	SETUP = configured_trade_module,
 
-	def test_setup_no_item(self):
+	def test(self):
 		with self.assertRaises(RuntimeError):
 			self.t_module.setup()
 
-class TradeSetupOkTest(TestCase):
+class Trade_Setup_HasItem(TestCase):
 	SETUP = configured_trade_module, user_has_item
 
-	def test_setup_ok(self):
+	def test(self):
 		self.t_module.setup()
 		self.assertFalse(self.user.inventory.filter(item_id=self.ITEM_ID).exists())
 		self.assertTrue(self.t_module.is_setup)
 
-class TradeTeardownTest(TestCase):
+class Trade_Teardown(TestCase):
 	SETUP = setup_trade_module,
 
-	def test_teardown(self):
+	def test(self):
 		self.t_module.teardown()
 		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=1).exists())
 		self.assertFalse(self.t_module.is_setup)
 
-class TradeExecuteNoItemTest(TestCase):
+class Trade_Execute_NoItem(TestCase):
 	SETUP = setup_trade_module, two_users
 
-	def test_execute_no_item(self):
+	def test(self):
 		with self.assertRaises(RuntimeError):
 			self.t_module.execute(self.other_user)
 
-class TradeExecuteOkTest(TestCase):
+class Trade_Execute_HasItem(TestCase):
 	SETUP = setup_trade_module, two_users, other_user_has_item
 
-	def test_execute_ok(self):
+	def test(self):
 		self.t_module.execute(self.other_user)
 		self.assertTrue(self.other_user.inventory.filter(item_id=self.ITEM_ID, qty=1).exists())
 		self.assertFalse(self.t_module.is_setup)
 
-class ArcadeNoPrizesTest(TestCase):
+class SelectArcadePrize_NoPrizes(TestCase):
 	SETUP = has_arcade_module, two_users
 
-	def test_select_arcade_prize(self):
+	def test(self):
 		with self.assertRaises(RuntimeError):
 			self.a_module.select_arcade_prize(self.other_user)
 
-class ArcadeOkTest(TestCase):
+class SelectArcadePrize_HasPrizes(TestCase):
 	SETUP = has_arcade_module, arcade_prizes, two_users
 
-	def test_select_arcade_prize(self):
+	def test(self):
 		with patch("random.randrange", return_value=0):
 			self.a_module.select_arcade_prize(self.other_user)
 		prize = ArcadePrize.objects.filter(module_item_id=self.a_module.item_id)[0]

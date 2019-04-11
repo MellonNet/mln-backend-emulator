@@ -34,42 +34,42 @@ def user_extra_data(self):
 			break
 	about_me.save()
 
-class PageGetNewFriendsTest(TestCase, metaclass=req_resp):
+class PageGetNewFriends(TestCase, metaclass=req_resp):
 	SETUP = friends,
 	DIR = "page/page_get_new/friends"
 	TESTS = "public_view_own",
 
-class PageGetNewPendingFriendsTest(TestCase, metaclass=req_resp):
+class PageGetNewPendingFriends(TestCase, metaclass=req_resp):
 	SETUP = pending_friends,
 	DIR = "page/page_get_new/pending"
 	TESTS = "public_view_other", "private_view"
 
-class PageGetNewPendingOtherWayTest(TestCase, metaclass=req_resp):
+class PageGetNewPendingOtherWay(TestCase, metaclass=req_resp):
 	SETUP = pending_friends_other_way,
 	DIR = "page/page_get_new/pending_other_way"
 	TESTS = "public_view_other", "private_view"
 
-class PageGetNewNetworkerFriendsTest(TestCase, metaclass=req_resp):
+class PageGetNewNetworkerFriends(TestCase, metaclass=req_resp):
 	SETUP = networker_friends,
 	DIR = "page/page_get_new/networker_friends"
 	TESTS = "public_view",
 
-class PageGetNewExtraDataTest(TestCase, metaclass=req_resp):
+class PageGetNewExtraData(TestCase, metaclass=req_resp):
 	SETUP = user_extra_data,
 	DIR = "page/page_get_new/extra_data"
 	TESTS = "public_view", "private_view"
 
-class PageSaveLayoutTest(TestCase, metaclass=req_resp):
+class PageSaveLayout(TestCase, metaclass=req_resp):
 	SETUP = has_harvestable_module, has_harvestable_module_stack,
 	DIR = "page"
 	TESTS = "page_save_layout",
 
-class PageSaveOptionsOnlyColumnColorTest(TestCase, metaclass=req_resp):
+class PageSaveOptionsOnlyColumnColor(TestCase, metaclass=req_resp):
 	SETUP = one_user,
 	DIR = "page/page_save_options"
 	VOID_TESTS = "only_column_color",
 
-class PageSaveOptionsSkinAndColorTest(TestCase, metaclass=req_resp):
+class PageSaveOptionsSkinAndColor(TestCase, metaclass=req_resp):
 	SETUP = color, has_skin
 	DIR = "page/page_save_options"
 	VOID_TESTS = "skin_and_color",
