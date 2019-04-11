@@ -66,34 +66,34 @@ def has_stickers(self):
 def has_trade_module(self):
 	self.module = self.t_module
 
-class SettingsTest(TestCase, metaclass=settings_meta):
+class Settings(TestCase, metaclass=settings_meta):
 	SETUP = has_module,
 	CLASSES = ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade, ModuleSaveNetworkerText, ModuleSaveRocketGame
 
-class FriendShareSettingsTest(TestCase, metaclass=settings_meta):
+class FriendShareSettings(TestCase, metaclass=settings_meta):
 	SETUP = has_module, friends
 	CLASSES = ModuleSetupFriendShare,
 
-class GroupPerformanceSettingsTest(TestCase, metaclass=settings_meta):
+class GroupPerformanceSettings(TestCase, metaclass=settings_meta):
 	SETUP = has_module, three_friends
 	CLASSES = ModuleSetupGroupPerformance,
 
-class SoundtrackSettingsTest(TestCase, metaclass=settings_meta):
+class SoundtrackSettings(TestCase, metaclass=settings_meta):
 	SETUP = has_module, has_loop
 	CLASSES = ModuleSaveSoundtrack, ModuleSaveConcertArcade
 
-class StickerSettingsTest(TestCase, metaclass=settings_meta):
+class StickerSettings(TestCase, metaclass=settings_meta):
 	SETUP = has_module, has_stickers,
 	CLASSES = ModuleSaveSticker,
 
-class TradeSettingsTest(TestCase, metaclass=settings_meta):
+class TradeSettings(TestCase, metaclass=settings_meta):
 	SETUP = has_trade_module,
 	CLASSES = ModuleSetupTrade,
 
-class TrioPerformanceSettingsTest(TestCase, metaclass=settings_meta):
+class TrioPerformanceSettings(TestCase, metaclass=settings_meta):
 	SETUP = has_module, two_friends
 	CLASSES = ModuleSetupTrioPerformance,
 
-class UGCSettingsTest(TestCase, metaclass=settings_meta):
+class UGCSettings(TestCase, metaclass=settings_meta):
 	SETUP = has_module,
 	CLASSES = ModuleSaveUGC,
