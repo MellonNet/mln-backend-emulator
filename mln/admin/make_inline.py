@@ -29,9 +29,10 @@ def make_inline(inliner, *inlinees, get_inlines=None):
 		inlines = [x for i in inline_classes.values() for x in i]
 		if get_inlines is not None:
 			def get_inline_instances(self, request, obj=None):
-				for inline in get_inlines(obj):
-					for cls in inline_classes[inline]:
-						yield cls(self.model, self.admin_site)
+				if obj is not None:
+					for inline in get_inlines(obj):
+						for cls in inline_classes[inline]:
+							yield cls(self.model, self.admin_site)
 
 		class Media:
 			css = { "all": ("admin/inlines.css",) }
