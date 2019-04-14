@@ -145,6 +145,7 @@ class ModuleEditorType(Enum):
 	STICKER_SHOPPE = auto()
 	TRADE = auto()
 	TRIO_PERFORMANCE = auto()
+	NETWORKER_PIC = auto()
 
 class ModuleInfo(models.Model):
 	"""Stores whether the module is executable, setupable, and its editor type. The editor type defines which save data the module uses."""

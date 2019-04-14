@@ -3,7 +3,7 @@ import re
 from django import template
 from django.template.base import DebugLexer, Lexer, tag_re, TextNode
 
-from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
+from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerPic, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
 from mln.models.module_settings_arcade import HopArcadeElement, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
 from mln.models.static import ItemType, MessageReplyType
 
@@ -12,6 +12,7 @@ SAVE_TEMPLATES = {
 	ModuleSaveDeliveryArcade: "delivery_arcade",
 	ModuleSaveDestructoidArcade: "destructoid_arcade",
 	ModuleSaveHopArcade: "hop_arcade",
+	ModuleSaveNetworkerPic: "networker_pic",
 	ModuleSaveNetworkerText: "networker_text",
 	ModuleSaveSoundtrack: "soundtrack",
 	ModuleSaveSticker: "sticker",

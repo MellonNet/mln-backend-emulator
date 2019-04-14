@@ -1,0 +1,6 @@
+{% load mln_utils %}
+{% with save=module|get_or_none:"save_networker_pic" %}
+{% if save is not None %}
+<Movieclip id="{{ save.picture_id }}" _x="360" _y="95" _xscale="100" _yscale="100" _rotation="0" depth="0" />
+{% endif %}
+{% endwith %}

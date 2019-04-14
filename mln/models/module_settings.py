@@ -22,6 +22,15 @@ class ModuleSaveGeneric(models.Model):
 	skin = models.ForeignKey(ModuleSkin, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
 	color = models.ForeignKey(Color, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
 
+class ModuleSaveNetworkerPic(models.Model):
+	"""
+	Save data for networker pic modules.
+	Networker pic modules used to be normal sticker modules in the original game, but this didn't model their contents well, as networker pic modules always have exactly one sticker at a fixed position/scale/rotation/depth.
+	If/When we break compatibility with the flash client we should change the modeling further so that the pictures aren't stickers (possibly not even items) anymore. The pictures aren't supposed to be used by users in a sticker module anyway.
+	"""
+	module = models.OneToOneField(Module, related_name="save_networker_pic", on_delete=models.CASCADE)
+	picture = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.STICKER})
+
 class ModuleSaveNetworkerText(models.Model):
 	"""
 	Save data for the networker text module used for networker descriptions and quotes.
@@ -62,7 +71,6 @@ class ModuleSaveSticker(models.Model):
 	"""
 	A sticker in a sticker module.
 	Saved are the sticker item, the position, scale, rotation, and depth (which sticker is drawn first).
-	Networker picture modules are actually just sticker modules as well, and their pictures are stickers.
 	"""
 	module = models.ForeignKey(Module, related_name="save_sticker", on_delete=models.CASCADE)
 	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BACKGROUND) | Q(type=ItemType.STICKER))
