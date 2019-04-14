@@ -69,6 +69,8 @@ class Command(BaseCommand):
 				href = item_info.get("hrefEditor")
 				if href is None:
 					editor_type = None
+				elif item_info.get("name") == "Networker Pic Module":
+					editor_type = ModuleEditorType.NETWORKER_PIC
 				else:
 					editor_type = href_types[href[href.rindex("/")+1:href.rindex(".")]]
 				t[ModuleInfo].append(ModuleInfo(item_id=id, is_executable=is_executable, is_setupable=is_setupable, editor_type=editor_type))

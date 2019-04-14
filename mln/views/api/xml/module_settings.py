@@ -1,5 +1,5 @@
 """Handlers for module specific save data updates."""
-from ....models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance, RocketGameTheme
+from ....models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerPic, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance, RocketGameTheme
 from ....models.module_settings_arcade import DestructoidBlockSkin, DestructoidCharacterSkin, HopArcadeElement, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
 from ....services.module_settings import create_or_update, get_or_create_module
 
@@ -115,6 +115,10 @@ def _deserialize_hop_arcade(save, setup):
 			attrs["%s_%i" % (name, j)] = (rows[i] >> (j * 30)) & 0x3fffffff
 	return attrs
 
+def _deserialize_networker_pic(module, save, setup):
+	# the flash sticker editor is broken for networker pics anyway
+	pass
+
 def _deserialize_networker_text(save, setup):
 	attrs = {}
 	attrs["text"] = save.find("text").text
@@ -182,6 +186,7 @@ SETTINGS_HANDLERS = {
 	ModuleSaveDestructoidArcade: _deserialize_destructoid_arcade,
 	ModuleSaveGeneric: _deserialize_generic,
 	ModuleSaveHopArcade: _deserialize_hop_arcade,
+	ModuleSaveNetworkerPic: _deserialize_networker_pic,
 	ModuleSaveNetworkerText: _deserialize_networker_text,
 	ModuleSaveRocketGame: _deserialize_rocket_game,
 	ModuleSaveSoundtrack: _deserialize_soundtrack,
