@@ -179,7 +179,7 @@ class Friendship(models.Model):
 	"""
 	from_user = models.ForeignKey(User, related_name="outgoing_friendships", on_delete=models.CASCADE) # invite sender
 	to_user = models.ForeignKey(User, related_name="incoming_friendships", on_delete=models.CASCADE) # invite recipient
-	status = EnumField(FriendshipStatus, default=FriendshipStatus.PENDING)
+	status = EnumField(FriendshipStatus)
 
 	def __str__(self):
 		return "%s -> %s: %s" % (self.from_user, self.to_user, self.get_status_display())
