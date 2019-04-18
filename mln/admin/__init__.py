@@ -121,7 +121,7 @@ for classes in module_settings_classes.values():
 module_admin = make_inline(Module, *settings, get_inlines=get_settings_inlines)
 module_admin.list_display = "owner", "item", "pos_x", "pos_y", "total_clicks"
 module_admin.list_display_links = "item",
-module_admin.list_filter = "owner",
+module_admin.search_fields = "owner__username", "item__name"
 
 # Register admin interfaces
 
