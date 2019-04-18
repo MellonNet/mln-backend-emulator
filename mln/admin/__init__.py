@@ -14,10 +14,17 @@ from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
 
+class ProfileAdmin(admin.ModelAdmin):
+	list_display = "user", "rank", "is_networker"
+	search_fields = "user__username",
+	list_filter = "rank", "is_networker"
+
+custom[Profile] = ProfileAdmin
+
 class FriendshipAdmin(admin.ModelAdmin):
 	list_display = "from_user", "to_user", "status"
 	list_display_links = "from_user", "to_user"
-	search_fields = "from_user__username", "to_user__username",
+	search_fields = "from_user__username", "to_user__username"
 	list_filter = "status",
 
 custom[Friendship] = FriendshipAdmin
