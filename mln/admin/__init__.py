@@ -91,7 +91,8 @@ make_inline(Question, Answer)
 message_admin = make_inline(Message, Attachment)
 message_admin.list_display = "sender", "recipient", "body", "is_read"
 message_admin.list_display_links = "body",
-message_admin.list_filter = "recipient", "sender"
+message_admin.list_filter = "is_read",
+message_admin.search_fields = "sender__username", "recipient__username", "body__subject", "body__text"
 
 friend_cond_admin = make_inline(NetworkerFriendshipCondition, NetworkerFriendshipConditionSource)
 friend_cond_admin.list_display = "networker", "condition", "success_body", "failure_body", "source"
