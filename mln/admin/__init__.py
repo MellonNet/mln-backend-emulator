@@ -56,7 +56,6 @@ custom[StartingStack] = StackAdmin
 class InventoryStackAdmin(StackAdmin):
 	list_display = ("owner",) + StackAdmin.list_display
 	search_fields = ("owner__username",) + StackAdmin.search_fields
-	list_filter = ("owner",) + StackAdmin.list_filter
 
 custom[InventoryStack] = InventoryStackAdmin
 
