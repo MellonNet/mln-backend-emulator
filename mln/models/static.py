@@ -151,7 +151,6 @@ class ModuleInfo(models.Model):
 	"""Stores whether the module is executable, setupable, and its editor type. The editor type defines which save data the module uses."""
 	item = models.OneToOneField(ItemInfo, related_name="module_info", on_delete=models.CASCADE)
 	is_executable = models.BooleanField()
-	is_setupable = models.BooleanField()
 	editor_type = EnumField(ModuleEditorType, null=True, blank=True)
 
 	def __str__(self):

@@ -68,10 +68,10 @@ def get_item_info_inlines(obj):
 	elif obj.type == ItemType.MODULE:
 		yield ModuleInfo
 		yield ModuleYieldInfo
+		if obj.module_info.editor_type not in (ModuleEditorType.LOOP_SHOPPE, ModuleEditorType.NETWORKER_TRADE, ModuleEditorType.STICKER_SHOPPE, ModuleEditorType.TRADE):
+			yield ModuleSetupCost
 		if obj.module_info.is_executable:
 			yield ModuleExecutionCost
-		if obj.module_info.is_setupable:
-			yield ModuleSetupCost
 		if obj.module_info.editor_type in (ModuleEditorType.CONCERT_I_ARCADE, ModuleEditorType.CONCERT_II_ARCADE, ModuleEditorType.DELIVERY_ARCADE, ModuleEditorType.DESTRUCTOID_ARCADE, ModuleEditorType.DR_INFERNO_ROBOT_SIM, ModuleEditorType.HOP_ARCADE):
 			yield	ArcadePrize
 

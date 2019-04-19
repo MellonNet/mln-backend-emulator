@@ -35,10 +35,12 @@ class Module(models.Model):
 		"""Get the ModuleInfo for this module."""
 		return ModuleInfo.objects.get(item_id=self.item_id)
 
+	def is_setupable(self):
+		return ModuleSetupTrade in self.get_settings_classes() or ModuleSetupCost.objects.filter(module_item_id=self.item_id).exists()
+
 	def _calc_yield_info(self):
 		"""Calculate the yield of this module (how many items you can harvest), as well as the time and clicks that remain."""
-		info = self.get_info()
-		if info.is_setupable and not self.is_setup:
+		if self.is_setupable() and not self.is_setup:
 			return 0, 0, 0
 		yield_info = get_or_none(ModuleYieldInfo, item_id=self.item_id)
 		if yield_info is None:
