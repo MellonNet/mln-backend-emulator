@@ -229,7 +229,7 @@ def handle_module_save_settings(user, request):
 		_deserialize_cls(cls, module, save, setup)
 
 	info = module.get_info()
-	if info.is_executable and not info.is_setupable:
+	if info.is_executable and not module.is_setupable():
 		module.is_setup = True
 		module.save()
 

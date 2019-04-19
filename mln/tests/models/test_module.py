@@ -10,7 +10,7 @@ from mln.tests.models.test_profile import item, one_user, other_user_has_item, t
 @requires(item)
 def harvestable_module(cls):
 	cls.HARVESTABLE_MODULE_ID = ItemInfo.objects.create(name="Harvestable Module", type=ItemType.MODULE).id
-	cls.MODULE_INFO = ModuleInfo.objects.create(item_id=cls.HARVESTABLE_MODULE_ID, is_executable=False, is_setupable=False, editor_type=ModuleEditorType.GENERIC)
+	cls.MODULE_INFO = ModuleInfo.objects.create(item_id=cls.HARVESTABLE_MODULE_ID, is_executable=False, editor_type=ModuleEditorType.GENERIC)
 	cls.MODULE_YIELD_INFO = ModuleYieldInfo.objects.create(item_id=cls.HARVESTABLE_MODULE_ID, yield_item_id=cls.ITEM_ID, max_yield=10, yield_per_day=5, clicks_per_yield=20)
 
 @setup
@@ -27,7 +27,7 @@ def has_harvestable_module_stack(self):
 @requires(item)
 def setupable_module(cls):
 	cls.SETUPABLE_MODULE_ID = ItemInfo.objects.create(name="Setupable Module", type=ItemType.MODULE).id
-	ModuleInfo.objects.create(item_id=cls.SETUPABLE_MODULE_ID, is_executable=True, is_setupable=True, editor_type=ModuleEditorType.GENERIC)
+	ModuleInfo.objects.create(item_id=cls.SETUPABLE_MODULE_ID, is_executable=True, editor_type=ModuleEditorType.GENERIC)
 	cls.SETUP_COST = ModuleSetupCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=10)
 	cls.EXECUTION_COST = ModuleExecutionCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=1)
 
@@ -55,7 +55,7 @@ def setup_setupable_module(self):
 @cls_setup
 def trade_module(cls):
 	cls.TRADE_MODULE_ID = ItemInfo.objects.create(name="Trade Module", type=ItemType.MODULE).id
-	ModuleInfo.objects.create(item_id=cls.TRADE_MODULE_ID, is_executable=True, is_setupable=True, editor_type=ModuleEditorType.TRADE)
+	ModuleInfo.objects.create(item_id=cls.TRADE_MODULE_ID, is_executable=True, editor_type=ModuleEditorType.TRADE)
 
 @setup
 @requires(item, trade_module, one_user)

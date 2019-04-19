@@ -65,7 +65,6 @@ class Command(BaseCommand):
 
 			elif type == "module":
 				is_executable = item_info.get("isExecutable") == "True"
-				is_setupable = item_info.get("isSetupable") == "True"
 				href = item_info.get("hrefEditor")
 				if href is None:
 					editor_type = None
@@ -73,7 +72,7 @@ class Command(BaseCommand):
 					editor_type = ModuleEditorType.NETWORKER_PIC
 				else:
 					editor_type = href_types[href[href.rindex("/")+1:href.rindex(".")]]
-				t[ModuleInfo].append(ModuleInfo(item_id=id, is_executable=is_executable, is_setupable=is_setupable, editor_type=editor_type))
+				t[ModuleInfo].append(ModuleInfo(item_id=id, is_executable=is_executable, editor_type=editor_type))
 
 				yield_elem = item_info.find("yield")
 				if yield_elem is not None:

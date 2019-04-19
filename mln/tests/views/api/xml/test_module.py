@@ -34,7 +34,7 @@ def user_has_execution_cost(self):
 @cls_setup
 def generic_module(cls):
 	cls.GENERIC_MODULE_ID = ItemInfo.objects.create(name="Generic Module", type=ItemType.MODULE).id
-	ModuleInfo.objects.create(item_id=cls.GENERIC_MODULE_ID, is_executable=False, is_setupable=False, editor_type=ModuleEditorType.GENERIC)
+	ModuleInfo.objects.create(item_id=cls.GENERIC_MODULE_ID, is_executable=False, editor_type=ModuleEditorType.GENERIC)
 
 @setup
 @requires(generic_module, one_user)
