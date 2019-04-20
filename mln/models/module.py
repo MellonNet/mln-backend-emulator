@@ -36,7 +36,7 @@ class Module(models.Model):
 		return ModuleInfo.objects.get(item_id=self.item_id)
 
 	def is_setupable(self):
-		return ModuleSetupTrade in self.get_settings_classes() or ModuleSetupCost.objects.filter(module_item_id=self.item_id).exists()
+		return self.get_info().editor_type == ModuleEditorType.TRADE or ModuleSetupCost.objects.filter(module_item_id=self.item_id).exists()
 
 	def _calc_yield_info(self):
 		"""Calculate the yield of this module (how many items you can harvest), as well as the time and clicks that remain."""
@@ -133,8 +133,9 @@ class Module(models.Model):
 			trade = ModuleSetupTrade.objects.get(module=self)
 			executer.profile.remove_inv_item(trade.request_item_id, trade.request_qty)
 			executer.profile.add_inv_item(trade.give_item_id, trade.give_qty)
-			self.owner.profile.add_inv_item(trade.request_item_id, trade.request_qty)
-			self.is_setup = False
+			if self.get_info().editor_type == ModuleEditorType.TRADE:
+				self.owner.profile.add_inv_item(trade.request_item_id, trade.request_qty)
+				self.is_setup = False
 			# give item was already taken from owner at setup
 		else:
 			costs = ModuleExecutionCost.objects.filter(module_item_id=self.item_id)

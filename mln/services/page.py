@@ -40,5 +40,4 @@ def page_save_layout(user, modules):
 		else:
 			if not user.profile.is_networker:
 				user.profile.remove_inv_item(item_id)
-			is_setup = user.profile.is_networker
-			user.modules.create(item_id=item_id, pos_x=pos_x, pos_y=pos_y, is_setup=is_setup)
+			user.modules.create(item_id=item_id, pos_x=pos_x, pos_y=pos_y)
