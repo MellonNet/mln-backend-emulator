@@ -9,5 +9,4 @@ def create_or_update(cls, module, attrs):
 def get_or_create_module(user, instance_id, item_id):
 	if instance_id is not None:
 		return user.modules.get(id=instance_id)
-	is_setup = user.profile.is_networker
-	return user.modules.create(item_id=item_id, is_setup=is_setup)
+	return user.modules.create(item_id=item_id)
