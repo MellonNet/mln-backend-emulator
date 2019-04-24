@@ -42,6 +42,9 @@ class Attachment(Stack):
 	"""An attachment, a stack sent with a message."""
 	message = models.ForeignKey(Message, related_name="attachments", on_delete=models.CASCADE)
 
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("message", "item"), name="unique_message_item"),)
+
 	def __str__(self):
 		return "%s attached to %s" % (super().__str__(), self.message)
 
@@ -157,6 +160,9 @@ for i in range(6):
 class InventoryStack(Stack):
 	"""A stack of items in the user's inventory."""
 	owner = models.ForeignKey(User, related_name="inventory", on_delete=models.CASCADE)
+
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("owner", "item"), name="unique_owner_item"),)
 
 	def __str__(self):
 		return "%s's stack of %s" % (self.owner, super().__str__())

@@ -4,7 +4,9 @@ from unittest.mock import patch
 from mln.models.module_settings import ModuleSetupTrade
 from mln.models.static import ArcadePrize, ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-from mln.tests.models.test_profile import item, one_user, other_user_has_item, two_users, user_has_item
+from mln.tests.models.dupe_testcase import DupeTest
+from mln.tests.models.test_profile import one_user, other_user_has_item, two_users, user_has_item
+from mln.tests.models.test_static import item
 
 @cls_setup
 @requires(item)
@@ -25,11 +27,26 @@ def has_harvestable_module_stack(self):
 
 @cls_setup
 @requires(item)
-def setupable_module(cls):
+def setupable_module_item(cls):
 	cls.SETUPABLE_MODULE_ID = ItemInfo.objects.create(name="Setupable Module", type=ItemType.MODULE).id
 	ModuleInfo.objects.create(item_id=cls.SETUPABLE_MODULE_ID, is_executable=True, editor_type=ModuleEditorType.GENERIC)
+
+
+@cls_setup
+@requires(setupable_module_item)
+def module_setup_cost(cls):
 	cls.SETUP_COST = ModuleSetupCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=10)
+
+@cls_setup
+@requires(setupable_module_item)
+def module_exec_cost(cls):
 	cls.EXECUTION_COST = ModuleExecutionCost.objects.create(module_item_id=cls.SETUPABLE_MODULE_ID, item_id=cls.ITEM_ID, qty=1)
+
+
+@cls_setup
+@requires(setupable_module_item, module_setup_cost, module_exec_cost)
+def setupable_module(cls):
+	pass
 
 @setup
 @requires(setupable_module, one_user)
@@ -78,17 +95,27 @@ def arcade_module(cls):
 	cls.ARCADE_MODULE_ID = ItemInfo.objects.create(name="Delivery Arcade Game", type=ItemType.MODULE).id
 
 @cls_setup
+@requires(arcade_module, item)
 def arcade_prizes(cls):
-	cls.ARCADE_PRIZE_IDS = []
-	for i in range(5):
-		prize_id = ItemInfo.objects.create(name="Arcade Prize %i" % i, type=ItemType.ITEM).id
-		ArcadePrize.objects.create(module_item_id=cls.ARCADE_MODULE_ID, item_id=prize_id, qty=i, success_rate=20)
-		cls.ARCADE_PRIZE_IDS.append(prize_id)
+	ArcadePrize.objects.create(module_item_id=cls.ARCADE_MODULE_ID, item_id=cls.ITEM_ID, qty=1, success_rate=100)
+	cls.ARCADE_PRIZE_IDS = (cls.ITEM_ID,)
 
 @setup
 @requires(arcade_module, one_user)
 def has_arcade_module(self):
 	self.a_module = self.user.modules.create(item_id=self.ARCADE_MODULE_ID, pos_x=0, pos_y=2)
+
+class DuplicateModule(DupeTest):
+	SETUP = has_harvestable_module,
+
+class DuplicateModuleSetupCost(DupeTest):
+	SETUP = module_setup_cost,
+
+class DuplicateModuleExecCost(DupeTest):
+	SETUP = module_exec_cost,
+
+class DuplicateArcadePrize(DupeTest):
+	SETUP = arcade_prizes,
 
 class Harvest(TestCase):
 	SETUP = has_harvestable_module,
@@ -250,7 +277,6 @@ class SelectArcadePrize_HasPrizes(TestCase):
 	SETUP = has_arcade_module, arcade_prizes, two_users
 
 	def test(self):
-		with patch("random.randrange", return_value=0):
-			self.a_module.select_arcade_prize(self.other_user)
+		self.a_module.select_arcade_prize(self.other_user)
 		prize = ArcadePrize.objects.filter(module_item_id=self.a_module.item_id)[0]
 		self.assertTrue(self.other_user.inventory.filter(item_id=prize.item_id, qty=prize.qty).exists())

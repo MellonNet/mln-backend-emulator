@@ -1,7 +1,8 @@
 from mln.models.static import ItemInfo, ItemType
 from mln.models.dynamic import AboutMe
-from mln.tests.models.test_profile import color, has_skin, one_user, networker, statements
+from mln.tests.models.test_profile import has_skin, one_user, networker, statements
 from mln.tests.models.test_module import has_harvestable_module, has_harvestable_module_stack
+from mln.tests.models.test_static import color
 from mln.tests.services.test_friend import friends, pending_friends, pending_friends_other_way, two_friends
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.views.api.xml.handler_testcase import req_resp

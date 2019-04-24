@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from mln.services.page import page_save_layout
 from mln.tests.setup_testcase import TestCase
 from mln.tests.models.test_module import harvestable_module, has_harvestable_module, has_harvestable_module_stack, has_setupable_module, setup_setupable_module
-from mln.tests.models.test_profile import item, one_user, user_has_item
+from mln.tests.models.test_profile import one_user
 
 class PageSaveLayout_NoStack(TestCase):
 	SETUP = harvestable_module, one_user

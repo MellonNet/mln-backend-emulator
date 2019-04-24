@@ -1,12 +1,10 @@
 from mln.models.static import MessageBody
 from mln.services.message import create_attachment, delete_message, detach_attachments, easy_reply, open_message, send_message
-from mln.tests.models.test_profile import item, other_user_has_item, two_users
+from mln.tests.models.test_dynamic import attachment, body, message
+from mln.tests.models.test_profile import other_user_has_item, two_users
+from mln.tests.models.test_static import item
 from mln.tests.services.test_friend import friends
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-
-@cls_setup
-def body(cls):
-	cls.BODY = MessageBody.objects.create(subject="Test Body", text="Test Body")
 
 @cls_setup
 @requires(body)
@@ -17,16 +15,6 @@ def other_body(cls):
 @requires(other_body)
 def easy_reply_body(cls):
 	cls.BODY.easy_replies.add(cls.REPLY_BODY)
-
-@setup
-@requires(body, two_users)
-def message(self):
-	self.message = self.user.messages.create(sender=self.other_user, body_id=self.BODY.id)
-
-@setup
-@requires(item, message)
-def attachment(self):
-	self.message.attachments.create(item_id=self.ITEM_ID, qty=1)
 
 class NoMessage(TestCase):
 	SETUP = body, two_users
