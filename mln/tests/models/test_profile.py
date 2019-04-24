@@ -3,13 +3,10 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from mln.models.static import Answer, Color, ItemInfo, ItemType, Question, StartingStack
+from mln.models.static import Answer, Color, ItemInfo, ItemType, Question
 from mln.models.dynamic import AboutMe
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-
-@cls_setup
-def item(cls):
-	cls.ITEM_ID = ItemInfo.objects.create(name="Test Item", type=ItemType.ITEM).id
+from mln.tests.models.test_static import item, starting_stack
 
 @setup
 def one_user(self):
@@ -47,10 +44,6 @@ def statements(cls):
 		cls.STATEMENTS[question_id] = answers
 
 @cls_setup
-def color(cls):
-	cls.COLOR_ID = Color.objects.create(color=0).id
-
-@cls_setup
 def page_skin(cls):
 	cls.SKIN_ID = ItemInfo.objects.create(name="Skin Item", type=ItemType.SKIN).id
 
@@ -59,15 +52,10 @@ def page_skin(cls):
 def has_skin(self):
 	self.user.profile.add_inv_item(self.SKIN_ID)
 
-@cls_setup
-@requires(item)
-def starting_item(cls):
-	StartingStack.objects.create(item_id=cls.ITEM_ID, qty=10)
-
 @setup
 @requires(item, one_user)
 def user_has_item(self):
-	self.user.profile.add_inv_item(self.ITEM_ID, 1)
+	self.user.inventory.create(item_id=self.ITEM_ID, qty=1)
 
 @setup
 @requires(item, two_users)
@@ -232,8 +220,8 @@ class ProfileInventory(TestCase):
 		with self.assertRaises(RuntimeError):
 			self.user.profile.remove_inv_item(self.ITEM_ID, remove_qty)
 
-class ProfileStartingItem(TestCase):
-	SETUP = starting_item, one_user
+class ProfileStartingStack(TestCase):
+	SETUP = starting_stack, one_user
 
 	def test(self):
 		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=10).exists())

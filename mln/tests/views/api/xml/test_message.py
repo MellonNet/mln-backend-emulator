@@ -1,5 +1,6 @@
-from mln.tests.models.test_profile import item, one_user, user_has_item
-from mln.tests.services.test_message import attachment, body, easy_reply_body, message
+from mln.tests.models.test_profile import user_has_item
+from mln.tests.models.test_dynamic import attachment, body, message
+from mln.tests.services.test_message import easy_reply_body
 from mln.tests.setup_testcase import requires, setup, TestCase
 from mln.tests.services.test_friend import friends
 from mln.tests.views.api.xml.handler_testcase import req_resp

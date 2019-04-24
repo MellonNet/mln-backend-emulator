@@ -1,9 +1,10 @@
 from django.core.exceptions import ValidationError
 
-from mln.models.static import BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType
+from mln.models.static import ItemInfo, ItemType
 from mln.services.misc import inventory_module_get, use_blueprint, assert_has_item
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-from mln.tests.models.test_profile import item, networker, one_user, user_has_item
+from mln.tests.models.test_profile import networker, one_user, user_has_item
+from mln.tests.models.test_static import blueprint_req, item
 
 @cls_setup
 def module(cls):
@@ -18,21 +19,13 @@ def module_2(cls):
 def has_module(self):
 	self.user.profile.add_inv_item(self.MODULE_ITEM_ID)
 
-@cls_setup
-@requires(item)
-def item_blueprint(cls):
-	cls.REQUIREMENT_ID = ItemInfo.objects.create(name="Requirement", type=ItemType.ITEM).id
-	cls.BLUEPRINT_ID = ItemInfo.objects.create(name="Test Item Blueprint", type=ItemType.BLUEPRINT).id
-	BlueprintInfo.objects.create(item_id=cls.BLUEPRINT_ID, build_id=cls.ITEM_ID)
-	BlueprintRequirement.objects.create(blueprint_item_id=cls.BLUEPRINT_ID, item_id=cls.REQUIREMENT_ID, qty=1)
-
 @setup
-@requires(item_blueprint, one_user)
+@requires(blueprint_req, one_user)
 def has_item_blueprint(self):
 	self.user.profile.add_inv_item(self.BLUEPRINT_ID)
 
 @setup
-@requires(item_blueprint, one_user)
+@requires(blueprint_req, one_user)
 def has_requirement(self):
 	self.user.profile.add_inv_item(self.REQUIREMENT_ID)
 
@@ -70,7 +63,7 @@ class InventoryModuleGet_NetworkerHasModule(TestCase):
 		self.assertIn((self.MODULE_ITEM_2_ID, 1), module_stacks)
 
 class UseBlueprint_NoBlueprint(TestCase):
-	SETUP = item_blueprint, one_user
+	SETUP = blueprint_req, one_user
 
 	def test(self):
 		with self.assertRaises(ValidationError):

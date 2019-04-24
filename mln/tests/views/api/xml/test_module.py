@@ -1,9 +1,8 @@
-from unittest.mock import patch
-
 from mln.models.static import ItemInfo, ItemType, ModuleEditorType, ModuleInfo, ModuleSkin
 from mln.models.module_settings import ModuleSaveGeneric
 from mln.tests.models.test_module import arcade_module, arcade_prizes, harvestable_module, has_harvestable_module, has_setupable_module, has_setup_cost, setup_setupable_module, setupable_module
-from mln.tests.models.test_profile import color, one_user, two_users
+from mln.tests.models.test_profile import one_user, two_users
+from mln.tests.models.test_static import color
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.views.api.xml.handler_testcase import req_resp
 
@@ -61,12 +60,6 @@ class ModuleCollectWinnings(TestCase, metaclass=req_resp):
 	TESTS = "module_collect_winnings_not_won", "module_collect_winnings_won",
 
 func = ModuleCollectWinnings.test_module_collect_winnings_won
-
-def patched(*args, **kwargs):
-	with patch("random.randrange", return_value=0):
-		func(*args, **kwargs)
-
-ModuleCollectWinnings.test_module_collect_winnings_won = patched
 
 class ModuleDetails(TestCase, metaclass=req_resp):
 	SETUP = configured_generic_module,
