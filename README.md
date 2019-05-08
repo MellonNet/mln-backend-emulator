@@ -15,21 +15,24 @@
 [Install Python and Django](https://docs.djangoproject.com/en/2.1/intro/install/). Install Pillow (`pip install Pillow`).
 
 Download this repository and place it where you like.
-Download the MLN content files - to avoid potential problems with copyright, they aren't included in the repo nor linked here, but it should be possible to find them if you search the web or ask someone involved in the MLN recreation effort.
-Place the content folder in a directory specified by `STATICFILES_DIRS` in `mlnserver/settings.py`. The default is `/content/`, so that the editorial should be at `/content/editorial-redux-v3.xml`.
+Download the MLN content files - to avoid problems with copyright, they aren't included or linked here, but it should be possible to find them if you ask someone involved in the MLN recreation effort.
+Place the content folder in `mlnserver/static/`, so that the editorial XML file should be at `mlnserver/static/editorial-redux-v4.xml`.
 
 ### Server setup
 
 Initialize the database by running `python manage.py migrate`. This will create the database tables.
 
-Included in the content files should be an XML file called `editorial-redux-v3`. Run `python manage.py import_mln_xml <path>`, where <path> is the path to this file. This will import the original MLN data.
+Included in the content files should be an XML file called `editorial-redux-v4.xml`. Run `python manage.py import_mln_xml <path>`, where <path> is the path to this file. This will import the original MLN data.
+
+Note: The editorial XML unfortunately doesn't contain any information about networkers. This means that the server won't have any networkers, even after importing the MLN data. We're trying to piece together networker information ourselves, using the MLN wiki and screenshots of pages. However this information is likely incomplete, so while we may be able to reconstruct networkers to the point where you can achieve all ranks, we probably won't be able to get the layout of the modules on their pages completely correct. Once we've completed piecing together the networker data we'll also make this data available to you if you want to host your own server.
 
 ### Run the server
 
-Run the server with `python manage.py runserver` (the option ` --noreload` can be used to disable automatic file scanning which can significantly improve performance). At this point the server should be running at `localhost:8000`.
-Do *not* use this way of running the server in production (if you actually want the server to be available to users over the network). [Here](https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/)'s a list of things to do before deploying the server in production, and [here](https://docs.djangoproject.com/en/2.1/howto/deployment/wsgi/)'s how to run the server with an actual dedicated web server using WSGI.
+Run the server with `python manage.py runserver` (the option ` --noreload` can be used to disable automatic file scanning which can significantly improve performance).
 
 The MLN private view should be available at http://localhost:8000/mln/private_view/default. The server also works with Django's admin interface, which should be available at http://localhost:8000/admin/.
+
+Do *not* use this way of running the server in production (if you actually want the server to be available to untrusted users over the network). [Here](https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/)'s a list of things to do before deploying the server in production, and [here](https://docs.djangoproject.com/en/2.2/howto/deployment/wsgi/)'s how to run the server with an actual dedicated web server using WSGI.
 
 ### Features
 #### Implemented
@@ -53,13 +56,13 @@ The MLN private view should be available at http://localhost:8000/mln/private_vi
 	* Friends & blocked friends
 * Gallery & Factory
 * Creation lab
+* Networker friendship conditions
 
-#### Not implemented
-* Networkers
+#### Not yet implemented
+* Networker mail replies
 * Masterpieces
 * Random items sometimes sent to friends when you click on modules
 * Items guests can receive in "battle" modules or similar
-* Some serverside prereq checking
 * Module-dependent sticker backgrounds
 * Statistics
 	* Module stats
