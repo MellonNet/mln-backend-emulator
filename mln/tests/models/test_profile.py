@@ -4,8 +4,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
 from mln.models.static import ItemInfo, ItemType
+from mln.services.inventory import add_inv_item
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
-from mln.tests.models.test_static import item, starting_stack
+from mln.tests.models.test_static import item
 
 @setup
 def one_user(self):
@@ -39,7 +40,7 @@ def page_skin(cls):
 @setup
 @requires(page_skin, one_user)
 def has_skin(self):
-	self.user.profile.add_inv_item(self.SKIN_ID)
+	add_inv_item(self.user, self.SKIN_ID)
 
 @setup
 @requires(item, one_user)
@@ -49,7 +50,7 @@ def user_has_item(self):
 @setup
 @requires(item, two_users)
 def other_user_has_item(self):
-	self.other_user.profile.add_inv_item(self.ITEM_ID, 1)
+	add_inv_item(self.other_user, self.ITEM_ID, 1)
 
 class Profile(TestCase):
 	SETUP = one_user,
@@ -125,49 +126,3 @@ class ProfileSaveSkin_HasSkin(TestCase):
 		self.user.profile.page_skin_id = self.SKIN_ID
 		self.user.profile.save()
 		self.assertEqual(self.user.profile.page_skin_id, self.SKIN_ID)
-
-class ProfileInventory(TestCase):
-	SETUP = item, one_user
-
-	def test_add_inv_item_empty(self):
-		add_qty = 10
-		self.user.profile.add_inv_item(self.ITEM_ID, add_qty)
-		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=add_qty).exists())
-
-	def test_add_inv_item_exists(self):
-		add_qty = 10
-		self.user.profile.add_inv_item(self.ITEM_ID, add_qty)
-		self.user.profile.add_inv_item(self.ITEM_ID, add_qty)
-		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=add_qty*2).exists())
-
-	def test_remove_inv_item_exists(self):
-		add_qty = 10
-		remove_qty = 5
-		self.user.profile.add_inv_item(self.ITEM_ID, add_qty)
-		self.user.profile.remove_inv_item(self.ITEM_ID, remove_qty)
-		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=add_qty-remove_qty).exists())
-
-	def test_remove_inv_item_delete_stack(self):
-		add_qty = 10
-		remove_qty = 10
-		self.user.profile.add_inv_item(self.ITEM_ID, add_qty)
-		self.user.profile.remove_inv_item(self.ITEM_ID, remove_qty)
-		self.assertFalse(self.user.inventory.filter(item_id=self.ITEM_ID).exists())
-
-	def test_remove_inv_item_no_stack(self):
-		remove_qty = 10
-		with self.assertRaises(RuntimeError):
-			self.user.profile.remove_inv_item(self.ITEM_ID, remove_qty)
-
-	def test_remove_inv_item_not_enough_items(self):
-		add_qty = 5
-		remove_qty = 10
-		self.user.profile.add_inv_item(self.ITEM_ID, add_qty)
-		with self.assertRaises(RuntimeError):
-			self.user.profile.remove_inv_item(self.ITEM_ID, remove_qty)
-
-class ProfileStartingStack(TestCase):
-	SETUP = starting_stack, one_user
-
-	def test(self):
-		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=10).exists())

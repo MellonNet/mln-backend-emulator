@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 from mln.models.module_settings import ModuleSetupTrade
 from mln.models.static import ArcadePrize, ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
+from mln.services.inventory import add_inv_item
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.models.dupe_testcase import DupeTest
 from mln.tests.models.test_profile import one_user, other_user_has_item, two_users, user_has_item
@@ -23,7 +24,7 @@ def has_harvestable_module(self):
 @setup
 @requires(harvestable_module, one_user)
 def has_harvestable_module_stack(self):
-	self.user.profile.add_inv_item(self.HARVESTABLE_MODULE_ID)
+	add_inv_item(self.user, self.HARVESTABLE_MODULE_ID)
 
 @cls_setup
 @requires(item)
@@ -56,12 +57,12 @@ def has_setupable_module(self):
 @setup
 @requires(setupable_module, one_user)
 def has_setup_cost(self):
-	self.user.profile.add_inv_item(self.SETUP_COST.item_id, self.SETUP_COST.qty)
+	add_inv_item(self.user, self.SETUP_COST.item_id, self.SETUP_COST.qty)
 
 @setup
 @requires(setupable_module, one_user)
 def has_execution_cost(self):
-	self.other_user.profile.add_inv_item(self.EXECUTION_COST.item_id, self.EXECUTION_COST.qty)
+	add_inv_item(self.other_user, self.EXECUTION_COST.item_id, self.EXECUTION_COST.qty)
 
 @setup
 @requires(has_setupable_module)
@@ -198,7 +199,7 @@ class Setupable(TestCase):
 		self.s_module.is_setup = True
 		costs = ModuleSetupCost.objects.filter(module_item_id=self.s_module.item_id)
 		for cost in costs:
-			self.user.profile.add_inv_item(cost.item_id, cost.qty)
+			add_inv_item(self.user, cost.item_id, cost.qty)
 		self.s_module.setup()
 		for cost in costs:
 			self.assertTrue(self.user.inventory.filter(item_id=cost.item_id, qty=cost.qty).exists())

@@ -5,6 +5,7 @@ from django.dispatch import receiver
 
 from .models.dynamic import Profile
 from .models.static import StartingStack
+from .services.inventory import add_inv_item
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -12,7 +13,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 	if created:
 		profile = Profile.objects.create(user=instance)
 		for stack in StartingStack.objects.all():
-			profile.add_inv_item(stack.item_id, stack.qty)
+			add_inv_item(instance, stack.item_id, stack.qty)
 
 @receiver(pre_save)
 def pre_save_full_clean_handler(sender, instance, *args, **kwargs):

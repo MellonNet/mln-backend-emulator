@@ -7,6 +7,7 @@ import mln.views.api.xml.module_settings as module_settings
 from mln.models.static import ItemInfo, ItemType
 from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
 from mln.models.module_settings_arcade import ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
+from mln.services.inventory import add_inv_item
 from mln.tests.models.test_profile import one_user
 from mln.tests.models.test_module import has_trade_module
 from mln.tests.services.test_friend import friends, two_friends, three_friends
@@ -49,7 +50,7 @@ def loop(cls):
 @setup
 @requires(loop)
 def has_loop(self):
-	self.user.profile.add_inv_item(self.LOOP_ID)
+	add_inv_item(self.user, self.LOOP_ID)
 
 @cls_setup
 def sticker_item(cls):
@@ -58,8 +59,8 @@ def sticker_item(cls):
 @setup
 @requires(sticker_item, background_item)
 def has_stickers(self):
-	self.user.profile.add_inv_item(self.STICKER_ID)
-	self.user.profile.add_inv_item(self.BACKGROUND_ID)
+	add_inv_item(self.user, self.STICKER_ID)
+	add_inv_item(self.user, self.BACKGROUND_ID)
 
 @setup
 @requires(has_trade_module)

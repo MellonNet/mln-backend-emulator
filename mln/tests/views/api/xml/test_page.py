@@ -1,5 +1,6 @@
 from mln.models.static import ItemInfo, ItemType
 from mln.models.dynamic import AboutMe
+from mln.services.inventory import add_inv_item
 from mln.tests.models.test_dynamic import statements
 from mln.tests.models.test_profile import has_skin, one_user, networker
 from mln.tests.models.test_module import has_harvestable_module, has_harvestable_module_stack
@@ -21,7 +22,7 @@ def networker_friends(self):
 @setup
 @requires(badge, color, statements, has_skin)
 def user_extra_data(self):
-	self.user.profile.add_inv_item(self.BADGE_ID)
+	add_inv_item(self.user, self.BADGE_ID)
 	self.user.profile.page_skin_id = self.SKIN_ID
 	self.user.profile.page_color_id = self.COLOR_ID
 	self.user.profile.page_column_color_id = 0

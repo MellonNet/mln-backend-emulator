@@ -5,7 +5,7 @@ from mln.models.static import Answer, Question
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.models.dupe_testcase import DupeTest
 from mln.tests.models.test_profile import one_user, two_users, user_has_item
-from mln.tests.models.test_static import body, item
+from mln.tests.models.test_static import body, item, starting_stack
 
 @setup
 @requires(body, two_users)
@@ -75,3 +75,9 @@ class AboutMeTest(TestCase):
 				break
 		with self.assertRaises(ValidationError):
 			about_me.save()
+
+class StartingStack(TestCase):
+	SETUP = starting_stack, one_user
+
+	def test(self):
+		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=10).exists())

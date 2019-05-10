@@ -9,6 +9,7 @@ from django.utils.timezone import now
 
 from .dynamic import DAY, get_or_none
 from .static import ArcadePrize, ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
+from ..services.inventory import add_inv_item, remove_inv_item
 
 class Module(models.Model):
 	"""
@@ -73,7 +74,7 @@ class Module(models.Model):
 		If the module was set up, the set up item will be lost at this point.
 		"""
 		harvest_qty, time_remainder, click_remainder = self._calc_yield_info()
-		self.owner.profile.add_inv_item(self.get_yield_item_id(), qty=harvest_qty)
+		add_inv_item(self.owner, self.get_yield_item_id(), qty=harvest_qty)
 		self.last_harvest_time = now() - time_remainder
 		self.clicks_since_last_harvest = click_remainder
 		self.is_setup = False
@@ -103,11 +104,11 @@ class Module(models.Model):
 			return
 		if ModuleSetupTrade in self.get_settings_classes():
 			trade = ModuleSetupTrade.objects.get(module=self)
-			self.owner.profile.remove_inv_item(trade.give_item_id, trade.give_qty)
+			remove_inv_item(self.owner, trade.give_item_id, trade.give_qty)
 		else:
 			costs = ModuleSetupCost.objects.filter(module_item_id=self.item_id)
 			for cost in costs:
-				self.owner.profile.remove_inv_item(cost.item_id, cost.qty)
+				remove_inv_item(self.owner, cost.item_id, cost.qty)
 		self.is_setup = True
 		self.last_harvest_time = now()
 		self.save()
@@ -118,10 +119,10 @@ class Module(models.Model):
 			return
 		if ModuleSetupTrade in self.get_settings_classes():
 			trade = ModuleSetupTrade.objects.get(module=self)
-			self.owner.profile.add_inv_item(trade.give_item_id, trade.give_qty)
+			add_inv_item(self.owner, trade.give_item_id, trade.give_qty)
 		else:
 			for cost in ModuleSetupCost.objects.filter(module_item_id=self.item_id):
-				self.owner.profile.add_inv_item(cost.item_id, cost.qty)
+				add_inv_item(self.owner, cost.item_id, cost.qty)
 		self.is_setup = False
 		self.save()
 
@@ -130,16 +131,16 @@ class Module(models.Model):
 		self.vote(executer)
 		if ModuleSetupTrade in self.get_settings_classes():
 			trade = ModuleSetupTrade.objects.get(module=self)
-			executer.profile.remove_inv_item(trade.request_item_id, trade.request_qty)
-			executer.profile.add_inv_item(trade.give_item_id, trade.give_qty)
+			remove_inv_item(executer, trade.request_item_id, trade.request_qty)
+			add_inv_item(executer, trade.give_item_id, trade.give_qty)
 			if self.get_info().editor_type == ModuleEditorType.TRADE:
-				self.owner.profile.add_inv_item(trade.request_item_id, trade.request_qty)
+				add_inv_item(self.owner, trade.request_item_id, trade.request_qty)
 				self.is_setup = False
 			# give item was already taken from owner at setup
 		else:
 			costs = ModuleExecutionCost.objects.filter(module_item_id=self.item_id)
 			for cost in costs:
-				executer.profile.remove_inv_item(cost.item_id, cost.qty)
+				remove_inv_item(executer, cost.item_id, cost.qty)
 		self.save()
 
 	def select_arcade_prize(self, user):
@@ -149,7 +150,7 @@ class Module(models.Model):
 		for prize in ArcadePrize.objects.filter(module_item_id=self.item_id):
 			sum += prize.success_rate
 			if sum > chance:
-				user.profile.add_inv_item(prize.item_id, prize.qty)
+				add_inv_item(user, prize.item_id, prize.qty)
 				return prize
 		raise RuntimeError("Should have chosen a prize but didn't for some reason")
 
