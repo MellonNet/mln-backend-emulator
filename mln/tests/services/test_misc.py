@@ -1,7 +1,8 @@
 from django.core.exceptions import ValidationError
 
 from mln.models.static import ItemInfo, ItemType
-from mln.services.misc import inventory_module_get, use_blueprint, assert_has_item
+from mln.services.inventory import add_inv_item, assert_has_item
+from mln.services.misc import inventory_module_get, use_blueprint
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.models.test_profile import networker, one_user, user_has_item
 from mln.tests.models.test_static import blueprint_req, item
@@ -17,17 +18,17 @@ def module_2(cls):
 @setup
 @requires(module, one_user)
 def has_module(self):
-	self.user.profile.add_inv_item(self.MODULE_ITEM_ID)
+	add_inv_item(self.user, self.MODULE_ITEM_ID)
 
 @setup
 @requires(blueprint_req, one_user)
 def has_item_blueprint(self):
-	self.user.profile.add_inv_item(self.BLUEPRINT_ID)
+	add_inv_item(self.user, self.BLUEPRINT_ID)
 
 @setup
 @requires(blueprint_req, one_user)
 def has_requirement(self):
-	self.user.profile.add_inv_item(self.REQUIREMENT_ID)
+	add_inv_item(self.user, self.REQUIREMENT_ID)
 
 class InventoryModuleGet_UserNoModules(TestCase):
 	SETUP = module, one_user

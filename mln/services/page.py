@@ -1,6 +1,7 @@
 from django.db.transaction import atomic
 
 from ..models.static import ItemInfo, ItemType
+from .inventory import add_inv_item, remove_inv_item
 
 @atomic
 def page_save_layout(user, modules):
@@ -21,7 +22,7 @@ def page_save_layout(user, modules):
 		for module in removed_modules.all():
 			if module.is_setup:
 				module.teardown()
-			user.profile.add_inv_item(module.item_id)
+			add_inv_item(user, module.item_id)
 	removed_modules.delete()
 
 	# todo: database info on how wide modules are, improved overlapping checks based on that info
@@ -39,5 +40,5 @@ def page_save_layout(user, modules):
 				module.save()
 		else:
 			if not user.profile.is_networker:
-				user.profile.remove_inv_item(item_id)
+				remove_inv_item(user, item_id)
 			user.modules.create(item_id=item_id, pos_x=pos_x, pos_y=pos_y)

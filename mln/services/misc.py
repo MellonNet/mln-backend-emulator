@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 
 from ..models.static import BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType
+from .inventory import add_inv_item, assert_has_item, remove_inv_item
 
 def inventory_module_get(user):
 	"""
@@ -28,23 +29,6 @@ def use_blueprint(user, blueprint_id):
 	requirements = BlueprintRequirement.objects.filter(blueprint_item_id=blueprint_id)
 	# remove required items
 	for requirement in requirements:
-		user.profile.remove_inv_item(requirement.item_id, requirement.qty)
+		remove_inv_item(user, requirement.item_id, requirement.qty)
 	# add newly built item
-	user.profile.add_inv_item(blueprint_info.build_id)
-
-def assert_has_item(user, item_id, qty=1, field_name=None):
-	"""
-	Raise ValidationError if the user has less than qty items in their inventory.
-	Never raises an error for networkers.
-	"""
-	if user.profile.is_networker:
-		# networkers can do anything without needing items
-		return
-	if not user.inventory.filter(item_id=item_id, qty__gte=qty).exists():
-		if qty == 1:
-			message = "User does not have item %s" % ItemInfo.objects.get(id=item_id)
-		else:
-			message = "User does not have at least %i of item %s" % (qty, ItemInfo.objects.get(id=item_id))
-		if field_name is not None:
-			raise ValidationError({field_name: message})
-		raise ValidationError(message)
+	add_inv_item(user, blueprint_info.build_id)

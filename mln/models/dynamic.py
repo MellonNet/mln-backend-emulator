@@ -12,7 +12,7 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils.timezone import now
 
-from ..services.misc import assert_has_item
+from ..services.inventory import assert_has_item
 from .static import Answer, Color, EnumField, ItemInfo, ItemType, MessageBody, Stack, Question
 
 DAY = datetime.timedelta(days=1)
@@ -83,39 +83,6 @@ class Profile(models.Model):
 
 		if self.page_skin_id is not None:
 			assert_has_item(self.user, self.page_skin_id)
-
-	def add_inv_item(self, item_id, qty=1):
-		"""
-		Add one or more items to the user's inventory.
-		Always use this function instead of creating InventoryStacks directly.
-		This function creates a stack only if it does not already exist, and otherwise adds to the existing stack.
-		"""
-		try:
-			stack = self.user.inventory.get(item_id=item_id)
-			stack.qty += qty
-			stack.save()
-			return stack
-		except ObjectDoesNotExist:
-			return InventoryStack.objects.create(item_id=item_id, qty=qty, owner=self.user)
-
-	def remove_inv_item(self, item_id, qty=1):
-		"""
-		Remove one or more items from the user's inventory.
-		Always use this function instead of modifying InventoryStacks directly.
-		This function subtracts the number of items from the stack, and deletes the stack if no more items are left.
-		Raise RuntimeError if the stack to remove items from does not exist, or if it has fewer items than should be removed.
-		"""
-		try:
-			stack = self.user.inventory.get(item_id=item_id)
-		except ObjectDoesNotExist:
-			raise RuntimeError("No stack of item ID %i of user %s exists to delete from" % (item_id, self))
-		if stack.qty > qty:
-			stack.qty -= qty
-			stack.save()
-		elif stack.qty == qty:
-			stack.delete()
-		else:
-			raise RuntimeError("%s has fewer items than the %i requested to delete" % (stack, qty))
 
 	def update_available_votes(self):
 		"""

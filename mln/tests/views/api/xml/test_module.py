@@ -1,5 +1,6 @@
 from mln.models.static import ItemInfo, ItemType, ModuleEditorType, ModuleInfo, ModuleSkin
 from mln.models.module_settings import ModuleSaveGeneric
+from mln.services.inventory import add_inv_item
 from mln.tests.models.test_module import arcade_module, arcade_prizes, harvestable_module, has_harvestable_module, has_setupable_module, has_setup_cost, setup_setupable_module, setupable_module
 from mln.tests.models.test_profile import one_user, two_users
 from mln.tests.models.test_static import color
@@ -28,7 +29,7 @@ def other_user_has_setupable_module(self):
 @setup
 @requires(setupable_module, one_user)
 def user_has_execution_cost(self):
-	self.user.profile.add_inv_item(self.EXECUTION_COST.item_id, self.EXECUTION_COST.qty)
+	add_inv_item(self.user, self.EXECUTION_COST.item_id, self.EXECUTION_COST.qty)
 
 @cls_setup
 def generic_module(cls):

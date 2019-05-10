@@ -8,7 +8,7 @@ from django.db import models
 from django.db.models import Q
 
 from ..services.friend import are_friends
-from ..services.misc import assert_has_item
+from ..services.inventory import assert_has_item
 from .module import Module
 from .static import Color, EnumField, ItemInfo, ItemType, ModuleSkin
 

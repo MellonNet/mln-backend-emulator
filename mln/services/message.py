@@ -1,6 +1,7 @@
 from ..models.dynamic import FriendshipStatus, Message
 from ..models.static import MessageBody
 from .friend import are_friends
+from .inventory import add_inv_item, remove_inv_item
 
 def _check_recipient(user, recipient_id):
 	if not user.profile.is_networker:
@@ -15,7 +16,7 @@ def _get_message(user, message_id):
 
 def create_attachment(message, item_id, qty):
 	"""Remove items from the user's inventory and attach it to the message."""
-	message.sender.profile.remove_inv_item(item_id, qty)
+	remove_inv_item(message.sender, item_id, qty)
 	message.attachments.create(item_id=item_id, qty=qty)
 
 def delete_message(user, message_id):
@@ -27,7 +28,7 @@ def detach_attachments(user, message_id):
 	"""Remove attachments from a message and place them in the user's inventory."""
 	message = _get_message(user, message_id)
 	for attachment in message.attachments.all():
-		user.profile.add_inv_item(attachment.item_id, attachment.qty)
+		add_inv_item(user, attachment.item_id, attachment.qty)
 	message.attachments.all().delete()
 	return message
 
