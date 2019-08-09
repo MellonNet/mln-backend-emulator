@@ -271,6 +271,11 @@ class NetworkerMessageAttachment(Stack):
 	class Meta:
 		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="unique_trigger_item"),)
 
+class NetworkerPageSource(models.Model):
+	"""Documentation only: Note whether a reconstructed networker page has a graphical source, or is tentatively reconstructed from a description."""
+	networker = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
+	source = models.TextField()
+
 class Question(models.Model):
 	"""A question for the "About me" section."""
 	text = models.CharField(max_length=64)
