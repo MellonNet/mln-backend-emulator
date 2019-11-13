@@ -1,0 +1,3 @@
+Place content files in this folder. The editorial xml should be next to this file.
+You can delete this file if you want, it's only here as a note.
+If you run into any problems, don't hesitate to contact me (lcdr) and ask.
