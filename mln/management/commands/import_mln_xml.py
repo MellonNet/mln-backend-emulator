@@ -2,23 +2,23 @@ import xml.etree.ElementTree as et
 
 from django.core.management.base import BaseCommand
 
-from mln.models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleSkin, ModuleYieldInfo, StartingStack, Question
+from mln.models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleSkin, ModuleYieldInfo, StartingStack, Question
 
 href_types = {
-	"Concert I Arcade Game":   ModuleEditorType.CONCERT_I_ARCADE,
-	"Concert II Arcade Game":   ModuleEditorType.CONCERT_II_ARCADE,
-	"Delivery Arcade Game":   ModuleEditorType.DELIVERY_ARCADE,
-	"Destructoid Arcade Game":   ModuleEditorType.DESTRUCTOID_ARCADE,
-	"Dr- Infernos Robot Simulator Module":   ModuleEditorType.DR_INFERNO_ROBOT_SIM,
+	"Concert I Arcade Game": ModuleEditorType.CONCERT_I_ARCADE,
+	"Concert II Arcade Game": ModuleEditorType.CONCERT_II_ARCADE,
+	"Delivery Arcade Game": ModuleEditorType.DELIVERY_ARCADE,
+	"Destructoid Arcade Game": ModuleEditorType.DESTRUCTOID_ARCADE,
+	"Dr- Infernos Robot Simulator Module": ModuleEditorType.DR_INFERNO_ROBOT_SIM,
 	"Factory": ModuleEditorType.FACTORY_GENERIC,
 	"Factory (Static Background)": ModuleEditorType.FACTORY_NON_GENERIC,
 	"Friend Share": ModuleEditorType.FRIEND_SHARE,
-	"Friendly Felixs Concert Module":   ModuleEditorType.FRIENDLY_FELIX_CONCERT,
+	"Friendly Felixs Concert Module": ModuleEditorType.FRIENDLY_FELIX_CONCERT,
 	"Gallery": ModuleEditorType.GALLERY_GENERIC,
 	"Gallery (Static Background)": ModuleEditorType.GALLERY_NON_GENERIC,
 	"Generic": ModuleEditorType.GENERIC,
 	"Group Performance Module": ModuleEditorType.GROUP_PERFORMANCE,
-	"Hop Arcade Game":   ModuleEditorType.HOP_ARCADE,
+	"Hop Arcade Game": ModuleEditorType.HOP_ARCADE,
 	"Loop Shoppe": ModuleEditorType.LOOP_SHOPPE,
 	"Networker Text": ModuleEditorType.NETWORKER_TEXT,
 	"Trade (Networker)": ModuleEditorType.NETWORKER_TRADE,
@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		EasyReply = MessageBody.easy_replies.through
-		tables = ItemInfo, BlueprintInfo, BlueprintRequirement, ModuleInfo, ModuleYieldInfo, ArcadePrize, ModuleExecutionCost, ModuleSetupCost, MessageBody, EasyReply, Question, Answer, Color, ModuleSkin, StartingStack
+		tables = ItemInfo, BlueprintInfo, BlueprintRequirement, ModuleInfo, ModuleYieldInfo, ArcadePrize, ModuleExecutionCost, ModuleSetupCost, MessageBodyCategory, MessageBody, EasyReply, Question, Answer, Color, ModuleSkin, StartingStack
 		t = {}
 		for table in tables:
 			t[table] = []
@@ -106,13 +106,24 @@ class Command(BaseCommand):
 							cost_qty = int(cost.get("qty"))
 							t[ModuleSetupCost].append(ModuleSetupCost(module_item_id=id, item_id=cost_item_id, qty=cost_qty))
 
-		for body in xml.findall("messages/category/body"):
-			id = int(body.get("id"))
-			subject = body.get("subject")
-			if subject == "":
-				continue
-			text = body.get("text")
-			t[MessageBody].append(MessageBody(id=id, subject=subject, text=text))
+		for category in xml.findall("messages/category"):
+			category_id = int(category.get("id"))
+			name = category.get("name")
+			hidden = category.get("hidden") is not None
+			background_color = int(category.get("Category_Background_Color"), 16)
+			button_color = category.get("Category_Button_Color").strip()
+			button_color = int(button_color, 16) if button_color else 0
+			text_color = category.get("Category_Text_Color").strip()
+			text_color = int(text_color, 16) if text_color else 0
+			t[MessageBodyCategory].append(MessageBodyCategory(id=category_id, name=name, hidden=hidden, background_color=background_color, button_color=button_color, text_color=text_color))
+
+			for body in category:
+				id = int(body.get("id"))
+				subject = body.get("subject")
+				if subject == "":
+					continue
+				text = body.get("text")
+				t[MessageBody].append(MessageBody(id=id, category_id=category_id, subject=subject, text=text))
 
 		for body_elem in xml.findall("messages/category/body"):
 			from_id = int(body_elem.get("id"))

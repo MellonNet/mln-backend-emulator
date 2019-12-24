@@ -1,4 +1,4 @@
-from mln.models.static import BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, NetworkerMessageAttachment, NetworkerMessageTrigger, StartingStack
+from mln.models.static import BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, NetworkerMessageAttachment, NetworkerMessageTrigger, StartingStack
 from mln.tests.setup_testcase import cls_setup, requires
 from mln.tests.models.dupe_testcase import DupeTest
 
@@ -23,8 +23,13 @@ def blueprint_req(cls):
 	BlueprintRequirement.objects.create(blueprint_item_id=cls.BLUEPRINT_ID, item_id=cls.REQUIREMENT_ID, qty=1)
 
 @cls_setup
+def body_category(cls):
+	cls.BODY_CAT_ID = MessageBodyCategory.objects.create(name="Test Category", hidden=False, background_color=0, button_color=0, text_color=0).id
+
+@cls_setup
+@requires(body_category)
 def body(cls):
-	cls.BODY = MessageBody.objects.create(subject="Test Body", text="Test Body")
+	cls.BODY = MessageBody.objects.create(category_id=cls.BODY_CAT_ID, subject="Test Body", text="Test Body")
 
 @cls_setup
 @requires(body)
