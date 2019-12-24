@@ -9,7 +9,7 @@ from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 @cls_setup
 @requires(body)
 def other_body(cls):
-	cls.REPLY_BODY = MessageBody.objects.create(subject="Reply Body", text="Test Body")
+	cls.REPLY_BODY = MessageBody.objects.create(category_id=cls.BODY_CAT_ID, subject="Reply Body", text="Test Body")
 
 @cls_setup
 @requires(other_body)

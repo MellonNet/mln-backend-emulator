@@ -205,6 +205,20 @@ class ModuleYieldInfo(models.Model):
 	def __str__(self):
 		return str(self.item)
 
+class MessageBodyCategory(models.Model):
+	"""A category used for grouping message bodies in the "compose message" interface."""
+	name = models.CharField(max_length=32)
+	hidden = models.BooleanField()
+	background_color = models.IntegerField()
+	button_color = models.IntegerField()
+	text_color = models.IntegerField()
+
+	class Meta:
+		verbose_name_plural = "Message body categories"
+
+	def __str__(self):
+		return self.name
+
 class MessageBody(models.Model):
 	"""
 	A message text, consisting of subject and body.
@@ -213,6 +227,7 @@ class MessageBody(models.Model):
 	Some message texts have ready-made responses available, called easy replies.
 	A common example is an easy reply of "Thanks", used by various message texts.
 	"""
+	category = models.ForeignKey(MessageBodyCategory, related_name="+", on_delete=models.CASCADE)
 	subject = models.CharField(max_length=128)
 	text = models.TextField()
 	easy_replies = models.ManyToManyField("self", related_name="+", symmetrical=False)

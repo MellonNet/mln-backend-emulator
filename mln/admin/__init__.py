@@ -37,6 +37,7 @@ class MessageBodyAdmin(admin.ModelAdmin):
 	list_display = "subject", "text", has_trigger
 	search_fields = "subject", "text"
 	filter_vertical = "easy_replies",
+	list_filter = "category",
 
 custom[MessageBody] = MessageBodyAdmin
 
