@@ -86,7 +86,7 @@ class ItemInfo(models.Model):
 
 	class Meta:
 		ordering = ("name",)
-		constraints = (models.UniqueConstraint(fields=("name", "type"), name="unique_name_type"),)
+		constraints = (models.UniqueConstraint(fields=("name", "type"), name="item_info_unique_name_type"),)
 
 	def __str__(self):
 		return self.name
@@ -119,7 +119,7 @@ class BlueprintRequirement(Stack):
 	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BADGE) | Q(type=ItemType.ITEM))
 
 	class Meta:
-		constraints = (models.UniqueConstraint(fields=("blueprint_item", "item"), name="unique_blueprint_item_item"),)
+		constraints = (models.UniqueConstraint(fields=("blueprint_item", "item"), name="blueprint_requirement_unique_blueprint_item_item"),)
 
 	def __str__(self):
 		return "%s needs %s" % (self.blueprint_item, super().__str__())
@@ -170,7 +170,7 @@ class ArcadePrize(Stack):
 	success_rate = models.PositiveSmallIntegerField()
 
 	class Meta:
-		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="unique_module_item_item"),)
+		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="arcade_prize_unique_module_item_item"),)
 
 class ModuleExecutionCost(Stack):
 	"""
@@ -181,7 +181,7 @@ class ModuleExecutionCost(Stack):
 	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.ITEM})
 
 	class Meta:
-		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="unique_module_item_item"),)
+		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_execution_cost_unique_module_item_item"),)
 
 class ModuleSetupCost(Stack):
 	"""
@@ -192,7 +192,7 @@ class ModuleSetupCost(Stack):
 	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.ITEM})
 
 	class Meta:
-		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="unique_module_item_item"),)
+		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_setup_cost_unique_module_item_item"),)
 
 class ModuleYieldInfo(models.Model):
 	"""Defines the item the module "grows", its harvest cap, its growth rate, and the click growth rate."""
@@ -284,7 +284,7 @@ class NetworkerMessageAttachment(Stack):
 	trigger = models.ForeignKey(NetworkerMessageTrigger, related_name="attachments", on_delete=models.CASCADE)
 
 	class Meta:
-		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="unique_trigger_item"),)
+		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="networker_message_attachment_unique_trigger_item"),)
 
 class NetworkerPageSource(models.Model):
 	"""Documentation only: Note whether a reconstructed networker page has a graphical source, or is tentatively reconstructed from a description."""
