@@ -26,7 +26,7 @@ class Module(models.Model):
 	is_setup = models.BooleanField(default=False) # this is actually only relevant for some modules, refactor?
 
 	class Meta:
-		constraints = (models.UniqueConstraint(fields=("owner", "pos_x", "pos_y"), name="unique_owner_pos"),)
+		constraints = (models.UniqueConstraint(fields=("owner", "pos_x", "pos_y"), name="module_unique_owner_pos"),)
 
 	def __str__(self):
 		return "%s's %s at pos (%i, %i), %i clicks" % (self.owner, self.item.name, self.pos_x, self.pos_y, self.total_clicks)

@@ -6,7 +6,7 @@
 
 #### Requirements:
 * Python >= 3.6
-* Django >= 2.1
+* Django >= 2.2
 * Pillow library
 * (Flash player plugin in the browser)
 
