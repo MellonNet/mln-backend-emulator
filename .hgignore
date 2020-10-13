@@ -1,5 +1,0 @@
-syntax: glob
-*.sqlite3
-media/
-static/
-__pycache__/
