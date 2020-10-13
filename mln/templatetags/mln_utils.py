@@ -30,10 +30,16 @@ register = template.Library()
 
 @register.filter
 def get_avatar(profile):
-	"""Get the avatar including whether the user is a networker, which is for some reason part of the avatar field."""
+	"""
+	Get the avatar including whether the user is a networker, which is for some reason part of the avatar field.
+	Also, in case of png avatars, return the actual path.
+	"""
+	avatar = profile.avatar
+	if avatar == "png":
+		avatar = "url#[npfp]"+profile.user.username+".png"
 	if profile.is_networker:
-		return profile.avatar+"#n"
-	return profile.avatar
+		avatar += "#n"
+	return avatar
 
 @register.filter
 def get_concert_arcade_arrows(module):

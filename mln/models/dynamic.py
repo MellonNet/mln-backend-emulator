@@ -67,15 +67,16 @@ class Profile(models.Model):
 		return self.user.username
 
 	def clean(self):
-		parts = self.avatar.split("#")
-		if len(parts) not in (2, 3):
-			raise ValidationError({"avatar": "Avatar does not have the right number of parts"})
-		if (self.is_networker and parts[0] not in ("0", "1")) or (not self.is_networker and parts[0] != "0"):
-			raise ValidationError({"avatar": "First part of avatar should not be %s" % parts[0]})
-		avatar_data = parts[1].split(",")
-		if not((parts[0] == "0" and len(avatar_data) == 14) or (parts[0] == "1" and len(avatar_data) == 5)):
-			raise ValidationError({"avatar": "Data part of avatar has %i values but shouldn't %s" % (len(avatar_data), self.avatar)})
-		self.avatar = parts[0]+"#"+parts[1]
+		if self.avatar != "png":
+			parts = self.avatar.split("#")
+			if len(parts) not in (2, 3):
+				raise ValidationError({"avatar": "Avatar does not have the right number of parts"})
+			if (self.is_networker and parts[0] not in ("0", "1")) or (not self.is_networker and parts[0] != "0"):
+				raise ValidationError({"avatar": "First part of avatar should not be %s" % parts[0]})
+			avatar_data = parts[1].split(",")
+			if not((parts[0] == "0" and len(avatar_data) == 14) or (parts[0] == "1" and len(avatar_data) == 5)):
+				raise ValidationError({"avatar": "Data part of avatar has %i values but shouldn't %s" % (len(avatar_data), self.avatar)})
+			self.avatar = parts[0]+"#"+parts[1]
 
 		max_votes = 20 + 8 * self.rank
 		if self.available_votes >	max_votes:

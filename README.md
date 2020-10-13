@@ -13,13 +13,13 @@ A server for the MLN social network / game hybrid.
 
 Download this repository and place it where you like.
 Download the MLN content files - to avoid problems with copyright, they aren't included or linked here, but it should be possible to find them if you ask someone involved in the MLN recreation effort.
-Place the content folder in `mlnserver/static/`, so that the editorial XML file should be at `mlnserver/static/editorial-redux-v4.xml`.
+Place the content folder in `mlnserver/static/`, so that the editorial XML file should be at `mlnserver/static/editorial-redux-v5.xml`.
 
 ## Server setup
 
 Initialize the database by running `python manage.py migrate`. This will create the database tables.
 
-Included in the content files should be an XML file called `editorial-redux-v4.xml`. Run `python manage.py import_mln_xml <path>`, where <path> is the path to this file. This will import the original MLN data.
+Included in the content files should be an XML file called `editorial-redux-v5.xml`. Run `python manage.py import_mln_xml <path>`, where <path> is the path to this file. This will import the original MLN data.
 
 Note: The editorial XML unfortunately doesn't contain any information about networkers. This means that the server won't have any networkers, even after importing the MLN data. We're trying to piece together networker information ourselves, using the MLN wiki and screenshots of pages. However this information is likely incomplete, so while we may be able to reconstruct networkers to the point where you can achieve all ranks, we probably won't be able to get the layout of the modules on their pages completely correct. Once we've completed piecing together the networker data we'll also make this data available to you if you want to host your own server.
 

@@ -76,6 +76,12 @@ class Profile(TestCase):
 		self.user.profile.save()
 		self.assertEqual(self.user.profile.avatar, avatar)
 
+	def test_save_avatar_png_ok(self):
+		avatar = "png"
+		self.user.profile.avatar = avatar
+		self.user.profile.save()
+		self.assertEqual(self.user.profile.avatar, avatar)
+
 	def test_save_page_column_color_ok(self):
 		self.user.profile.page_column_color_id = 0
 		self.user.profile.save()
