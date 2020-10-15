@@ -11,10 +11,10 @@ import xml.etree.ElementTree as et
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 
 from ....models.static import MLNError
+from ....templatetags.mln_utils import render_to_string_stripped
 from .friend import handle_friend_process_blocking, handle_friend_process_invitation, handle_friend_remove_member, handle_friend_send_invitation
 from .page import handle_page_get_new, handle_page_save_layout, handle_page_save_options
 from .misc import handle_blueprint_use, handle_inventory_module_get, handle_user_get_my_avatar, handle_user_save_my_avatar, handle_user_save_my_statements
@@ -103,7 +103,7 @@ def _webservice_unencrypted(user, data):
 			context.update(extra_context)
 	else:
 		template = "mln/api/xml/base.xml"
-	out = loader.get_template(template).render(context)
+	out = render_to_string_stripped(template, context)
 
 	log.debug(out)
 	return out

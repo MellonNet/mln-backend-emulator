@@ -1,6 +1,7 @@
 """Various utility functions for accessing or formatting data for templates that would be too complex to do in the templates themselves."""
 import re
 from django import template
+from django.template import loader
 from django.template.base import DebugLexer, Lexer, tag_re, TextNode
 
 from mln.models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerPic, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
@@ -194,8 +195,6 @@ def debug_tokenize_fix(self):
 		result.append(self.create_token(last_bit, (upto, upto + len(last_bit)), lineno, in_tag=False))
 	return result
 
-DebugLexer.tokenize = debug_tokenize_fix
-
 def whitespace_fix(self, s):
 	"""
 	Remove whitespace surrounding XML tags (same as standard django tag "spaceless") and also remove whitespace surrounding django template language constructs.
@@ -207,5 +206,16 @@ def whitespace_fix(self, s):
 	s = re.sub(r"\s*(/?>)\s*", r"\1", s)
 	s = re.sub(r"\s+<", "<", s)
 	self.s = s
+
+def render_to_string_stripped(template, context):
+	olt = Lexer.tokenize
+	odlt = DebugLexer.tokenize
+	Lexer.tokenize = tokenize_fix
+	DebugLexer.tokenize = debug_tokenize_fix
+	res = loader.render_to_string(template, context)
+	Lexer.tokenize = olt
+	DebugLexer.tokenize = odlt
+	return res
+
 
 TextNode.__init__ = whitespace_fix
