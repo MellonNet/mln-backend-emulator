@@ -15,10 +15,19 @@ def module(cls):
 def module_2(cls):
 	cls.MODULE_ITEM_2_ID = ItemInfo.objects.create(name="Module Item 2", type=ItemType.MODULE).id
 
+@cls_setup
+def masterpiece(cls):
+	cls.MASTERPIECE_ITEM_ID = ItemInfo.objects.create(name="Masterpiece Item", type=ItemType.MASTERPIECE).id
+
 @setup
 @requires(module, one_user)
 def has_module(self):
 	add_inv_item(self.user, self.MODULE_ITEM_ID)
+
+@setup
+@requires(masterpiece, one_user)
+def has_masterpiece(self):
+	add_inv_item(self.user, self.MASTERPIECE_ITEM_ID)
 
 @setup
 @requires(blueprint_req, one_user)
@@ -84,6 +93,24 @@ class UseBlueprint_Ok(TestCase):
 		use_blueprint(self.user, self.BLUEPRINT_ID)
 		self.assertFalse(self.user.inventory.filter(item_id=self.REQUIREMENT_ID).exists())
 		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=1).exists())
+
+class CraftMasterpiece_Ok(TestCase):
+	SETUP = has_item_blueprint, has_requirement, has_masterpiece
+	
+	def test(self):
+		use_blueprint(self.user, self.BLUEPRINT_ID)
+		self.assertFalse(self.user.inventory.filter(item_id=self.REQUIREMENT_ID).exists())
+		self.assertTrue(self.user.inventory.filter(item_id=self.MASTERPIECE_ITEM_ID, qty=1).exists())
+		self.assertTrue(self.user.profile.rank == 1)
+
+class CraftMasterpiece_Dupe(TestCase):
+	SETUP = has_item_blueprint, has_requirement, has_masterpiece
+	
+	def test(self):
+		use_blueprint(self.user, self.BLUEPRINT_ID)
+		self.assertFalse(self.user.inventory.filter(item_id=self.REQUIREMENT_ID).exists())
+		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_ITEM_ID, qty=2).exists())
+		self.assertFalse(self.user.profile.rank == 2)
 
 class AssertHasItem_NoItem(TestCase):
 	SETUP = item, one_user
