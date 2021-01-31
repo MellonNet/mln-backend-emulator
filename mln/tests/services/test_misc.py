@@ -5,7 +5,7 @@ from mln.services.inventory import add_inv_item, assert_has_item
 from mln.services.misc import inventory_module_get, use_blueprint
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.models.test_profile import networker, one_user, user_has_item
-from mln.tests.models.test_static import masterpiece_blueprint_req, blueprint_req, item
+from mln.tests.models.test_static import masterpiece_blueprint_req, blueprint_req, item, masterpiece
 
 @cls_setup
 def module(cls):
@@ -14,10 +14,6 @@ def module(cls):
 @cls_setup
 def module_2(cls):
 	cls.MODULE_ITEM_2_ID = ItemInfo.objects.create(name="Module Item 2", type=ItemType.MODULE).id
-
-@cls_setup
-def masterpiece(cls):
-	cls.MASTERPIECE_ITEM_ID = ItemInfo.objects.create(name="Masterpiece Item", type=ItemType.MASTERPIECE).id
 
 @setup
 @requires(module, one_user)
@@ -109,7 +105,7 @@ class CraftMasterpiece_Ok(TestCase):
 	
 	def test(self):
 		use_blueprint(self.user, self.MASTERPIECE_BLUEPRINT_ID)
-		self.assertFalse(self.user.inventory.filter(item_id=self.REQUIREMENT_ID).exists())
+		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_REQUIREMENT_ID).exists())
 		self.assertTrue(self.user.inventory.filter(item_id=self.MASTERPIECE_ITEM_ID, qty=1).exists())
 		self.assertTrue(self.user.profile.rank == 1)
 
@@ -118,7 +114,7 @@ class CraftMasterpiece_Dupe(TestCase):
 	
 	def test(self):
 		use_blueprint(self.user, self.MASTERPIECE_BLUEPRINT_ID)
-		self.assertFalse(self.user.inventory.filter(item_id=self.REQUIREMENT_ID).exists())
+		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_REQUIREMENT_ID).exists())
 		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_ITEM_ID, qty=2).exists())
 		self.assertFalse(self.user.profile.rank == 2)
 
