@@ -107,7 +107,7 @@ class CraftMasterpiece_Ok(TestCase):
 		use_blueprint(self.user, self.MASTERPIECE_BLUEPRINT_ID)
 		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_REQUIREMENT_ID).exists())
 		self.assertTrue(self.user.inventory.filter(item_id=self.MASTERPIECE_ITEM_ID, qty=1).exists())
-		self.assertTrue(self.user.profile.rank == 1)
+		self.assertEqual(self.user.profile.rank, 1)
 
 class CraftMasterpiece_Dupe(TestCase):
 	SETUP = has_masterpiece_blueprint, has_masterpiece_requirement, has_masterpiece
@@ -116,7 +116,7 @@ class CraftMasterpiece_Dupe(TestCase):
 		use_blueprint(self.user, self.MASTERPIECE_BLUEPRINT_ID)
 		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_REQUIREMENT_ID).exists())
 		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_ITEM_ID, qty=2).exists())
-		self.assertFalse(self.user.profile.rank == 2)
+		self.assertEqual(self.user.profile.rank, 0)
 
 class AssertHasItem_NoItem(TestCase):
 	SETUP = item, one_user
