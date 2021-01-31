@@ -40,12 +40,12 @@ def has_masterpiece_blueprint(self):
 	add_inv_item(self.user, self.MASTERPIECE_BLUEPRINT_ID)
 
 @setup
-@requires(blueprint_req, one_user)
+@requires(masterpiece_blueprint_req, one_user)
 def has_masterpiece_requirement(self):
 	add_inv_item(self.user, self.MASTERPIECE_REQUIREMENT_ID)
 
 @setup
-@requires(masterpiece_blueprint_req, one_user)
+@requires(blueprint_req, one_user)
 def has_requirement(self):
 	add_inv_item(self.user, self.REQUIREMENT_ID)
 
