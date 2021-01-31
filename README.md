@@ -36,6 +36,7 @@ Do *not* use this way of running the server in production (if you actually want 
 * Private view
 	* Inventory
 		* Blueprints
+		* Masterpieces
 	* Page builder
 		* Module customization & configuration
 	* Mail
@@ -55,9 +56,9 @@ Do *not* use this way of running the server in production (if you actually want 
 * Creation lab
 * Networker friendship conditions
 
+
 ### Not yet implemented
 * Networker mail replies
-* Masterpieces
 * Random items sometimes sent to friends when you click on modules
 * Items guests can receive in "battle" modules or similar
 * Module-dependent sticker backgrounds

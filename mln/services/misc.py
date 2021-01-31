@@ -30,5 +30,11 @@ def use_blueprint(user, blueprint_id):
 	# remove required items
 	for requirement in requirements:
 		remove_inv_item(user, requirement.item_id, requirement.qty)
+	if blueprint_info.build.type == ItemType.MASTERPIECE:
+		if user.inventory.filter(item_id=blueprint_info.build_id).exists():
+			return
+		else:
+			user.profile.rank += 1
+			user.profile.save()
 	# add newly built item
 	add_inv_item(user, blueprint_info.build_id)

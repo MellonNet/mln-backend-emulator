@@ -5,7 +5,7 @@ from mln.services.inventory import add_inv_item, assert_has_item
 from mln.services.misc import inventory_module_get, use_blueprint
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.models.test_profile import networker, one_user, user_has_item
-from mln.tests.models.test_static import blueprint_req, item
+from mln.tests.models.test_static import masterpiece_blueprint_req, blueprint_req, item, masterpiece
 
 @cls_setup
 def module(cls):
@@ -21,9 +21,24 @@ def has_module(self):
 	add_inv_item(self.user, self.MODULE_ITEM_ID)
 
 @setup
+@requires(masterpiece, one_user)
+def has_masterpiece(self):
+	add_inv_item(self.user, self.MASTERPIECE_ITEM_ID)
+
+@setup
 @requires(blueprint_req, one_user)
 def has_item_blueprint(self):
 	add_inv_item(self.user, self.BLUEPRINT_ID)
+
+@setup
+@requires(masterpiece_blueprint_req, one_user)
+def has_masterpiece_blueprint(self):
+	add_inv_item(self.user, self.MASTERPIECE_BLUEPRINT_ID)
+
+@setup
+@requires(masterpiece_blueprint_req, one_user)
+def has_masterpiece_requirement(self):
+	add_inv_item(self.user, self.MASTERPIECE_REQUIREMENT_ID)
 
 @setup
 @requires(blueprint_req, one_user)
@@ -84,6 +99,24 @@ class UseBlueprint_Ok(TestCase):
 		use_blueprint(self.user, self.BLUEPRINT_ID)
 		self.assertFalse(self.user.inventory.filter(item_id=self.REQUIREMENT_ID).exists())
 		self.assertTrue(self.user.inventory.filter(item_id=self.ITEM_ID, qty=1).exists())
+
+class CraftMasterpiece_Ok(TestCase):
+	SETUP = has_masterpiece_blueprint, has_masterpiece_requirement
+	
+	def test(self):
+		use_blueprint(self.user, self.MASTERPIECE_BLUEPRINT_ID)
+		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_REQUIREMENT_ID).exists())
+		self.assertTrue(self.user.inventory.filter(item_id=self.MASTERPIECE_ITEM_ID, qty=1).exists())
+		self.assertEqual(self.user.profile.rank, 1)
+
+class CraftMasterpiece_Dupe(TestCase):
+	SETUP = has_masterpiece_blueprint, has_masterpiece_requirement, has_masterpiece
+	
+	def test(self):
+		use_blueprint(self.user, self.MASTERPIECE_BLUEPRINT_ID)
+		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_REQUIREMENT_ID).exists())
+		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_ITEM_ID, qty=2).exists())
+		self.assertEqual(self.user.profile.rank, 0)
 
 class AssertHasItem_NoItem(TestCase):
 	SETUP = item, one_user

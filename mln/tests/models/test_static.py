@@ -11,16 +11,32 @@ def item(cls):
 	cls.ITEM_ID = ItemInfo.objects.create(name="Test Item", type=ItemType.ITEM).id
 
 @cls_setup
+def masterpiece(cls):
+	cls.MASTERPIECE_ITEM_ID = ItemInfo.objects.create(name="Masterpiece Item", type=ItemType.MASTERPIECE).id
+
+@cls_setup
 @requires(item)
 def blueprint_info(cls):
 	cls.BLUEPRINT_ID = ItemInfo.objects.create(name="Test Item Blueprint", type=ItemType.BLUEPRINT).id
 	BlueprintInfo.objects.create(item_id=cls.BLUEPRINT_ID, build_id=cls.ITEM_ID)
 
 @cls_setup
+@requires(masterpiece)
+def masterpiece_blueprint_info(cls):
+	cls.MASTERPIECE_BLUEPRINT_ID = ItemInfo.objects.create(name="Test Masterpiece Blueprint", type=ItemType.BLUEPRINT).id
+	BlueprintInfo.objects.create(item_id=cls.MASTERPIECE_BLUEPRINT_ID, build_id=cls.MASTERPIECE_ITEM_ID)
+
+@cls_setup
 @requires(blueprint_info)
 def blueprint_req(cls):
 	cls.REQUIREMENT_ID = ItemInfo.objects.create(name="Requirement", type=ItemType.ITEM).id
 	BlueprintRequirement.objects.create(blueprint_item_id=cls.BLUEPRINT_ID, item_id=cls.REQUIREMENT_ID, qty=1)
+
+@cls_setup
+@requires(masterpiece_blueprint_info)
+def masterpiece_blueprint_req(cls):
+	cls.MASTERPIECE_REQUIREMENT_ID = ItemInfo.objects.create(name="Masterpiece Requirement", type=ItemType.ITEM).id
+	BlueprintRequirement.objects.create(blueprint_item_id=cls.MASTERPIECE_BLUEPRINT_ID, item_id=cls.MASTERPIECE_REQUIREMENT_ID, qty=1)
 
 @cls_setup
 def body_category(cls):
