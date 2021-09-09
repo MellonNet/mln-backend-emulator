@@ -36,7 +36,6 @@ def handle_message_send(user, request):
 	body_id = int(request.get("bodyID"))
 	message = create_message(user, recipient_id, body_id)
 	send_message(message, None)
-	return message
 
 def handle_message_send_with_attachment(user, request):
 	"""Send a message with attachment."""
@@ -45,7 +44,6 @@ def handle_message_send_with_attachment(user, request):
 	message = create_message(user, recipient_id, body_id)
 	attachment = handle_create_attachment(request, message)
 	send_message(message, attachment)
-	return message
 
 def handle_create_attachment(request, message):
 	item_id = int(request.get("itemID"))

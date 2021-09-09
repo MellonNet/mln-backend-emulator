@@ -57,7 +57,7 @@ def create_message(user, recipient_id, body_id):
 def send_message(message, attachment):
 	"""Send a message to someone."""
 	message.save()
-	attachment.save()
+	if attachment is not None: attachment.save()
 	if message.recipient.profile.is_networker: 
 		for trigger in NetworkerMessageTrigger.objects.filter(networker=message.recipient): 
 			if not trigger.evaluate(message): continue 
@@ -67,4 +67,4 @@ def send_message(message, attachment):
 			break
 		# no need to keep messages to networkers
 		message.delete()
-		attachment.delete()
+		if attachment is not None: attachment.delete()
