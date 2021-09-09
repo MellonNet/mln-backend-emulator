@@ -1,4 +1,4 @@
-from ..models.dynamic import FriendshipStatus, Message
+from ..models.dynamic import Attachment, FriendshipStatus, Message, Profile, NetworkerMessageTrigger
 from ..models.static import MessageBody
 from .friend import are_friends
 from .inventory import add_inv_item, remove_inv_item
@@ -17,7 +17,7 @@ def _get_message(user, message_id):
 def create_attachment(message, item_id, qty):
 	"""Remove items from the user's inventory and attach it to the message."""
 	remove_inv_item(message.sender, item_id, qty)
-	message.attachments.create(item_id=item_id, qty=qty)
+	return Attachment(message=message, item_id=item_id, qty=qty)
 
 def delete_message(user, message_id):
 	"""Delete a message from the user's inbox, detaching any attachments."""
@@ -49,7 +49,22 @@ def open_message(user, message_id):
 	message.save()
 	return message
 
-def send_message(user, recipient_id, body_id):
-	"""Send a message to someone."""
+def create_message(user, recipient_id, body_id): 
+	"""Creates a message in-memory. To actually send, use [send_message]."""
 	_check_recipient(user, recipient_id)
-	return Message.objects.create(sender=user, recipient_id=recipient_id, body_id=body_id)
+	return Message(sender=user, recipient_id=recipient_id, body_id=body_id)
+
+def send_message(message, attachment):
+	"""Send a message to someone."""
+	message.save()
+	attachment.save()
+	if message.recipient.profile.is_networker: 
+		for trigger in NetworkerMessageTrigger.objects.filter(networker=message.recipient): 
+			if not trigger.evaluate(message): continue 
+			response = Message.objects.create(sender=message.recipient, recipient=message.sender, body=trigger.response.body)
+			for attachment in trigger.response.attachments.all(): 
+				response.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
+			break
+		# no need to keep messages to networkers
+		message.delete()
+		attachment.delete()

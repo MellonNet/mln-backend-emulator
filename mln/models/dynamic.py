@@ -177,9 +177,10 @@ class NetworkerMessageTrigger(NetworkerTrigger):
 
 	def evaluate(self, message):  # message is a Message object
 		result = True
-		if (self.message_body is not None and message.body != self.message_body): 
+		has_item = any(attachment.item == self.message_attachment for attachment in message.attachments.all())
+		if (self.message_body is not None and message.body != self.message_body):
 			result = False
-		if (self.message_attachments is not None and message.body != self.message_attachments): 
+		if (self.message_attachment is not None and not has_item):
 			result = False
 		return result
 
