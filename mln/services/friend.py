@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
-from ..models.dynamic import Friendship, FriendshipStatus
+from ..models.dynamic import Friendship, FriendshipStatus, NetworkerFriendTrigger
 from ..models.static import MLNError, NetworkerFriendshipConditionDev
 
 def _get_friendship(user, relation_id):
@@ -30,20 +30,11 @@ def send_friend_invite(user, invitee_name):
 		raise RuntimeError("Friendship to user %s already exists" % invitee_name)
 	except ObjectDoesNotExist:
 		pass
-	try:
-		cond = NetworkerFriendshipConditionDev.objects.get(networker=invitee)
-		# networker
-		if cond.condition_id is None:
-			success = True
-		else:
-			success = user.inventory.filter(item_id=cond.condition_id).exists()
-		if success:
-			user.outgoing_friendships.create(to_user=invitee, status=FriendshipStatus.FRIEND)
-			user.messages.create(sender=invitee, body_id=cond.success_body_id)
-		else:
-			user.messages.create(sender=invitee, body_id=cond.failure_body_id)
-	except ObjectDoesNotExist:
-		# normal user
+	for trigger in NetworkerFriendTrigger.objects.filter(networker=invitee):
+		if not trigger.evaluate(user.inventory): continue
+		user.outgoing_friendships.create(to_user=invitee, status=FriendshipStatus.FRIEND)
+		trigger.send_message(user)
+	else: # normal user
 		user.outgoing_friendships.create(to_user=invitee, status=FriendshipStatus.PENDING)
 
 def handle_friend_invite_response(user, relation_id, accept):
