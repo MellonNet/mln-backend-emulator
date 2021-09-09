@@ -268,7 +268,7 @@ class NetworkerFriendshipConditionSource(models.Model):
 	def __str__(self):
 		return self.source
 
-class NetworkerMessageTrigger(models.Model):
+class NetworkerMessageTriggerDev(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""
 	networker = models.CharField(max_length=64, blank=True, null=True)
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
@@ -279,9 +279,9 @@ class NetworkerMessageTrigger(models.Model):
 	def __str__(self):
 		return "From %s: %s" % (self.networker, self.body)
 
-class NetworkerMessageAttachment(Stack):
+class NetworkerMessageAttachmentDev(Stack):
 	"""A stack to be attached to a networker message."""
-	trigger = models.ForeignKey(NetworkerMessageTrigger, related_name="attachments", on_delete=models.CASCADE)
+	trigger = models.ForeignKey(NetworkerMessageTriggerDev, related_name="attachments", on_delete=models.CASCADE)
 
 	class Meta:
 		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="networker_message_attachment_unique_trigger_item"),)

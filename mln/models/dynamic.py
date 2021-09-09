@@ -26,7 +26,7 @@ class Message(models.Model):
 	Messages can have attachments.
 	"""
 	sender = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
-	recipient = models.ForeignKey(User, related_name="messages", on_delete=models.CASCADE)
+	recipient = models.ForeignKey(User, related_name="messages", on_delete=models.CASCADE, blank=True, null=True)
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
 	reply_body = models.ForeignKey(MessageBody, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
 	is_read = models.BooleanField(default=False)
@@ -157,6 +157,31 @@ class Friendship(models.Model):
 
 	def __str__(self):
 		return "%s -> %s: %s" % (self.from_user, self.to_user, self.get_status_display())
+
+class NetworkerTrigger(models.Model): 
+	"""Triggers a message from a networker in response to a user's action"""
+	networker = models.OneToOneField(User, related_name="networker_trigger", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True}, default=None)
+	response = models.ForeignKey(Message, primary_key=True, related_name="trigger", on_delete=models.CASCADE, default=None)
+
+	class Meta: 
+		abstract = True
+
+	def __str__(self): return str(self.response)
+	def evaluate(self, action): 
+		"""Returns True if the user's action should trigger this networker's message"""
+		pass
+
+class NetworkerMessageTrigger(NetworkerTrigger): 
+	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
+	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
+
+	def evaluate(self, message):  # message is a Message object
+		result = True
+		if (self.message_body is not None and message.body != self.message_body): 
+			result = False
+		if (self.message_attachments is not None and message.body != self.message_attachments): 
+			result = False
+		return result
 
 def get_or_none(cls, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""
