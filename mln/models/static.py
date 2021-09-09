@@ -256,16 +256,16 @@ class MessageReplyType(Enum):
 	EASY_REPLY_ONLY = 2
 	NO_REPLY = 3
 
-class NetworkerFriendshipCondition(models.Model):
+class NetworkerFriendshipConditionDev(models.Model):
 	"""Stores what a networker requires to accept a friend request, and the messages to be sent on success or failure."""
 	networker = models.OneToOneField(User, related_name="friendship_condition", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
 	condition = models.ForeignKey(ItemInfo, related_name="+", blank=True, null=True, on_delete=models.SET_NULL, limit_choices_to=Q(type=ItemType.BADGE) | Q(type=ItemType.BLUEPRINT) | Q(type=ItemType.ITEM) | Q(type=ItemType.MASTERPIECE))
 	success_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
 	failure_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
 
-class NetworkerFriendshipConditionSource(models.Model):
+class NetworkerFriendshipConditionSourceDev(models.Model):
 	"""Not related to MLN's core data model: Sources for manually associated friendship conditions."""
-	condition = models.OneToOneField(NetworkerFriendshipCondition, related_name="source", on_delete=models.CASCADE)
+	condition = models.OneToOneField(NetworkerFriendshipConditionDev, related_name="source", on_delete=models.CASCADE)
 	source = models.TextField()
 
 	def __str__(self):

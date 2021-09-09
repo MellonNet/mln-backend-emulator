@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
 from ..models.dynamic import Friendship, FriendshipStatus
-from ..models.static import MLNError, NetworkerFriendshipCondition
+from ..models.static import MLNError, NetworkerFriendshipConditionDev
 
 def _get_friendship(user, relation_id):
 	try:
@@ -31,7 +31,7 @@ def send_friend_invite(user, invitee_name):
 	except ObjectDoesNotExist:
 		pass
 	try:
-		cond = NetworkerFriendshipCondition.objects.get(networker=invitee)
+		cond = NetworkerFriendshipConditionDev.objects.get(networker=invitee)
 		# networker
 		if cond.condition_id is None:
 			success = True
