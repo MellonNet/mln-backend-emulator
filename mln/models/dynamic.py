@@ -160,8 +160,8 @@ class Friendship(models.Model):
 
 class NetworkerTrigger(models.Model): 
 	"""Triggers a message from a networker in response to a user's action"""
-	networker = models.OneToOneField(User, related_name="networker_trigger", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True}, default=None)
-	response = models.ForeignKey(Message, primary_key=True, related_name="trigger", on_delete=models.CASCADE, default=None)
+	networker = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True}, default=None)
+	response = models.ForeignKey(Message, primary_key=True, related_name="+", on_delete=models.CASCADE, default=None)
 
 	class Meta: 
 		abstract = True
@@ -170,6 +170,11 @@ class NetworkerTrigger(models.Model):
 	def evaluate(self, action): 
 		"""Returns True if the user's action should trigger this networker's message"""
 		pass
+
+	def send_message(self, user): 
+		response = Message.objects.create(sender=self.networker, recipient=user, body=self.response.body)
+		for response_attachment in self.response.attachments.all():
+			response.attachments.create(item_id=response_attachment.item_id, qty=response_attachment.qty)
 
 class NetworkerMessageTrigger(NetworkerTrigger): 
 	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
@@ -183,6 +188,13 @@ class NetworkerMessageTrigger(NetworkerTrigger):
 		if (self.message_attachment is not None and not has_item):
 			result = False
 		return result
+
+class NetworkerFriendTrigger(NetworkerTrigger): 
+	required_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
+	accept = models.BooleanField(default=True)
+
+	def evaluate(self, inventory): 
+		return self.required_item is None or self.required_item in inventory == self.success
 
 def get_or_none(cls, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""

@@ -62,9 +62,7 @@ def send_message(message, attachment):
 	# Send the networker's response
 	for trigger in NetworkerMessageTrigger.objects.filter(networker=message.recipient): 
 		if not trigger.evaluate(message): continue
-		response = Message.objects.create(sender=message.recipient, recipient=message.sender, body=trigger.response.body)
-		for response_attachment in trigger.response.attachments.all():
-			response.attachments.create(item_id=response_attachment.item_id, qty=response_attachment.qty)
+		trigger.send_message(message.sender)
 		break
 	else:  # networker doesn't have a trigger for this message
 		body = MessageBody.objects.filter(text=MLNError.I_DONT_GET_IT).first()
