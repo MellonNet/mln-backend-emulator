@@ -1,5 +1,5 @@
 from ..models.dynamic import Attachment, FriendshipStatus, Message, Profile, NetworkerMessageTrigger
-from ..models.static import MessageBody
+from ..models.static import MessageBody, MLNError
 from .friend import are_friends
 from .inventory import add_inv_item, remove_inv_item
 
@@ -65,6 +65,9 @@ def send_message(message, attachment):
 			for attachment in trigger.response.attachments.all(): 
 				response.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
 			break
+		else:  # networker doesn't have a trigger for this message
+			body = MessageBody.objects.filter(text=MLNError.I_DONT_GET_IT).first()
+			Message.objects.create(sender=message.recipient, recipient=message.sender, body=body)
 		# no need to keep messages to networkers
 		message.delete()
 		if attachment is not None: attachment.delete()
