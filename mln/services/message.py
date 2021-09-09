@@ -58,16 +58,17 @@ def send_message(message, attachment):
 	"""Send a message to someone."""
 	message.save()
 	if attachment is not None: attachment.save()
-	if message.recipient.profile.is_networker: 
-		for trigger in NetworkerMessageTrigger.objects.filter(networker=message.recipient): 
-			if not trigger.evaluate(message): continue 
-			response = Message.objects.create(sender=message.recipient, recipient=message.sender, body=trigger.response.body)
-			for attachment in trigger.response.attachments.all(): 
-				response.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
-			break
-		else:  # networker doesn't have a trigger for this message
-			body = MessageBody.objects.filter(text=MLNError.I_DONT_GET_IT).first()
-			Message.objects.create(sender=message.recipient, recipient=message.sender, body=body)
-		# no need to keep messages to networkers
-		message.delete()
-		if attachment is not None: attachment.delete()
+	if not message.recipient.profile.is_networker: return
+	# Send the networker's response
+	for trigger in NetworkerMessageTrigger.objects.filter(networker=message.recipient): 
+		if not trigger.evaluate(message): continue
+		response = Message.objects.create(sender=message.recipient, recipient=message.sender, body=trigger.response.body)
+		for response_attachment in trigger.response.attachments.all():
+			response.attachments.create(item_id=response_attachment.item_id, qty=response_attachment.qty)
+		break
+	else:  # networker doesn't have a trigger for this message
+		body = MessageBody.objects.filter(text=MLNError.I_DONT_GET_IT).first()
+		Message.objects.create(sender=message.recipient, recipient=message.sender, body=body)
+	# no need to keep messages to networkers
+	message.delete()
+	if attachment is not None: attachment.delete()
