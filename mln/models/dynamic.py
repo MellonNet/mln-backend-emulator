@@ -160,7 +160,7 @@ class Friendship(models.Model):
 
 class NetworkerTrigger(models.Model): 
 	"""Triggers a message from a networker in response to a user's action"""
-	networker = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True}, default=None)
+	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True}, default=None)
 	response = models.ForeignKey(Message, primary_key=True, related_name="+", on_delete=models.CASCADE, default=None)
 
 	class Meta: 
@@ -194,7 +194,8 @@ class NetworkerFriendTrigger(NetworkerTrigger):
 	accept = models.BooleanField(default=True)
 
 	def evaluate(self, inventory): 
-		return self.required_item is None or self.required_item in inventory == self.success
+		has_item = self.required_item is None or any(stack.item == self.required_item for stack in inventory.all())
+		return has_item == self.accept
 
 def get_or_none(cls, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""
