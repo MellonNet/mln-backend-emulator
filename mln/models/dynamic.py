@@ -180,14 +180,11 @@ class NetworkerMessageTrigger(NetworkerTrigger):
 	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
 	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
 
-	def evaluate(self, message):  # message is a Message object
-		result = True
-		has_item = any(attachment.item == self.message_attachment for attachment in message.attachments.all())
-		if (self.message_body is not None and message.body != self.message_body):
-			result = False
-		if (self.message_attachment is not None and not has_item):
-			result = False
-		return result
+	def evaluate(self, message, attachment): return (
+		(self.message_body is None or message.body == self.message_body) and  # check body
+		(self.message_attachment is None) == (attachment is None) and  # don't check a null attachment
+		(self.message_attachment is None or attachment.item == self.message_attachment)  # check attachment
+	) 
 
 class NetworkerFriendTrigger(NetworkerTrigger): 
 	required_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
