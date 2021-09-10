@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
-from ..models.dynamic import Friendship, FriendshipStatus, Message, NetworkerFriendTrigger
-from ..models.static import MLNError, NetworkerFriendshipConditionDev
+from ..models.dynamic import Friendship, FriendshipStatus, Message, NetworkerFriendTrigger, get_or_none
+from ..models.static import MLNError, MLNMessage, NetworkerFriendshipConditionDev
 
 def _get_friendship(user, relation_id):
 	try:
@@ -23,9 +23,9 @@ def send_friend_invite(user, invitee_name):
 	# Try to get the invitee
 	invitee = get_or_none(User, username=invitee_name)
 	if invitee is None:  # user doens't exist
-		postman = get_or_none(User, username="Dead Letter Postman")
+		postman = get_or_none(User, username="Dead_Letter_Postman")
 		if postman is not None:  # send the error through the Dead Letter Postman
-			user.messages.create(sender=postman, body_id=MLNError.MEMBER_NOT_FOUND)
+			return user.messages.create(sender=postman, body_id=MLNError.MEMBER_NOT_FOUND)
 		else:  # regular error
 			raise RuntimeError("No user with the username %s exists" % invitee_name)
 
@@ -69,8 +69,10 @@ def handle_friend_invite_response(user, relation_id, accept):
 	if accept:
 		relation.status = FriendshipStatus.FRIEND
 		relation.save()
+		relation.from_user.messages.create(sender=user, body_id=MLNMessage.FRIEND_REQUEST_ACCEPT)
 	else:
 		relation.delete()
+		relation.from_user.messages.create(sender=user, body_id=MLNMessage.FRIEND_REQUEST_REJECT)
 
 def remove_friend(user, relation_id):
 	"""
@@ -78,12 +80,12 @@ def remove_friend(user, relation_id):
 	Raise RuntimeError if
 	- the friendship does not exist
 	- the relation does not relate to this user
-	Raise MLNError if the the user is blocked.
 	"""
 	relation = _get_friendship(user, relation_id)
-	if relation.status == FriendshipStatus.BLOCKED and relation.from_user != user:
-		raise MLNError(MLNError.YOU_ARE_BLOCKED)
 	relation.delete()
+	if relation.status != FriendshipStatus.BLOCKED:  # notify other user
+		other = relation.from_user if relation.to_user == user else relation.to_user
+		other.messages.create(sender=user, body_id=MLNMessage.FRIEND_REMOVE)
 
 def block_friend(user, relation_id):
 	"""
@@ -102,6 +104,7 @@ def block_friend(user, relation_id):
 		relation.from_user = user
 		relation.to_user = friend
 	relation.status = FriendshipStatus.BLOCKED
+	relation.to_user.messages.create(sender=user, body_id=MLNMessage.FRIEND_BLOCK)
 	relation.save()
 
 def unblock_friend(user, relation_id):
@@ -117,8 +120,9 @@ def unblock_friend(user, relation_id):
 	if relation.status != FriendshipStatus.BLOCKED:
 		raise RuntimeError("%s is not a blocked relation" % relation)
 	if relation.from_user != user:
-		raise MLNError(MLNError.YOU_ARE_BLOCKED)
+		return user.messages.create(sender=relation.from_user, body_id=MLNError.YOU_ARE_BLOCKED)
 	relation.status = FriendshipStatus.FRIEND
+	relation.to_user.messages.create(sender=user, body_id=MLNMessage.FRIEND_UNBLOCK)
 	relation.save()
 
 def are_friends(user, other_user_id):
