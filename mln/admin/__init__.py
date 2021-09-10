@@ -29,7 +29,7 @@ class FriendshipAdmin(admin.ModelAdmin):
 
 custom[Friendship] = FriendshipAdmin
 
-has_trigger = lambda obj: NetworkerMessageTriggerDev.objects.filter(body=obj).exists() or NetworkerFriendshipCondition.objects.filter(Q(success_body=obj) | Q(failure_body=obj)).exists()
+has_trigger = lambda obj: NetworkerMessageTrigger.objects.filter(response=obj).exists() or NetworkerFriendshipCondition.objects.filter(Q(success_body=obj) | Q(failure_body=obj)).exists()
 has_trigger.short_description = "has trigger"
 has_trigger.boolean = True
 
