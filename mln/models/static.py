@@ -15,6 +15,11 @@ class MLNError(Exception):
 	The displayed messages are actually mail messages in a hidden category.
 	As such, this list of raw IDs is not completely ideal and will break when message IDs are reassigned.
 	"""
+	FRIEND_REQUEST_ACCEPT = 45086
+	FRIEND_REQUEST_REJECT = 45087
+	FRIEND_REMOVE = 45088
+	FRIEND_BLOCK = 45090
+	FRIEND_UNBLOCK = 45091
 	OPERATION_FAILED = 46304
 	YOU_ARE_BLOCKED = 46305
 	ALREADY_FRIENDS = 46307

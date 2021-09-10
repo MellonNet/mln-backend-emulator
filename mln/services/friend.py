@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
-from ..models.dynamic import Friendship, FriendshipStatus, NetworkerFriendTrigger
+from ..models.dynamic import Friendship, FriendshipStatus, Message, NetworkerFriendTrigger
 from ..models.static import MLNError, NetworkerFriendshipConditionDev
 
 def _get_friendship(user, relation_id):
@@ -19,27 +19,39 @@ def send_friend_invite(user, invitee_name):
 	Raise RuntimeError if no user with the specified username exists.
 	Raise RuntimeError if the user already is a friend or blocked friend.
 	"""
-	try:
-		invitee = User.objects.get(username=invitee_name)
-	except ObjectDoesNotExist:
-		raise RuntimeError("No user with the username %s exists" % invitee_name)
-	try:
-		friendship = user.outgoing_friendships.get(to_user=invitee)
-		if friendship.status == FriendshipStatus.PENDING:
-			return
-		raise RuntimeError("Friendship to user %s already exists" % invitee_name)
-	except ObjectDoesNotExist:
-		pass
-	if invitee.profile.is_networker: 
-		for trigger in NetworkerFriendTrigger.objects.filter(networker=invitee):
-			if not trigger.evaluate(user.inventory): continue
-			if trigger.accept: user.outgoing_friendships.create(to_user=invitee, status=FriendshipStatus.FRIEND)
-			trigger.send_message(user)
-			break
-		else:  # no trigger matched
-			raise RuntimeError("No applicable friendship conditions for %s" % invitee)
-	else: # normal user
-		user.outgoing_friendships.create(to_user=invitee, status=FriendshipStatus.PENDING)
+
+	# Try to get the invitee
+	invitee = get_or_none(User, username=invitee_name)
+	if invitee is None:  # user doens't exist
+		postman = get_or_none(User, username="Dead Letter Postman")
+		if postman is not None:  # send the error through the Dead Letter Postman
+			user.messages.create(sender=postman, body_id=MLNError.MEMBER_NOT_FOUND)
+		else:  # regular error
+			raise RuntimeError("No user with the username %s exists" % invitee_name)
+
+	# Try to get the current friendship status
+	friendship = get_or_none(Friendship, from_user=user, to_user=invitee)
+	if friendship is not None:  # already friends with this user
+		if friendship.status == FriendshipStatus.PENDING: 
+			error = MLNError.INVITATION_ALREADY_EXISTS
+		elif friendship.status == FriendshipStatus.FRIEND: 
+			error = MLNError.ALREADY_FRIENDS
+		elif friendship.status == FriendshipStatus.BLOCKED: 
+			error = MLNError.YOU_ARE_BLOCKED
+		return user.messages.create(sender=invitee, body_id=error)
+
+	# Send regular friend request to human users
+	if not invitee.profile.is_networker: 
+		return user.outgoing_friendships.create(to_user=invitee, status=FriendshipStatus.PENDING)
+
+	# Handle networker friendship conditions
+	for trigger in NetworkerFriendTrigger.objects.filter(networker=invitee):
+		if not trigger.evaluate(user.inventory): continue
+		if trigger.accept: user.outgoing_friendships.create(to_user=invitee, status=FriendshipStatus.FRIEND)
+		trigger.send_message(user)
+		break
+	else:  # no trigger matched
+		raise RuntimeError("No applicable friendship conditions for %s" % invitee)
 
 def handle_friend_invite_response(user, relation_id, accept):
 	"""
