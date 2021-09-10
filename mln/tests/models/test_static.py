@@ -1,4 +1,5 @@
-from mln.models.static import BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, NetworkerMessageAttachmentDev, NetworkerMessageTriggerDev, StartingStack
+from mln.models.static import BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, NetworkerMessageTriggerDev, StartingStack
+from mln.models.dynamic import NetworkerMessageAttachment
 from mln.tests.setup_testcase import cls_setup, requires
 from mln.tests.models.dupe_testcase import DupeTest
 
@@ -55,7 +56,7 @@ def networker_message_trigger(cls):
 @cls_setup
 @requires(networker_message_trigger, item)
 def networker_message_attachment(cls):
-	NetworkerMessageAttachmentDev.objects.create(trigger_id=cls.TRIGGER_ID, item_id=cls.ITEM_ID, qty=1)
+	NetworkerMessageAttachment.objects.create(trigger_id=cls.TRIGGER_ID, item_id=cls.ITEM_ID, qty=1)
 
 @cls_setup
 @requires(item)
