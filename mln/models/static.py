@@ -24,9 +24,9 @@ class MLNError(Exception):
 	As such, this list of raw IDs is not completely ideal and will break when message IDs are reassigned.
 	"""
 	OPERATION_FAILED = 46304
-	YOU_ARE_BLOCKED = 46305  # mail
-	ALREADY_FRIENDS = 46307  # mail
-	INVITATION_ALREADY_EXISTS = 46308  # mail
+	YOU_ARE_BLOCKED = 46305
+	ALREADY_FRIENDS = 46307
+	INVITATION_ALREADY_EXISTS = 46308
 	ITEM_MISSING = 46309
 	ITEM_IS_NOT_MAILABLE = 46310
 	MODULE_ALREADY_SETUP = 46311
