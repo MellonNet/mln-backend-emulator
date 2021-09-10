@@ -26,7 +26,7 @@ class Message(models.Model):
 	Messages can have attachments.
 	"""
 	sender = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
-	recipient = models.ForeignKey(User, related_name="messages", on_delete=models.CASCADE, blank=True, null=True)
+	recipient = models.ForeignKey(User, related_name="messages", on_delete=models.CASCADE)
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
 	reply_body = models.ForeignKey(MessageBody, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
 	is_read = models.BooleanField(default=False)
@@ -159,30 +159,37 @@ class Friendship(models.Model):
 		return "%s -> %s: %s" % (self.from_user, self.to_user, self.get_status_display())
 
 class NetworkerTrigger(models.Model): 
-	"""Triggers a message from a networker in response to a user's action"""
-	networker = models.OneToOneField(User, related_name="networker_trigger", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True}, default=None)
-	response = models.ForeignKey(Message, primary_key=True, related_name="trigger", on_delete=models.CASCADE, default=None)
+	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
+	response = models.OneToOneField(MessageBody, primary_key=True, related_name="trigger", on_delete=models.CASCADE)
 
-	class Meta: 
-		abstract = True
+	def __str__(self): 
+		return "Message from %s: %s" % (self.networker, self.response.subject)
 
-	def __str__(self): return str(self.response)
 	def evaluate(self, action): 
-		"""Returns True if the user's action should trigger this networker's message"""
+		"""Returns True if the user's action should trigger this networker to respond with a message"""
 		pass
+
+	def send_message(self, user): 
+		response = Message.objects.create(sender=self.networker, recipient=user, body=self.response)
+		for response_attachment in self.attachments.all():
+			response.attachments.create(item_id=response_attachment.item_id, qty=response_attachment.qty)
+
+class NetworkerMessageAttachment(Stack):
+	"""A stack to be attached to a networker message."""
+	trigger = models.ForeignKey(NetworkerTrigger, related_name="attachments", on_delete=models.CASCADE)
+
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="networker_message_attachment_unique_trigger_item"),)
 
 class NetworkerMessageTrigger(NetworkerTrigger): 
 	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
 	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
 
-	def evaluate(self, message):  # message is a Message object
-		result = True
-		has_item = any(attachment.item == self.message_attachment for attachment in message.attachments.all())
-		if (self.message_body is not None and message.body != self.message_body):
-			result = False
-		if (self.message_attachment is not None and not has_item):
-			result = False
-		return result
+	def evaluate(self, message, attachment): return (
+		(self.message_body is None or message.body == self.message_body) and  # check body
+		(self.message_attachment is None) == (attachment is None) and  # don't check a null attachment
+		(self.message_attachment is None or attachment.item == self.message_attachment)  # check attachment
+	)
 
 def get_or_none(cls, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""

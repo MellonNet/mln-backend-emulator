@@ -6,10 +6,10 @@ from django.apps import apps
 from django.contrib import admin
 from django.db.models import Q
 
-from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
+from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack, NetworkerMessageAttachment, NetworkerMessageTrigger, NetworkerTrigger
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
 from ..models.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerDev, NetworkerMessageAttachmentDev, StartingStack, Question
+from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, StartingStack, Question
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
@@ -60,6 +60,12 @@ class InventoryStackAdmin(StackAdmin):
 
 custom[InventoryStack] = InventoryStackAdmin
 
+class NetworkerTriggerAdmin(admin.ModelAdmin): 
+	"""Hide this from the UI, as all editing should happen in subclasses"""
+	def has_module_permission(self, request): return False
+
+custom [NetworkerTrigger] = NetworkerTriggerAdmin
+
 # Inline display functions
 
 def get_item_info_inlines(obj):
@@ -99,10 +105,10 @@ friend_cond_admin.list_display = "networker", "condition", "success_body", "fail
 friend_cond_admin.list_display_links = "networker",
 friend_cond_admin.search_fields = "networker", "condition", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source__source"
 
-trigger_admin = make_inline(NetworkerMessageTriggerDev, NetworkerMessageAttachmentDev)
-trigger_admin.list_display = "networker", "body", "trigger", "source", "notes"
-trigger_admin.list_display_links = "body",
-trigger_admin.search_fields = "networker", "body__subject", "body__text", "trigger", "source", "notes"
+trigger_admin = make_inline(NetworkerMessageTrigger, NetworkerMessageAttachment)
+trigger_admin.list_display = "networker", "response"
+trigger_admin.list_display_links = "response",
+trigger_admin.search_fields = "networker", "response__subject", "response__text"
 
 # Item infos
 

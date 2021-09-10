@@ -282,13 +282,6 @@ class NetworkerMessageTriggerDev(models.Model):
 	def __str__(self):
 		return "From %s: %s" % (self.networker, self.body)
 
-class NetworkerMessageAttachmentDev(Stack):
-	"""A stack to be attached to a networker message."""
-	trigger = models.ForeignKey(NetworkerMessageTriggerDev, related_name="attachments", on_delete=models.CASCADE)
-
-	class Meta:
-		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="networker_message_attachment_unique_trigger_item"),)
-
 class NetworkerPageSource(models.Model):
 	"""Documentation only: Note whether a reconstructed networker page has a graphical source, or is tentatively reconstructed from a description."""
 	networker = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
