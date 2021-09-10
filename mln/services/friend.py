@@ -23,7 +23,7 @@ def send_friend_invite(user, invitee_name):
 	# Try to get the invitee
 	invitee = get_or_none(User, username=invitee_name)
 	if invitee is None:  # user doens't exist
-		postman = get_or_none(User, username="Dead_Letter_Postman")
+		postman = get_or_none(User, username="Dead Letter Postman")
 		if postman is not None:  # send the error through the Dead Letter Postman
 			return user.messages.create(sender=postman, body_id=MLNError.MEMBER_NOT_FOUND)
 		else:  # regular error
