@@ -24,9 +24,9 @@ class MLNError(Exception):
 	As such, this list of raw IDs is not completely ideal and will break when message IDs are reassigned.
 	"""
 	OPERATION_FAILED = 46304
-	YOU_ARE_BLOCKED = 46305
-	ALREADY_FRIENDS = 46307
-	INVITATION_ALREADY_EXISTS = 46308
+	YOU_ARE_BLOCKED = 46305  # mail
+	ALREADY_FRIENDS = 46307  # mail
+	INVITATION_ALREADY_EXISTS = 46308  # mail
 	ITEM_MISSING = 46309
 	ITEM_IS_NOT_MAILABLE = 46310
 	MODULE_ALREADY_SETUP = 46311
@@ -34,9 +34,7 @@ class MLNError(Exception):
 	OUT_OF_VOTES = 46313
 	MLN_OFFLINE = 47570
 	MEMBER_NOT_FOUND = 52256
-
-	# This looks ugly, but this is probably the best spot to put it.
-	I_DONT_GET_IT = "I don't understand the mail you sent me. I'm sorry, us Networkers can only make sense of certain mails and attachments. But keep trying, we often give you a hint to what items and mails we're looking for on our page."
+	I_DONT_GET_IT = 46222
 
 	def __init__(self, id):
 		super().__init__()

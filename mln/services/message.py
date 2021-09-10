@@ -65,5 +65,4 @@ def send_message(message, attachment):
 			trigger.send_message(message.sender)
 			break
 		else:  # networker doesn't have a trigger for this message
-			body = MessageBody.objects.get(text=MLNError.I_DONT_GET_IT)
-			Message.objects.create(sender=message.recipient, recipient=message.sender, body=body)
+			Message.objects.create(sender=message.recipient, recipient=message.sender, body_id=MLNError.I_DONT_GET_IT)
