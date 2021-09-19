@@ -58,11 +58,16 @@ def send_message(message, attachment):
 	"""Send a message to someone."""
 	if not message.recipient.profile.is_networker:
 		message.save()
-		if attachment is not None: attachment.save()
+		if attachment is not None: 
+			attachment.save()
 	# Send the networker's response
 	for trigger in NetworkerMessageTrigger.objects.filter(networker=message.recipient): 
 		if not trigger.evaluate(message, attachment): continue
 		trigger.send_message(message.sender)
 		break
 	else:  # networker doesn't have a trigger for this message
-		Message.objects.create(sender=message.recipient, recipient=message.sender, body_id=MLNError.I_DONT_GET_IT)
+		response = Message.objects.create(sender=message.recipient, recipient=message.sender, body_id=MLNError.I_DONT_GET_IT)
+		if attachment is not None:  # send the attachment back
+			attachment.message = response
+			attachment.save()
+
