@@ -185,11 +185,12 @@ class NetworkerMessageTrigger(NetworkerTrigger):
 	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
 	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
 
-	def evaluate(self, message, attachment): return (
-		(self.message_body is None or message.body == self.message_body) and  # check body
-		(self.message_attachment is None) == (attachment is None) and  # don't check a null attachment
-		(self.message_attachment is None or attachment.item == self.message_attachment)  # check attachment
-	)
+	def evaluate(self, message, attachment): 
+		return (
+			(self.message_body is None or message.body == self.message_body) and  # check body
+			(self.message_attachment is None) == (attachment is None) and  # don't check a null attachment
+			(self.message_attachment is None or attachment.item == self.message_attachment)  # check attachment
+		)
 
 def get_or_none(cls, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""
