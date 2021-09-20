@@ -111,7 +111,7 @@ item_info_admin.list_display = "name", "type"
 item_info_admin.search_fields = "name",
 item_info_admin.list_filter = "type",
 
-# Modules & module settings 
+# Modules & module settings
 
 settings = set()
 for classes in module_settings_classes.values():
