@@ -31,7 +31,6 @@ class Migration(migrations.Migration):
       old_name='networker',
       new_name='networker_name'
     ),
-
 		migrations.CreateModel(
 			name='NetworkerTrigger',
 			fields=[
@@ -48,7 +47,7 @@ class Migration(migrations.Migration):
 			field=models.OneToOneField(auto_created=True, null=True, default=None, on_delete=django.db.models.deletion.CASCADE, parent_link=True, serialize=False, to='mln.networkertrigger'),
 			preserve_default=False,
 		),
-		migrations.RunPython(migrate_message_triggers),
+		migrations.RunPython(migrate_message_triggers, reverse_code=migrations.RunPython.noop),
 
 		# Step 3. Remove outdated NMT fields
 		migrations.RemoveField(

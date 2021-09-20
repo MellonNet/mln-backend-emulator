@@ -277,6 +277,7 @@ class NetworkerMessageTrigger(NetworkerTrigger):
 	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
 
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""
+	networker_name = models.CharField(max_length=64, blank=True, null=True)
 	trigger = models.TextField(blank=True, null=True)
 	source = models.TextField()
 	notes = models.TextField(blank=True, null=True)
