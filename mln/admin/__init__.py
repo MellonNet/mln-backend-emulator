@@ -9,7 +9,7 @@ from django.db.models import Q
 from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
 from ..models.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTrigger, NetworkerMessageAttachment, NetworkerTrigger, StartingStack, Question
+from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageTrigger, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageAttachment, NetworkerReplyTrigger, StartingStack, Question
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
@@ -29,7 +29,7 @@ class FriendshipAdmin(admin.ModelAdmin):
 
 custom[Friendship] = FriendshipAdmin
 
-has_trigger = lambda obj: NetworkerMessageTrigger.objects.filter(body=obj).exists() or NetworkerFriendshipCondition.objects.filter(Q(success_body=obj) | Q(failure_body=obj)).exists()
+has_trigger = lambda obj: NetworkerReplyTrigger.objects.filter(body=obj).exists() or NetworkerFriendshipCondition.objects.filter(Q(success_body=obj) | Q(failure_body=obj)).exists()
 has_trigger.short_description = "has trigger"
 has_trigger.boolean = True
 
@@ -60,11 +60,11 @@ class InventoryStackAdmin(StackAdmin):
 
 custom[InventoryStack] = InventoryStackAdmin
 
-class NetworkerTriggerAdmin(admin.ModelAdmin): 
+class MessageTriggerAdmin(admin.ModelAdmin): 
 	"""Hide this from the UI, as all editing should happen in subclasses"""
 	def has_module_permission(self, request): return False
 
-custom [NetworkerTrigger] = NetworkerTriggerAdmin
+custom [MessageTrigger] = MessageTriggerAdmin
 
 # Inline display functions
 
@@ -105,7 +105,7 @@ friend_cond_admin.list_display = "networker", "condition", "success_body", "fail
 friend_cond_admin.list_display_links = "networker",
 friend_cond_admin.search_fields = "networker", "condition", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source__source"
 
-trigger_admin = make_inline(NetworkerMessageTrigger, NetworkerMessageAttachment)
+trigger_admin = make_inline(NetworkerReplyTrigger, NetworkerMessageAttachment)
 trigger_admin.list_display = "networker", "response", "message_body", "message_attachment", "trigger"
 trigger_admin.list_display_links = "response",
 trigger_admin.search_fields = "networker", "response__subject", "response__text", "trigger", "source", "notes"
