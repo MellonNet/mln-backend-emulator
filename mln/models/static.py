@@ -287,12 +287,12 @@ class NetworkerReplyTrigger(MessageTemplate):
 	def __str__(self):
 		return "From %s: %s" % (self.networker, self.response)
 
-class NetworkerMessageAttachment(Stack):
+class MessageTemplateAttachment(Stack):
 	"""A stack to be attached to a networker message."""
-	trigger = models.ForeignKey(MessageTemplate, related_name="attachments", on_delete=models.CASCADE)
+	template = models.ForeignKey(MessageTemplate, related_name="attachments", on_delete=models.CASCADE)
 
 	class Meta:
-		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="networker_message_attachment_unique_trigger_item"),)
+		constraints = (models.UniqueConstraint(fields=("template", "item"), name="networker_template_attachment_unique_template_item"),)
 
 class NetworkerPageSource(models.Model):
 	"""Documentation only: Note whether a reconstructed networker page has a graphical source, or is tentatively reconstructed from a description."""

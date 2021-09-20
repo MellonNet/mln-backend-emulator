@@ -21,6 +21,7 @@ class Migration(migrations.Migration):
 		# 2. Migrate MT fields: networker_name, networker, response, source
 		# 3. Create NRT: message_body, message_attachment
 		# 4. Create an NRT for every existing MT
+		# 5. Rename NetworkerMessageAttachment to MessageTemplateAttachment
 
 		# Step 1. Rename NRT to MT
 		migrations.RenameModel(
@@ -62,4 +63,23 @@ class Migration(migrations.Migration):
 
 		# Step 4. Create MessageTemplates
 		migrations.RunPython(create_NRTs, reverse_code=migrations.RunPython.noop),
+
+		# Step 5. Rename NetworkerMessageAttachment to MessageTemplateAttachment
+		migrations.RenameModel(
+			old_name="NetworkerMessageAttachment",
+			new_name="MessageTemplateAttachment",
+		),
+		migrations.RenameField(
+			model_name="messagetemplateattachment",
+			old_name="trigger",
+			new_name="template",
+		),
+		migrations.RemoveConstraint(
+			model_name='messagetemplateattachment',
+			name='networker_message_attachment_unique_trigger_item',
+		),
+		migrations.AddConstraint(
+			model_name='messagetemplateattachment',
+			constraint=models.UniqueConstraint(fields=('template', 'item'), name='networker_template_attachment_unique_template_item'),
+		),
 	]
