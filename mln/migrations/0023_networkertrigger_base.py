@@ -5,12 +5,19 @@ import django.db.models.deletion
 
 def migrate_message_triggers(apps, schema_editor): 
 	# Copies fields from NetworkerMessageTrigger to NetworkerTrigger
+	print("1")
 	NetworkerMessageTrigger = apps.get_model("mln", "NetworkerMessageTrigger")
 	NetworkerTrigger = apps.get_model("mln", "NetworkerTrigger")
+	print("2")
 	for message_trigger in NetworkerMessageTrigger.objects.all():
+		print("3")
+		print(dir(message_trigger))
 		NetworkerTrigger.objects.create(id=message_trigger.id, networker=message_trigger.networker, response=message_trigger.body)
 		message_trigger.networkertrigger_ptr_id = message_trigger.id
+		# for attachment in message_trigger.attachments.all():
+		# 	attachment.
 
+def temp(*args, **kwargs): print("\nHere")
 
 class Migration(migrations.Migration):
 	dependencies = [
@@ -41,6 +48,7 @@ class Migration(migrations.Migration):
 			field=models.OneToOneField(auto_created=True, default=None, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='mln.networkertrigger'),
 			preserve_default=False,
 		),
+		migrations.RunPython(temp),
 		migrations.RunPython(migrate_message_triggers),
 
 		# Step 3. Remove outdated NMT fields
