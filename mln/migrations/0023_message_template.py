@@ -69,14 +69,14 @@ class Migration(migrations.Migration):
 			old_name="NetworkerMessageAttachment",
 			new_name="MessageTemplateAttachment",
 		),
+		migrations.RemoveConstraint(
+			model_name='messagetemplateattachment',
+			name='networker_message_attachment_unique_trigger_item',
+		),
 		migrations.RenameField(
 			model_name="messagetemplateattachment",
 			old_name="trigger",
 			new_name="template",
-		),
-		migrations.RemoveConstraint(
-			model_name='messagetemplateattachment',
-			name='networker_message_attachment_unique_trigger_item',
 		),
 		migrations.AddConstraint(
 			model_name='messagetemplateattachment',
