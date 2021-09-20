@@ -100,7 +100,7 @@ friend_cond_admin.list_display_links = "networker",
 friend_cond_admin.search_fields = "networker", "condition", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source__source"
 
 trigger_admin = make_inline(NetworkerMessageTrigger, NetworkerMessageAttachment)
-trigger_admin.list_display = "networker", "response", "trigger", "source", "notes"
+trigger_admin.list_display = "networker", "response", "message_body", "message_attachment", "trigger"
 trigger_admin.list_display_links = "response",
 trigger_admin.search_fields = "networker", "response__subject", "response__text", "trigger", "source", "notes"
 

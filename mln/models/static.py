@@ -273,8 +273,8 @@ class NetworkerTrigger(models.Model):
 	response = models.ForeignKey(on_delete=models.deletion.CASCADE, related_name='+', to='mln.messagebody')
 
 class NetworkerMessageTrigger(NetworkerTrigger):
-	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, blank=True, null=True),
-	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True),
+	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
+	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
 
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""
 	trigger = models.TextField(blank=True, null=True)
