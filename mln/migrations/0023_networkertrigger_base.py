@@ -7,9 +7,9 @@ import django.db.models.deletion
 def create_NRTs(apps, schema_editor): 
 	# Create an NMT for each NT
 	NetworkerReplyTrigger = apps.get_model("mln", "NetworkerReplyTrigger")
-	MessageTrigger = apps.get_model("mln", "MessageTrigger")
-	for trigger in MessageTrigger.objects.all():
-		NetworkerReplyTrigger.objects.create(messagetrigger_ptr=trigger)
+	MessageTemplate = apps.get_model("mln", "MessageTemplate")
+	for template in MessageTemplate.objects.all():
+		NetworkerReplyTrigger.objects.create(messagetemplate_ptr=template)
 
 class Migration(migrations.Migration):
 	dependencies = [
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
 	]
 
 	operations = [
-		# 1. Rename NetworkerReplyTrigger (NRT) to MessageTrigger (MT)
+		# 1. Rename NetworkerReplyTrigger (NRT) to MessageTemplate (MT)
 		# 2. Migrate MT fields: networker_name, networker, response, source
 		# 3. Create NRT: message_body, message_attachment
 		# 4. Create an NRT for every existing MT
@@ -25,27 +25,27 @@ class Migration(migrations.Migration):
 		# Step 1. Rename NRT to MT
 		migrations.RenameModel(
 			old_name="NetworkerMessageTrigger",
-			new_name="MessageTrigger",
+			new_name="MessageTemplate",
 		),
 
-		# Step 2. Migrate MessageTrigger fields
+		# Step 2. Migrate MessageTemplate fields
 		migrations.RenameField(  # networker -> networker_name
-			model_name="messagetrigger",
+			model_name="messagetemplate",
 			old_name="networker",
 			new_name="networker_name",
 		),
 		migrations.RenameField(  # body --> response
-			model_name="messagetrigger",
+			model_name="messagetemplate",
 			old_name="body",
 			new_name="response"
 		),
 		migrations.AddField(  # create networker
-			model_name="messagetrigger",
+			model_name="messagetemplate",
 			name="networker",
 			field=models.ForeignKey(limit_choices_to={'profile__is_networker': True}, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL),
 		),
 		migrations.AlterField(  # make source nullable
-			model_name="messagetrigger",
+			model_name="messagetemplate",
 			name="source",
 			field=models.TextField(blank=True, null=True),
 		),
@@ -56,10 +56,10 @@ class Migration(migrations.Migration):
 			fields=[
 				("message_body", models.ForeignKey(to="mln.messagebody", related_name="+", on_delete=models.CASCADE, blank=True, null=True)),
 				("message_attachment", models.ForeignKey(to="mln.iteminfo", related_name="+", on_delete=models.CASCADE, blank=True, null=True)),
-				("messagetrigger_ptr", models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='mln.messagetrigger')),
+				("messagetemplate_ptr", models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='mln.messagetemplate')),
 			]
 		),
 
-		# Step 4. Create MessageTriggers
+		# Step 4. Create MessageTemplates
 		migrations.RunPython(create_NRTs, reverse_code=migrations.RunPython.noop),
 	]
