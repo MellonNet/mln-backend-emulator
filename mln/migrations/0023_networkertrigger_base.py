@@ -5,15 +5,12 @@ import django.db.models.deletion
 
 def migrate_message_triggers(apps, schema_editor): 
 	# Copies fields from NetworkerMessageTrigger to NetworkerTrigger
-	print("1")
 	NetworkerMessageTrigger = apps.get_model("mln", "NetworkerMessageTrigger")
 	NetworkerTrigger = apps.get_model("mln", "NetworkerTrigger")
-	print("2")
 	for message_trigger in NetworkerMessageTrigger.objects.all():
-		print("3")
-		print(dir(message_trigger))
-		NetworkerTrigger.objects.create(id=message_trigger.id, networker=message_trigger.networker, response=message_trigger.body)
+		NetworkerTrigger.objects.create(id=message_trigger.id, response=message_trigger.body)
 		message_trigger.networkertrigger_ptr_id = message_trigger.id
+		message_trigger.save()
 		# for attachment in message_trigger.attachments.all():
 		# 	attachment.
 
@@ -36,7 +33,7 @@ class Migration(migrations.Migration):
 			name='NetworkerTrigger',
 			fields=[
 				('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-				('networker', models.ForeignKey(to="auth.user", related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})),
+				('networker', models.ForeignKey(to="auth.user", null=True, default=None, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})),
 				('response', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody')),
 			],
 		),
