@@ -276,7 +276,7 @@ class NetworkerTrigger(models.Model):
 	# Currently meant for devs to collect data on triggers, later to be properly integrated into the system.
 	networker_name = models.CharField(max_length=64, blank=True, null=True)
 	trigger = models.TextField(blank=True, null=True)
-	source = models.TextField(blank=True, null=True, default=True)
+	source = models.TextField(blank=True, null=True)
 	notes = models.TextField(blank=True, null=True)
 
 class NetworkerMessageTrigger(NetworkerTrigger):

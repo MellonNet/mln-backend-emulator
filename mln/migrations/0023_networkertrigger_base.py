@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
 		migrations.AlterField(  # make source nullable
 			model_name="networkertrigger",
 			name="source",
-			field=models.TextField(blank=True, null=True, default=True),
+			field=models.TextField(blank=True, null=True),
 		),
 
 		# Step 3. Create (new) NetworkerMessageTrigger
