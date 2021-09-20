@@ -58,10 +58,6 @@ class Migration(migrations.Migration):
 			model_name='networkermessagetrigger',
 			name='id',
 		),
-		migrations.RemoveField(
-			model_name='networkermessagetrigger',
-			name='networker',
-		),
 
 		# Step 4. Create new NMT fields
 		migrations.AddField(
