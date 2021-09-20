@@ -26,6 +26,12 @@ class Migration(migrations.Migration):
 		# 5. Migrate all NetworkerMessageAttachment.trigger
 
 		# Step 1. Create NMT with required fields
+		migrations.RenameField(  # don't want this to be overriden
+      model_name='networkermessagetrigger',
+      old_name='networker',
+      new_name='networker_name'
+    ),
+
 		migrations.CreateModel(
 			name='NetworkerTrigger',
 			fields=[
