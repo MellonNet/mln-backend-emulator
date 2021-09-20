@@ -4,14 +4,14 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
-def migrate_message_triggers(apps, schema_editor): 
-	# Copies fields from NetworkerMessageTrigger to NetworkerTrigger
-	NetworkerMessageTrigger = apps.get_model("mln", "NetworkerMessageTrigger")
-	NetworkerTrigger = apps.get_model("mln", "NetworkerTrigger")
-	for message_trigger in NetworkerMessageTrigger.objects.all():
-		NetworkerTrigger.objects.create(id=message_trigger.id, response=message_trigger.body)
-		message_trigger.networkertrigger_ptr_id = message_trigger.id
-		message_trigger.save()
+# def migrate_message_triggers(apps, schema_editor): 
+# 	# Copies fields from NetworkerMessageTrigger to NetworkerTrigger
+# 	NetworkerMessageTrigger = apps.get_model("mln", "NetworkerMessageTrigger")
+# 	NetworkerTrigger = apps.get_model("mln", "NetworkerTrigger")
+# 	for message_trigger in NetworkerMessageTrigger.objects.all():
+# 		NetworkerTrigger.objects.create(id=message_trigger.id, response=message_trigger.body)
+# 		message_trigger.networkertrigger_ptr_id = message_trigger.id
+# 		message_trigger.save()
 
 class Migration(migrations.Migration):
 	dependencies = [
@@ -19,64 +19,104 @@ class Migration(migrations.Migration):
 	]
 
 	operations = [
+		# 1. Rename NetworkerMessageTrigger to NetworkerTrigger
+		# 2. Rename NT.networker to networker name
+		# 3. Add NT.response, NT.networker
+		# 4. Create NMT: message_body, message_attachment
+
+		# Step 1. Rename NMT to NT
+		migrations.RenameModel(
+			old_name="NetworkerMessageTrigger",
+			new_name="NetworkerTrigger",
+		),
+
+		# Step 2. Rename NT.networker -> networker_name
+		migrations.RenameField(
+			model_name="networkertrigger",
+			old_name="networker",
+			new_name="networker_name",
+		),
+
+		# Step 3. Add NetworkerTrigger fields
+		migrations.AddField(
+			model_name="networkertrigger",
+			name="response",
+			field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody'),
+		),
+		migrations.AddField(
+			model_name="networkertrigger",
+			name="networker",
+			field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody')
+		),
+
+		# Step 4. Create (new) NetworkerMessageTrigger
+		migrations.CreateModel(
+			name="NetworkerMessageTrigger",
+			fields=[
+				("message_body", models.ForeignKey(to="mln.messagebody", related_name="+", on_delete=models.CASCADE, blank=True, null=True)),
+				("message_attachment", models.ForeignKey(to="mln.iteminfo", related_name="+", on_delete=models.CASCADE, blank=True, null=True)),
+			]
+		),
+
+
 		# 1. Create NetworkerTrigger (NT): networker, response
 		# 2. Migrate all NetworkerMessageTriggers (NMT)
 		# 3. Remove outdated NMT fields (networker, body)
 		# 4. Create new NMT fields (message_body, message_attachment)
 		# 5. Migrate all NetworkerMessageAttachment.trigger
 
-		# Step 1. Create NMT with required fields
-		migrations.RenameField(  # don't want this to be overriden
-      model_name='networkermessagetrigger',
-      old_name='networker',
-      new_name='networker_name'
-    ),
-		migrations.CreateModel(
-			name='NetworkerTrigger',
-			fields=[
-				('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-				('networker', models.ForeignKey(null=True, limit_choices_to={'profile__is_networker': True}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL)),
-				('response', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody')),
-			],
-		),
+		# # Step 1. Create NMT with required fields
+		# migrations.RenameField(  # don't want this to be overriden
+  #     model_name='networkermessagetrigger',
+  #     old_name='networker',
+  #     new_name='networker_name'
+  #   ),
+		# migrations.CreateModel(
+		# 	name='NetworkerTrigger',
+		# 	fields=[
+		# 		('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+		# 		('networker', models.ForeignKey(null=True, limit_choices_to={'profile__is_networker': True}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL)),
+		# 		('response', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody')),
+		# 	],
+		# ),
 
-		# Step 2. Migrate NMTs to NTs with the same ID
-		migrations.AddField(
-			model_name='networkermessagetrigger',
-			name='networkertrigger_ptr',
-			field=models.OneToOneField(auto_created=True, null=True, default=None, on_delete=django.db.models.deletion.CASCADE, parent_link=True, serialize=False, to='mln.networkertrigger'),
-			preserve_default=False,
-		),
-		migrations.RunPython(migrate_message_triggers, reverse_code=migrations.RunPython.noop),
+		# # Step 2. Migrate NMTs to NTs with the same ID
+		# migrations.AddField(
+		# 	model_name='networkermessagetrigger',
+		# 	name='networkertrigger_ptr',
+		# 	field=models.OneToOneField(auto_created=True, null=True, default=None, on_delete=django.db.models.deletion.CASCADE, parent_link=True, serialize=False, to='mln.networkertrigger'),
+		# 	preserve_default=False,
+		# ),
+		# migrations.RunPython(migrate_message_triggers, reverse_code=migrations.RunPython.noop),
 
-		# Step 3. Remove outdated NMT fields
-		migrations.RemoveField(
-			model_name='networkermessagetrigger',
-			name='body',
-		),
-		migrations.RemoveField(
-			model_name='networkermessagetrigger',
-			name='id',
-		),
+		# # Step 3. Remove outdated NMT fields
+		# migrations.RemoveField(
+		# 	model_name='networkermessagetrigger',
+		# 	name='body',
+		# ),
+		# migrations.RemoveField(
+		# 	model_name='networkermessagetrigger',
+		# 	name='id',
+		# ),
 
-		# Step 4. Create new NMT fields
-		migrations.AddField(
-			model_name='networkermessagetrigger',
-			name='message_body',
-			field=models.ForeignKey(to="mln.messagebody", related_name="+", on_delete=models.CASCADE, blank=True, null=True),
-			preserve_default=False,
-		),
-		migrations.AddField(
-			model_name='networkermessagetrigger',
-			name='message_attachment',
-			field=models.ForeignKey(to="mln.iteminfo", related_name="+", on_delete=models.CASCADE, blank=True, null=True),
-			preserve_default=False,
-		),
+		# # Step 4. Create new NMT fields
+		# migrations.AddField(
+		# 	model_name='networkermessagetrigger',
+		# 	name='message_body',
+		# 	field=models.ForeignKey(to="mln.messagebody", related_name="+", on_delete=models.CASCADE, blank=True, null=True),
+		# 	preserve_default=False,
+		# ),
+		# migrations.AddField(
+		# 	model_name='networkermessagetrigger',
+		# 	name='message_attachment',
+		# 	field=models.ForeignKey(to="mln.iteminfo", related_name="+", on_delete=models.CASCADE, blank=True, null=True),
+		# 	preserve_default=False,
+		# ),
 
-		# Step 5. Migrate NMA.trigger
-		migrations.AlterField(
-			model_name='networkermessageattachment',
-			name='trigger',
-			field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attachments', to='mln.networkertrigger'),
-		),
+		# # Step 5. Migrate NMA.trigger
+		# migrations.AlterField(
+		# 	model_name='networkermessageattachment',
+		# 	name='trigger',
+		# 	field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attachments', to='mln.networkertrigger'),
+		# ),
 	]
