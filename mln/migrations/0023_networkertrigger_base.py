@@ -38,15 +38,15 @@ class Migration(migrations.Migration):
 		),
 
 		# Step 3. Add NetworkerTrigger fields
-		migrations.AddField(
+		migrations.RenameField(
 			model_name="networkertrigger",
-			name="response",
-			field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody'),
+			old_name="body",
+			new_name="response"
 		),
 		migrations.AddField(
 			model_name="networkertrigger",
 			name="networker",
-			field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody')
+			field=models.ForeignKey(limit_choices_to={'profile__is_networker': True}, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL),
 		),
 
 		# Step 4. Create (new) NetworkerMessageTrigger
@@ -55,6 +55,7 @@ class Migration(migrations.Migration):
 			fields=[
 				("message_body", models.ForeignKey(to="mln.messagebody", related_name="+", on_delete=models.CASCADE, blank=True, null=True)),
 				("message_attachment", models.ForeignKey(to="mln.iteminfo", related_name="+", on_delete=models.CASCADE, blank=True, null=True)),
+				("networkertrigger_ptr", models.OneToOneField(auto_created=True, default=None, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='mln.networkertrigger')),
 			]
 		),
 
@@ -80,7 +81,7 @@ class Migration(migrations.Migration):
 		# 	],
 		# ),
 
-		# # Step 2. Migrate NMTs to NTs with the same ID
+		# Step 2. Migrate NMTs to NTs with the same ID
 		# migrations.AddField(
 		# 	model_name='networkermessagetrigger',
 		# 	name='networkertrigger_ptr',
