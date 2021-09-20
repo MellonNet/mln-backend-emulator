@@ -269,7 +269,7 @@ class NetworkerFriendshipConditionSource(models.Model):
 		return self.source
 
 class NetworkerTrigger(models.Model): 
-	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
+	networker = models.ForeignKey(User, null=True, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
 	response = models.ForeignKey(on_delete=models.deletion.CASCADE, related_name='+', to='mln.messagebody')
 
 class NetworkerMessageTrigger(NetworkerTrigger):
@@ -282,7 +282,7 @@ class NetworkerMessageTrigger(NetworkerTrigger):
 	notes = models.TextField(blank=True, null=True)
 
 	def __str__(self):
-		return "From %s: %s" % (self.networker, self.body)
+		return "From %s: %s" % (self.networker, self.response)
 
 class NetworkerMessageAttachment(Stack):
 	"""A stack to be attached to a networker message."""

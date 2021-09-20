@@ -12,10 +12,6 @@ def migrate_message_triggers(apps, schema_editor):
 		NetworkerTrigger.objects.create(id=message_trigger.id, response=message_trigger.body)
 		message_trigger.networkertrigger_ptr_id = message_trigger.id
 		message_trigger.save()
-		# for attachment in message_trigger.attachments.all():
-		# 	attachment.
-
-def temp(*args, **kwargs): print("\nHere")
 
 class Migration(migrations.Migration):
 	dependencies = [
@@ -34,7 +30,7 @@ class Migration(migrations.Migration):
 			name='NetworkerTrigger',
 			fields=[
 				('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-				('networker', models.ForeignKey(limit_choices_to={'profile__is_networker': True}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL)),
+				('networker', models.ForeignKey(null=True, limit_choices_to={'profile__is_networker': True}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL)),
 				('response', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody')),
 			],
 		),
@@ -43,10 +39,9 @@ class Migration(migrations.Migration):
 		migrations.AddField(
 			model_name='networkermessagetrigger',
 			name='networkertrigger_ptr',
-			field=models.OneToOneField(auto_created=True, default=None, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='mln.networkertrigger'),
+			field=models.OneToOneField(auto_created=True, null=True, default=None, on_delete=django.db.models.deletion.CASCADE, parent_link=True, serialize=False, to='mln.networkertrigger'),
 			preserve_default=False,
 		),
-		migrations.RunPython(temp),
 		migrations.RunPython(migrate_message_triggers),
 
 		# Step 3. Remove outdated NMT fields

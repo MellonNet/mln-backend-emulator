@@ -99,10 +99,10 @@ friend_cond_admin.list_display = "networker", "condition", "success_body", "fail
 friend_cond_admin.list_display_links = "networker",
 friend_cond_admin.search_fields = "networker", "condition", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source__source"
 
-# trigger_admin = make_inline(NetworkerMessageTrigger, NetworkerMessageAttachment)
-# trigger_admin.list_display = "networker", "body", "trigger", "source", "notes"
-# trigger_admin.list_display_links = "body",
-# trigger_admin.search_fields = "networker", "body__subject", "body__text", "trigger", "source", "notes"
+trigger_admin = make_inline(NetworkerMessageTrigger, NetworkerMessageAttachment)
+trigger_admin.list_display = "networker", "response", "trigger", "source", "notes"
+trigger_admin.list_display_links = "response",
+trigger_admin.search_fields = "networker", "response__subject", "response__text", "trigger", "source", "notes"
 
 # Item infos
 
@@ -111,7 +111,7 @@ item_info_admin.list_display = "name", "type"
 item_info_admin.search_fields = "name",
 item_info_admin.list_filter = "type",
 
-# Modules & module settings
+# Modules & module settings 
 
 settings = set()
 for classes in module_settings_classes.values():
