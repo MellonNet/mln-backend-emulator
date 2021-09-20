@@ -24,28 +24,28 @@ class Migration(migrations.Migration):
 
 		# Step 1. Rename NRT to MT
 		migrations.RenameModel(
-			old_name="NetworkerReplyTrigger",
+			old_name="NetworkerMessageTrigger",
 			new_name="MessageTrigger",
 		),
 
 		# Step 2. Migrate MessageTrigger fields
 		migrations.RenameField(  # networker -> networker_name
-			model_name="message_trigger",
+			model_name="messagetrigger",
 			old_name="networker",
 			new_name="networker_name",
 		),
 		migrations.RenameField(  # body --> response
-			model_name="message_trigger",
+			model_name="messagetrigger",
 			old_name="body",
 			new_name="response"
 		),
 		migrations.AddField(  # create networker
-			model_name="message_trigger",
+			model_name="messagetrigger",
 			name="networker",
 			field=models.ForeignKey(limit_choices_to={'profile__is_networker': True}, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL),
 		),
 		migrations.AlterField(  # make source nullable
-			model_name="message_trigger",
+			model_name="messagetrigger",
 			name="source",
 			field=models.TextField(blank=True, null=True),
 		),
