@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
 		# Step 2. Migrate all NetworkerFriendshipConditions to NetworkerFriendTrigger
 		migrations.RunPython(migrate_NFC_to_NFT, reverse_code=migrations.RunPython.noop),
 
-		# Step 2. Delete NetworkerFriendshipCondition and NetworkerFriendshipSource
+		# Step 3. Delete NetworkerFriendshipCondition and NetworkerFriendshipSource
 		migrations.DeleteModel("NetworkerFriendshipCondition"),
 		migrations.DeleteModel("NetworkerFriendshipConditionSource"),
 	]
