@@ -54,7 +54,7 @@ def create_message(user, recipient_id, body_id):
 	_check_recipient(user, recipient_id)
 	return Message(sender=user, recipient_id=recipient_id, body_id=body_id)
 
-def send_message(message, attachment): 
+def send_message(message, attachment=None):
 	"""Send a message to someone."""
 	if not message.recipient.profile.is_networker:  # send the message directly
 		message.save()
