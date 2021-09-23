@@ -174,6 +174,13 @@ class MessageTemplate(models.Model):
 		for attachment in self.attachments.all():
 			message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
 
+class MessageTemplateAttachment(Stack):
+	"""A stack to be attached to a networker message."""
+	template = models.ForeignKey(MessageTemplate, related_name="attachments", on_delete=models.CASCADE)
+
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("template", "item"), name="networker_template_attachment_unique_template_item"),)
+
 class NetworkerReplyTrigger(MessageTemplate):
 	"""A template for a message that triggers a networker's response."""
 	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
@@ -181,13 +188,6 @@ class NetworkerReplyTrigger(MessageTemplate):
 
 	def __str__(self):
 		return "From %s: %s" % (self.networker, self.response)
-
-class MessageTemplateAttachment(Stack):
-	"""A stack to be attached to a networker message."""
-	template = models.ForeignKey(MessageTemplate, related_name="attachments", on_delete=models.CASCADE)
-
-	class Meta:
-		constraints = (models.UniqueConstraint(fields=("template", "item"), name="networker_template_attachment_unique_template_item"),)
 
 def get_or_none(cls, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""
