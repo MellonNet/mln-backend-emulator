@@ -169,6 +169,11 @@ class MessageTemplate(models.Model):
 	source = models.TextField(blank=True, null=True)
 	notes = models.TextField(blank=True, null=True)
 
+	def send(self, recipient, sender=None): 
+		message = Message.objects.create(sender=sender or self.networker, recipient=recipient, body=self.response)
+		for attachment in self.attachments.all():
+			message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
+
 class NetworkerReplyTrigger(MessageTemplate):
 	"""A template for a message that triggers a networker's response."""
 	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
