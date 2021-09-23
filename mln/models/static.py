@@ -269,8 +269,8 @@ class NetworkerFriendshipConditionSource(models.Model):
 		return self.source
 
 class MessageTemplate(models.Model): 
-	"""An action that triggers a message to be sent to the user."""
-	sender = models.ForeignKey(User, null=True, related_name="+", on_delete=models.CASCADE)
+	"""An action that triggers a networker to send a response to the user."""
+	networker = models.ForeignKey(User, null=True, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
 	response = models.ForeignKey(on_delete=models.deletion.CASCADE, related_name='+', to='mln.messagebody')
 
 	# Currently meant for devs to collect data on triggers, later to be properly integrated into the system.
@@ -292,7 +292,7 @@ class MessageTemplateAttachment(Stack):
 	template = models.ForeignKey(MessageTemplate, related_name="attachments", on_delete=models.CASCADE)
 
 	class Meta:
-		constraints = (models.UniqueConstraint(fields=("template", "item"), name="message_template_attachment_unique_template_item"),)
+		constraints = (models.UniqueConstraint(fields=("template", "item"), name="networker_template_attachment_unique_template_item"),)
 
 class NetworkerPageSource(models.Model):
 	"""Documentation only: Note whether a reconstructed networker page has a graphical source, or is tentatively reconstructed from a description."""
