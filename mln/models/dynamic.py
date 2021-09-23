@@ -184,6 +184,15 @@ class MessageTemplateAttachment(Stack):
 	class Meta:
 		constraints = (models.UniqueConstraint(fields=("template", "item"), name="networker_template_attachment_unique_template_item"),)
 
+class NetworkerFriendTrigger(MessageTemplate):
+	"""A template for a message when a networker accepts/rejects a friend request."""
+	required_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
+	accept = models.BooleanField(default=True)  # whether this trigger is for accepting or rejecting the request
+
+	def evaluate(self, inventory): 
+		has_item = self.required_item is None or any(stack.item == self.required_item for stack in inventory.all())
+		return has_item == self.accept
+
 def get_or_none(cls, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""
 	try:
