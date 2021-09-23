@@ -101,7 +101,7 @@ message_admin.list_filter = "is_read",
 message_admin.search_fields = "sender__username", "recipient__username", "body__subject", "body__text"
 
 friend_cond_admin = make_inline(NetworkerFriendTrigger)
-friend_cond_admin.list_display = "networker", "required_item", "body", "source"
+friend_cond_admin.list_display = "networker", "required_item", "body", "source", "accept"
 friend_cond_admin.list_display_links = "networker",
 friend_cond_admin.search_fields = "networker", "required_item", "body__subject", "body__text", "source"
 

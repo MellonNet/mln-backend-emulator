@@ -9,20 +9,29 @@ def migrate_NFC_to_NFT(apps, schema_editor):
 	NetworkerFriendshipCondition = apps.get_model("mln", "NetworkerFriendshipCondition")
 	_Source = apps.get_model("mln", "NetworkerFriendshipConditionSource")
 	NetworkerFriendTrigger = apps.get_model("mln", "NetworkerFriendTrigger")
+	MessageTemplate = apps.get_model("mln", "MessageTemplate")
 	for condition in NetworkerFriendshipCondition.objects.all(): 
-		NetworkerFriendTrigger.objects.create(
+		# Success message
+		message_success = MessageTemplate.objects.create(
 			networker=condition.networker,
 			body=condition.success_body,
-			required_item=condition.condition,
-			accept=True,
 			source=condition.source.source,
 		)
 		NetworkerFriendTrigger.objects.create(
+			messagetemplate_ptr=message_success,
+			required_item=condition.condition,
+			accept=True,
+		)
+		# Failure message
+		message_failure = MessageTemplate.objects.create(
 			networker=condition.networker,
 			body=condition.failure_body,
+			source=condition.source.source,
+		)
+		NetworkerFriendTrigger.objects.create(
+			messagetemplate_ptr=message_failure,
 			required_item=None,
 			accept=False,
-			source=condition.source.source,
 		)
 
 class Migration(migrations.Migration):
