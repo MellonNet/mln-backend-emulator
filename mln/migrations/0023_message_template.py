@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
 
 	operations = [
 		# 1. Rename NetworkerReplyTrigger (NRT) to MessageTemplate (MT)
-		# 2. Migrate MT fields: networker_name, networker, response, source
+		# 2. Migrate MT fields: networker_name, sender, response, source
 		# 3. Create NRT: message_body, message_attachment
 		# 4. Create an NRT for every existing MT
 		# 5. Rename NetworkerMessageAttachment to MessageTemplateAttachment
@@ -40,10 +40,10 @@ class Migration(migrations.Migration):
 			old_name="body",
 			new_name="response"
 		),
-		migrations.AddField(  # create networker
+		migrations.AddField(  # create sender
 			model_name="messagetemplate",
-			name="networker",
-			field=models.ForeignKey(limit_choices_to={'profile__is_networker': True}, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL),
+			name="sender",
+			field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL),
 		),
 		migrations.AlterField(  # make source nullable
 			model_name="messagetemplate",
@@ -80,6 +80,6 @@ class Migration(migrations.Migration):
 		),
 		migrations.AddConstraint(
 			model_name='messagetemplateattachment',
-			constraint=models.UniqueConstraint(fields=('template', 'item'), name='networker_template_attachment_unique_template_item'),
+			constraint=models.UniqueConstraint(fields=('template', 'item'), name='message_template_attachment_unique_template_item'),
 		),
 	]
