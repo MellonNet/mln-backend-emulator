@@ -31,6 +31,14 @@ class MLNError(Exception):
 		super().__init__()
 		self.id = id
 
+class MLNMessage: 
+	"""
+	These are messages that can be sent to the user on certain conditions.
+	They don't necessarily indicate an error within MLN, rather inform the user they need to do something different.
+	Like MLNError, these IDs refer to instances of MessageBody.
+	"""
+	I_DONT_GET_IT = 46222
+
 class ItemType(Enum):
 	"""Types of items. The main use is to place items into different inventory tabs."""
 	BACKGROUND = auto()
