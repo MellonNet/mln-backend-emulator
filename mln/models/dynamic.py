@@ -175,7 +175,7 @@ class NetworkerReplyTrigger(MessageTemplate):
 	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, blank=True, null=True)
 
 	def __str__(self):
-		return "From %s: %s" % (self.networker, self.response)
+		return "From %s: %s" % (self.networker, self.body)
 
 class MessageTemplateAttachment(Stack):
 	"""A stack to be attached to a networker message."""
