@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
 
 	operations = [
 		# 1. Rename NetworkerReplyTrigger (NRT) to MessageTemplate (MT)
-		# 2. Migrate MT fields: networker_name, networker, response, source
+		# 2. Migrate MT fields: networker_name, networker, source
 		# 3. Create NRT: message_body, message_attachment
 		# 4. Create an NRT for every existing MT
 		# 5. Rename NetworkerMessageAttachment to MessageTemplateAttachment
@@ -34,11 +34,6 @@ class Migration(migrations.Migration):
 			model_name="messagetemplate",
 			old_name="networker",
 			new_name="networker_name",
-		),
-		migrations.RenameField(  # body --> response
-			model_name="messagetemplate",
-			old_name="body",
-			new_name="response"
 		),
 		migrations.AddField(  # create networker
 			model_name="messagetemplate",

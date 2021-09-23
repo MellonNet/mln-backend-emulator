@@ -161,7 +161,7 @@ class Friendship(models.Model):
 class MessageTemplate(models.Model): 
 	"""An action that triggers a networker to send a response to the user."""
 	networker = models.ForeignKey(User, null=True, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
-	response = models.ForeignKey(on_delete=models.deletion.CASCADE, related_name='+', to='mln.messagebody')
+	body = models.ForeignKey(on_delete=models.deletion.CASCADE, related_name='+', to='mln.messagebody')
 
 	# Currently meant for devs to collect data on triggers, later to be properly integrated into the system.
 	networker_name = models.CharField(max_length=64, blank=True, null=True)
