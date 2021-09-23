@@ -189,6 +189,13 @@ class NetworkerReplyTrigger(MessageTemplate):
 	def __str__(self):
 		return "From %s: %s" % (self.networker, self.response)
 
+	def evaluate(self, message, attachment): 
+		return (
+			(self.message_body is None or message.body == self.message_body) and  # compare bodies
+			(self.message_attachment is None) == (attachment is None) and  # don't compare null attachments
+			(self.message_attachment is None or attachment.item == self.message_attachment)  # compare attachments
+		)
+
 def get_or_none(cls, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""
 	try:
