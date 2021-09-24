@@ -63,10 +63,15 @@ def send_message(message, attachment=None):
 	# Check for a networker's reply and send that to the user directly
 	for trigger in NetworkerReplyTrigger.objects.filter(networker=message.recipient):
 		if not trigger.evaluate(message, attachment): continue
-		trigger.send(message.sender)
+		send_template(trigger, message.sender)
 		break
 	else:  # networker doesn't have a trigger for this message
 		response = Message.objects.create(sender=message.recipient, recipient=message.sender, body_id=MLNMessage.I_DONT_GET_IT)
 		if attachment is not None:  # send the attachment back to the user
 			attachment.message = response
 			attachment.save()
+
+def send_template(template, recipient, sender=None): 
+	message = Message.objects.create(sender=sender or template.networker, recipient=recipient, body=template.body)
+	for attachment in template.attachments.all():
+		message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)

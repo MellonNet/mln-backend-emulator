@@ -169,11 +169,6 @@ class MessageTemplate(models.Model):
 	source = models.TextField(blank=True, null=True)
 	notes = models.TextField(blank=True, null=True)
 
-	def send(self, recipient, sender=None): 
-		message = Message.objects.create(sender=sender or self.networker, recipient=recipient, body=self.body)
-		for attachment in self.attachments.all():
-			message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
-
 class MessageTemplateAttachment(Stack):
 	"""A stack to be attached to a networker message."""
 	template = models.ForeignKey(MessageTemplate, related_name="attachments", on_delete=models.CASCADE)
