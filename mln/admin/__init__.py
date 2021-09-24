@@ -6,10 +6,10 @@ from django.apps import apps
 from django.contrib import admin
 from django.db.models import Q
 
-from ..models.dynamic import Attachment, Friendship, Message, MessageTemplate, MessageTemplateAttachment, NetworkerFriendTrigger, NetworkerReplyTrigger, Profile, InventoryStack
+from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
 from ..models.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, StartingStack, Question
+from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendTrigger, NetworkerReplyTrigger, StartingStack, Question
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
