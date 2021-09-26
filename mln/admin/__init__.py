@@ -9,7 +9,7 @@ from django.db.models import Q
 from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
 from ..models.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, StartingStack, Question
+from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, StartingStack, Question
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
@@ -99,10 +99,15 @@ friend_cond_admin.list_display = "networker", "condition", "success_body", "fail
 friend_cond_admin.list_display_links = "networker",
 friend_cond_admin.search_fields = "networker", "condition", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source__source"
 
-trigger_admin = make_inline(NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy)
-trigger_admin.list_display = "networker", "body", "trigger", "source", "notes"
-trigger_admin.list_display_links = "body",
-trigger_admin.search_fields = "networker", "body__subject", "body__text", "trigger", "source", "notes"
+trigger_admin_legacy = make_inline(NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy)
+trigger_admin_legacy.list_display = "networker", "body", "trigger", "source", "notes"
+trigger_admin_legacy.list_display_links = "body",
+trigger_admin_legacy.search_fields = "networker", "body__subject", "body__text", "trigger", "source", "notes"
+
+message_template_admin = make_inline(MessageTemplate, MessageTemplateAttachment)
+message_template_admin.list_display = "networker", "body"
+message_template_admin.list_display_links = "body",
+message_template_admin.search_fields = "networker", "body__subject", "body__text"
 
 # Item infos
 
