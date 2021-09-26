@@ -9,7 +9,7 @@ from django.db.models import Q
 from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
 from ..models.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReplyTrigger, StartingStack, Question
+from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReply, StartingStack, Question
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
@@ -109,18 +109,18 @@ message_template_admin.list_display = "networker", "body"
 message_template_admin.list_display_links = "body",
 message_template_admin.search_fields = "networker", "body__subject", "body__text"
 
-trigger_admin = make_inline(NetworkerReplyTrigger, NetworkerMessageTriggerLegacy)
-trigger_admin.networker = lambda _, trigger: trigger.template.networker
-trigger_admin.networker.short_description = "Networker"
-trigger_admin.trigger = lambda _, trigger: trigger.message_attachment or trigger.message_body
-trigger_admin.trigger.short_description = "Trigger"
-trigger_admin.response = lambda _, trigger: trigger.template.body.subject
-trigger_admin.response.short_description = "Response"
-trigger_admin.attachment = lambda _, trigger: next(iter(trigger.template.attachments.all()), None)
-trigger_admin.attachment.short_description = "Attachment"
-trigger_admin.list_display = "networker", "trigger", "response", "attachment"
-trigger_admin.list_display_links = "response",
-trigger_admin.search_fields = "template__networker__username", "template__attachments__item__name",  "template__body__subject", "template__body__text", "message_attachment__name", "message_body__subject", "message_body__text"
+networker_reply_admin = make_inline(NetworkerReply, NetworkerMessageTriggerLegacy)
+networker_reply_admin.networker = lambda _, reply: reply.template.networker
+networker_reply_admin.networker.short_description = "Networker"
+networker_reply_admin.trigger = lambda _, reply: reply.message_attachment or reply.message_body
+networker_reply_admin.trigger.short_description = "Trigger"
+networker_reply_admin.response = lambda _, reply: reply.template.body.subject
+networker_reply_admin.response.short_description = "Response"
+networker_reply_admin.attachment = lambda _, reply: next(iter(reply.template.attachments.all()), None)
+networker_reply_admin.attachment.short_description = "Attachment"
+networker_reply_admin.list_display = "networker", "trigger", "response", "attachment"
+networker_reply_admin.list_display_links = "response",
+networker_reply_admin.search_fields = "template__networker__username", "template__attachments__item__name",  "template__body__subject", "template__body__text", "message_attachment__name", "message_body__subject", "message_body__text"
 
 # Item infos
 

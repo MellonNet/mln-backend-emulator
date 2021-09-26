@@ -320,10 +320,13 @@ class MessageTemplateAttachment(Stack):
 	class Meta: 
 		constraints = (models.UniqueConstraint(fields=("template", "item"), name="messsage_template_attachment_unique_template_item"),)
 
-class NetworkerReplyTrigger(models.Model): 
-	template = models.ForeignKey(MessageTemplate, related_name="reply_trigger", on_delete=models.CASCADE)
+class NetworkerReply(models.Model): 
+	template = models.ForeignKey(MessageTemplate, related_name="+", on_delete=models.CASCADE)
 	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
 	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+
+	class Meta:
+		verbose_name_plural = "Networker replies"
 
 	def __str__(self): 
 		return "Reply when sending %s to %s: %s" % (self.message_attachment or self.message_body, self.template.networker, self.template.body.subject)
@@ -335,7 +338,7 @@ class NetworkerMessageTriggerLegacy(models.Model):
 	trigger = models.TextField(blank=True, null=True)
 	source = models.TextField()
 	notes = models.TextField(blank=True, null=True)
-	updated = models.ForeignKey(NetworkerReplyTrigger, related_name="legacy", on_delete=models.CASCADE, blank=True, null=True)
+	updated = models.ForeignKey(NetworkerReply, related_name="legacy", on_delete=models.CASCADE, blank=True, null=True)
 
 	def __str__(self):
 		return "From %s: %s" % (self.networker, self.body)
