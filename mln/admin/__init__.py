@@ -110,6 +110,15 @@ message_template_admin.list_display_links = "body",
 message_template_admin.search_fields = "networker", "body__subject", "body__text"
 
 trigger_admin = make_inline(NetworkerReplyTrigger, NetworkerMessageTriggerLegacy)
+trigger_admin.networker = lambda _, trigger: trigger.template.networker
+trigger_admin.networker.short_description = "Networker"
+trigger_admin.trigger = lambda _, trigger: trigger.message_attachment or trigger.message_body
+trigger_admin.trigger.short_description = "Trigger"
+trigger_admin.response = lambda _, trigger: trigger.template.body.subject
+trigger_admin.response.short_description = "Response"
+trigger_admin.attachment = lambda _, trigger: next(iter(trigger.template.attachments.all()), None)
+trigger_admin.attachment.short_description = "Attachment"
+trigger_admin.list_display = "networker", "trigger", "response", "attachment"
 
 # Item infos
 
