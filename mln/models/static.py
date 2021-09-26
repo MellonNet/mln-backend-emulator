@@ -268,7 +268,7 @@ class NetworkerFriendshipConditionSource(models.Model):
 	def __str__(self):
 		return self.source
 
-class NetworkerMessageTrigger(models.Model):
+class NetworkerMessageTriggerLegacy(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""
 	networker = models.CharField(max_length=64, blank=True, null=True)
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
@@ -279,9 +279,9 @@ class NetworkerMessageTrigger(models.Model):
 	def __str__(self):
 		return "From %s: %s" % (self.networker, self.body)
 
-class NetworkerMessageAttachment(Stack):
+class NetworkerMessageAttachmentLegacy(Stack):
 	"""A stack to be attached to a networker message."""
-	trigger = models.ForeignKey(NetworkerMessageTrigger, related_name="attachments", on_delete=models.CASCADE)
+	trigger = models.ForeignKey(NetworkerMessageTriggerLegacy, related_name="attachments", on_delete=models.CASCADE)
 
 	class Meta:
 		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="networker_message_attachment_unique_trigger_item"),)
@@ -324,3 +324,16 @@ class ModuleSkin(models.Model):
 class StartingStack(Stack):
 	"""A stack that users start off with in their inventory when they create an account."""
 	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
+
+class MessageTemplate(models.Model): 
+	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, blank=True, null=True, limit_choices_to={"profile__is_networker": True})
+	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
+
+	def __str__(self): 
+		return "From %s: %s" % (self.networker, self.body)
+
+class MessageTemplateAttachment(Stack): 
+	template = models.ForeignKey(MessageTemplate, related_name="attachments", on_delete=models.CASCADE)
+
+	class Meta: 
+		constraints = (models.UniqueConstraint(fields=("template", "item"), name="messsage_template_attachment_unique_template_item"),)
