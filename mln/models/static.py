@@ -337,3 +337,9 @@ class MessageTemplateAttachment(Stack):
 
 	class Meta: 
 		constraints = (models.UniqueConstraint(fields=("template", "item"), name="messsage_template_attachment_unique_template_item"),)
+
+class NetworkerReplyTrigger(models.Model): 
+	template = models.ForeignKey(MessageTemplate, related_name="reply_trigger", on_delete=models.CASCADE)
+	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+	legacy = models.ForeignKey(NetworkerMessageTriggerLegacy, related_name="new_model", on_delete=models.SET_NULL, null=True, blank=True)
