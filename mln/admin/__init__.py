@@ -119,6 +119,8 @@ trigger_admin.response.short_description = "Response"
 trigger_admin.attachment = lambda _, trigger: next(iter(trigger.template.attachments.all()), None)
 trigger_admin.attachment.short_description = "Attachment"
 trigger_admin.list_display = "networker", "trigger", "response", "attachment"
+trigger_admin.list_display_links = "response",
+trigger_admin.search_fields = "template__networker__username", "template__attachments__item__name",  "template__body__subject", "template__body__text", "message_attachment__name", "message_body__subject", "message_body__text"
 
 # Item infos
 
