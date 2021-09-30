@@ -9,7 +9,7 @@ from django.db.models import Q
 from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
 from ..models.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTrigger, NetworkerMessageAttachment, StartingStack, Question
+from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReply, StartingStack, Question
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
@@ -29,7 +29,7 @@ class FriendshipAdmin(admin.ModelAdmin):
 
 custom[Friendship] = FriendshipAdmin
 
-has_trigger = lambda obj: NetworkerMessageTrigger.objects.filter(body=obj).exists() or NetworkerFriendshipCondition.objects.filter(Q(success_body=obj) | Q(failure_body=obj)).exists()
+has_trigger = lambda obj: NetworkerMessageTriggerLegacy.objects.filter(body=obj).exists() or NetworkerFriendshipCondition.objects.filter(Q(success_body=obj) | Q(failure_body=obj)).exists()
 has_trigger.short_description = "has trigger"
 has_trigger.boolean = True
 
@@ -99,10 +99,28 @@ friend_cond_admin.list_display = "networker", "condition", "success_body", "fail
 friend_cond_admin.list_display_links = "networker",
 friend_cond_admin.search_fields = "networker", "condition", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source__source"
 
-trigger_admin = make_inline(NetworkerMessageTrigger, NetworkerMessageAttachment)
-trigger_admin.list_display = "networker", "body", "trigger", "source", "notes"
-trigger_admin.list_display_links = "body",
-trigger_admin.search_fields = "networker", "body__subject", "body__text", "trigger", "source", "notes"
+trigger_admin_legacy = make_inline(NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy)
+trigger_admin_legacy.list_display = "networker", "body", "trigger", "source", "notes"
+trigger_admin_legacy.list_display_links = "body",
+trigger_admin_legacy.search_fields = "networker", "body__subject", "body__text", "trigger", "source", "notes"
+
+message_template_admin = make_inline(MessageTemplate, MessageTemplateAttachment)
+message_template_admin.list_display = "body",
+message_template_admin.list_display_links = "body",
+message_template_admin.search_fields = "body__subject", "body__text"
+
+networker_reply_admin = make_inline(NetworkerReply, NetworkerMessageTriggerLegacy)
+networker_reply_admin.networker = lambda _, reply: reply.template.networker
+networker_reply_admin.networker.short_description = "Networker"
+networker_reply_admin.trigger = lambda _, reply: reply.trigger_attachment or reply.trigger_body
+networker_reply_admin.trigger.short_description = "Trigger"
+networker_reply_admin.response = lambda _, reply: reply.template.body.subject
+networker_reply_admin.response.short_description = "Response"
+networker_reply_admin.attachment = lambda _, reply: next(iter(reply.template.attachments.all()), None)
+networker_reply_admin.attachment.short_description = "Attachment"
+networker_reply_admin.list_display = "networker", "trigger", "response", "attachment"
+networker_reply_admin.list_display_links = "response",
+networker_reply_admin.search_fields = "template__networker__username", "template__attachments__item__name",  "template__body__subject", "template__body__text", "message_attachment__name", "message_body__subject", "message_body__text"
 
 # Item infos
 

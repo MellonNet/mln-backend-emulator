@@ -268,24 +268,6 @@ class NetworkerFriendshipConditionSource(models.Model):
 	def __str__(self):
 		return self.source
 
-class NetworkerMessageTrigger(models.Model):
-	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""
-	networker = models.CharField(max_length=64, blank=True, null=True)
-	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
-	trigger = models.TextField(blank=True, null=True)
-	source = models.TextField()
-	notes = models.TextField(blank=True, null=True)
-
-	def __str__(self):
-		return "From %s: %s" % (self.networker, self.body)
-
-class NetworkerMessageAttachment(Stack):
-	"""A stack to be attached to a networker message."""
-	trigger = models.ForeignKey(NetworkerMessageTrigger, related_name="attachments", on_delete=models.CASCADE)
-
-	class Meta:
-		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="networker_message_attachment_unique_trigger_item"),)
-
 class NetworkerPageSource(models.Model):
 	"""Documentation only: Note whether a reconstructed networker page has a graphical source, or is tentatively reconstructed from a description."""
 	networker = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
@@ -324,3 +306,54 @@ class ModuleSkin(models.Model):
 class StartingStack(Stack):
 	"""A stack that users start off with in their inventory when they create an account."""
 	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
+
+class MessageTemplate(models.Model): 
+	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
+
+	def __str__(self): 
+		result = "%s" % self.body.subject
+		attachments = [
+			str(attachment) 
+			for attachment in self.attachments.all()
+		]
+		if attachments: result += " + "
+		result += " + ".join(attachments)
+		return result
+
+class MessageTemplateAttachment(Stack): 
+	template = models.ForeignKey(MessageTemplate, related_name="attachments", on_delete=models.CASCADE)
+
+	class Meta: 
+		constraints = (models.UniqueConstraint(fields=("template", "item"), name="messsage_template_attachment_unique_template_item"),)
+
+class NetworkerReply(models.Model): 
+	template = models.ForeignKey(MessageTemplate, related_name="+", on_delete=models.CASCADE)
+	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, blank=True, null=True, limit_choices_to={"profile__is_networker": True})
+	trigger_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+	trigger_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+
+	class Meta:
+		verbose_name_plural = "Networker replies"
+
+	def __str__(self): 
+		return "Reply when sending %s to %s: %s" % (self.trigger_attachment or self.trigger_body, self.networker, self.template.body.subject)
+
+class NetworkerMessageTriggerLegacy(models.Model):
+	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""
+	networker = models.CharField(max_length=64, blank=True, null=True)
+	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
+	trigger = models.TextField(blank=True, null=True)
+	source = models.TextField()
+	notes = models.TextField(blank=True, null=True)
+	updated = models.ForeignKey(NetworkerReply, related_name="legacy", on_delete=models.CASCADE, blank=True, null=True)
+
+	def __str__(self):
+		return "From %s: %s" % (self.networker, self.body)
+
+class NetworkerMessageAttachmentLegacy(Stack):
+	"""A stack to be attached to a networker message."""
+	trigger = models.ForeignKey(NetworkerMessageTriggerLegacy, related_name="attachments", on_delete=models.CASCADE)
+	updated = models.ForeignKey(MessageTemplateAttachment, related_name="legacy", on_delete=models.CASCADE, blank=True, null=True)
+
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="networker_message_attachment_unique_trigger_item"),)
