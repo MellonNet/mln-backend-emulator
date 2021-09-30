@@ -13,14 +13,6 @@ class Migration(migrations.Migration):
 	]
 
 	operations = [
-		migrations.CreateModel(
-			name='MessageTemplate',
-			fields=[
-				('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-				('body', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody')),
-				('networker', models.ForeignKey(blank=True, limit_choices_to={'profile__is_networker': True}, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL)),
-			],
-		),
 		migrations.RenameModel(
 			old_name='NetworkerMessageAttachment',
 			new_name='NetworkerMessageAttachmentLegacy',
@@ -28,6 +20,13 @@ class Migration(migrations.Migration):
 		migrations.RenameModel(
 			old_name='NetworkerMessageTrigger',
 			new_name='NetworkerMessageTriggerLegacy',
+		),
+		migrations.CreateModel(
+			name='MessageTemplate',
+			fields=[
+				('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+				('body', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody')),
+			],
 		),
 		migrations.CreateModel(
 			name='MessageTemplateAttachment',

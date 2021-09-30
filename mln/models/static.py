@@ -308,11 +308,17 @@ class StartingStack(Stack):
 	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
 
 class MessageTemplate(models.Model): 
-	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, blank=True, null=True, limit_choices_to={"profile__is_networker": True})
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
 
 	def __str__(self): 
-		return "From %s: %s" % (self.networker, self.body)
+		result = "%s" % self.body.subject
+		attachments = [
+			str(attachment) 
+			for attachment in self.attachments.all()
+		]
+		if attachments: result += " + "
+		result += " + ".join(attachments)
+		return result
 
 class MessageTemplateAttachment(Stack): 
 	template = models.ForeignKey(MessageTemplate, related_name="attachments", on_delete=models.CASCADE)
@@ -322,14 +328,15 @@ class MessageTemplateAttachment(Stack):
 
 class NetworkerReply(models.Model): 
 	template = models.ForeignKey(MessageTemplate, related_name="+", on_delete=models.CASCADE)
-	message_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
-	message_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, blank=True, null=True, limit_choices_to={"profile__is_networker": True})
+	trigger_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+	trigger_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
 
 	class Meta:
 		verbose_name_plural = "Networker replies"
 
 	def __str__(self): 
-		return "Reply when sending %s to %s: %s" % (self.message_attachment or self.message_body, self.template.networker, self.template.body.subject)
+		return "Reply when sending %s to %s: %s" % (self.trigger_attachment or self.trigger_body, self.networker, self.template.body.subject)
 
 class NetworkerMessageTriggerLegacy(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""

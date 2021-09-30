@@ -105,14 +105,14 @@ trigger_admin_legacy.list_display_links = "body",
 trigger_admin_legacy.search_fields = "networker", "body__subject", "body__text", "trigger", "source", "notes"
 
 message_template_admin = make_inline(MessageTemplate, MessageTemplateAttachment)
-message_template_admin.list_display = "networker", "body"
+message_template_admin.list_display = "body",
 message_template_admin.list_display_links = "body",
-message_template_admin.search_fields = "networker", "body__subject", "body__text"
+message_template_admin.search_fields = "body__subject", "body__text"
 
 networker_reply_admin = make_inline(NetworkerReply, NetworkerMessageTriggerLegacy)
 networker_reply_admin.networker = lambda _, reply: reply.template.networker
 networker_reply_admin.networker.short_description = "Networker"
-networker_reply_admin.trigger = lambda _, reply: reply.message_attachment or reply.message_body
+networker_reply_admin.trigger = lambda _, reply: reply.trigger_attachment or reply.trigger_body
 networker_reply_admin.trigger.short_description = "Trigger"
 networker_reply_admin.response = lambda _, reply: reply.template.body.subject
 networker_reply_admin.response.short_description = "Response"
