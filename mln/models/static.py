@@ -328,7 +328,7 @@ class MessageTemplateAttachment(Stack):
 
 class NetworkerReply(models.Model): 
 	template = models.ForeignKey(MessageTemplate, related_name="+", on_delete=models.CASCADE)
-	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
+	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, blank=True, null=True, limit_choices_to={"profile__is_networker": True})
 	trigger_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
 	trigger_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
 

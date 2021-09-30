@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
 				('trigger_attachment', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.iteminfo')),
 				('trigger_body', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagebody')),
 				('template', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagetemplate')),
-				('networker', models.ForeignKey(limit_choices_to={'profile__is_networker': True}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL)),
+				('networker', models.ForeignKey(blank=True, limit_choices_to={'profile__is_networker': True}, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL)),
 			],			
       options={'verbose_name_plural': 'Networker replies'},
 		),
