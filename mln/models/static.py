@@ -321,7 +321,7 @@ class MessageTemplate(models.Model):
 	def __str__(self): 
 		result = self.body.subject
 		for attachment in self.attachments.all():
-			result += " + %s" + attachment
+			result += " + %s" % str(attachment)
 		return result
 
 class MessageTemplateAttachment(Stack): 
@@ -345,7 +345,7 @@ class NetworkerReply(models.Model):
 	def should_reply(self, message, attachment): 
 		return (
 			(self.trigger_body is not None and message.body == self.trigger_body) or
-			(self.trigger_attachment is not None and attachment.item == self.trigger_attachment)
+			(self.trigger_attachment is not None and attachment is not None and attachment.item == self.trigger_attachment)
 		)
 
 class NetworkerMessageTriggerLegacy(models.Model):

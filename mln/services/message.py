@@ -62,7 +62,6 @@ def send_message(message, attachment=None):
 			attachment.save()
 	# Check for a networker's reply and send that to the user directly
 	for reply in NetworkerReply.objects.filter(networker=message.recipient):
-		print(reply)
 		if reply.should_reply(message, attachment):
 			send_template(reply.template, message.recipient, message.sender)
 			break
