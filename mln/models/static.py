@@ -8,6 +8,14 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 
+class MLNMessage: 
+	"""
+	These are messages that can be sent to the user on certain conditions.
+	They don't necessarily indicate an error within MLN, rather inform the user they need to do something different.
+	Like MLNError, these IDs refer to instances of MessageBody.
+	"""
+	I_DONT_GET_IT = 46222
+
 # can't change this without also changing the xml - error descriptions are clientside
 class MLNError(Exception):
 	"""
@@ -311,13 +319,9 @@ class MessageTemplate(models.Model):
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
 
 	def __str__(self): 
-		result = "%s" % self.body.subject
-		attachments = [
-			str(attachment) 
-			for attachment in self.attachments.all()
-		]
-		if attachments: result += " + "
-		result += " + ".join(attachments)
+		result = self.body.subject
+		for attachment in self.attachments.all():
+			result += " + %s" + attachment
 		return result
 
 class MessageTemplateAttachment(Stack): 
@@ -337,6 +341,12 @@ class NetworkerReply(models.Model):
 
 	def __str__(self): 
 		return "Reply when sending %s to %s: %s" % (self.trigger_attachment or self.trigger_body, self.networker, self.template.body.subject)
+
+	def should_reply(self, message, attachment): 
+		return (
+			(self.trigger_body is not None and message.body == self.trigger_body) or
+			(self.trigger_attachment is not None and attachment.item == self.trigger_attachment)
+		)
 
 class NetworkerMessageTriggerLegacy(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""
