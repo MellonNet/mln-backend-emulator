@@ -1,4 +1,4 @@
-from mln.models.static import BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, NetworkerMessageAttachmentLegacy, NetworkerMessageTriggerLegacy, StartingStack
+from mln.models.static import BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, MessageTemplate, MessageTemplateAttachment, NetworkerReply, StartingStack
 from mln.tests.setup_testcase import cls_setup, requires
 from mln.tests.models.dupe_testcase import DupeTest
 
@@ -49,13 +49,13 @@ def body(cls):
 
 @cls_setup
 @requires(body)
-def networker_message_trigger(cls):
-	cls.TRIGGER_ID = NetworkerMessageTriggerLegacy.objects.create(body=cls.BODY, source="test").id
+def message_template(cls):
+	cls.TEMPLATE_ID = MessageTemplate.objects.create(body=cls.BODY).id
 
 @cls_setup
-@requires(networker_message_trigger, item)
-def networker_message_attachment(cls):
-	NetworkerMessageAttachmentLegacy.objects.create(trigger_id=cls.TRIGGER_ID, item_id=cls.ITEM_ID, qty=1)
+@requires(message_template, item)
+def message_template_attachment(cls):
+	MessageTemplateAttachment.objects.create(template_id=cls.TEMPLATE_ID, item_id=cls.ITEM_ID, qty=1)
 
 @cls_setup
 @requires(item)
@@ -68,8 +68,8 @@ class DuplicateItemInfo(DupeTest):
 class DuplicateBlueprintRequirement(DupeTest):
 	SETUP = blueprint_req,
 
-class DuplicateNetworkerMessageAttachmentLegacy(DupeTest):
-	SETUP = networker_message_attachment,
+class DuplicateMessageTemplateAttachment(DupeTest):
+	SETUP = message_template_attachment,
 
 class DuplicateStartingStack(DupeTest):
 	SETUP = starting_stack,
