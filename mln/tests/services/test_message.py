@@ -1,5 +1,5 @@
 from mln.models.static import MessageBody
-from mln.services.message import create_attachment, delete_message, detach_attachments, easy_reply, open_message, send_message
+from mln.services.message import create_attachment, create_message, delete_message, detach_attachments, easy_reply, open_message, send_message
 from mln.tests.models.test_dynamic import attachment, body, message
 from mln.tests.models.test_profile import other_user_has_item, two_users
 from mln.tests.models.test_static import item
@@ -21,13 +21,14 @@ class NoMessage(TestCase):
 
 	def test_send_message_no_friend(self):
 		with self.assertRaises(RuntimeError):
-			send_message(self.user, self.other_user.id, self.BODY.id)
+			send_message(create_message(self.user, self.other_user.id, self.BODY.id), None)
 
 class NoMessage_Friend(TestCase):
 	SETUP = body, friends
 
 	def test_send_message_ok(self):
-		message = send_message(self.user, self.other_user.id, self.BODY.id)
+		message = create_message(self.user, self.other_user.id, self.BODY.id)
+		send_message(message, None)
 		self.assertTrue(self.other_user.messages.filter(id=message.id, sender_id=self.user.id, body_id=self.BODY.id).exists())
 
 class Message(TestCase):
@@ -62,7 +63,8 @@ class CreateAttachment_ExistingStack(TestCase):
 	SETUP = other_user_has_item, message
 
 	def test(self):
-		create_attachment(self.message, self.ITEM_ID, 1)
+		attachment = create_attachment(self.message, self.ITEM_ID, 1)
+		send_message(self.message, attachment)
 		self.assertFalse(self.other_user.inventory.filter(id=self.ITEM_ID).exists())
 		self.assertTrue(self.message.attachments.filter(item_id=self.ITEM_ID, qty=1).exists())
 

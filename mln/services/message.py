@@ -60,6 +60,7 @@ def send_message(message, attachment=None):
 		message.save()
 		if attachment is not None:
 			attachment.save()
+		return
 	# Check for a networker's reply and send that to the user directly
 	for reply in NetworkerReply.objects.filter(networker=message.recipient):
 		if reply.should_reply(message, attachment):
