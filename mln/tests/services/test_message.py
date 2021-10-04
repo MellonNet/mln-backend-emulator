@@ -1,8 +1,9 @@
-from mln.models.static import MessageBody
+from mln.models.static import ItemInfo, ItemType, MessageBody, MessageTemplate, MLNMessage, NetworkerReply
+from mln.services.inventory import add_inv_item
 from mln.services.message import create_attachment, create_message, delete_message, detach_attachments, easy_reply, open_message, send_message
 from mln.tests.models.test_dynamic import attachment, body, message
-from mln.tests.models.test_profile import other_user_has_item, two_users
-from mln.tests.models.test_static import item
+from mln.tests.models.test_profile import networker, other_user_has_item, two_users
+from mln.tests.models.test_static import body_category, item
 from mln.tests.services.test_friend import friends
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 
@@ -15,6 +16,23 @@ def other_body(cls):
 @requires(other_body)
 def easy_reply_body(cls):
 	cls.BODY.easy_replies.add(cls.REPLY_BODY)
+
+@setup
+@requires(body_category)
+def networker_message(self): 
+	"""Sets up tests for NetworkerReply."""
+	self.wrong_message_body_id = MessageBody.objects.create(category_id=self.BODY_CAT_ID, subject="Wrong Message", text="Wrong body").id
+	self.correct_message_body_id = MessageBody.objects.create(category_id=self.BODY_CAT_ID, subject="Correct Message", text="Correct body").id
+	self.reply_id = MessageBody.objects.create(category_id=self.BODY_CAT_ID, subject="Networker reply", text="This is a response").id
+	self.wrong_attachment_id = ItemInfo.objects.create(name="Wrong item", type=ItemType.ITEM).id
+	self.correct_attachment_id = ItemInfo.objects.create(name="Correct item", type=ItemType.ITEM).id
+	# Create networker's reply
+	MessageBody.objects.create(id=MLNMessage.I_DONT_GET_IT, category_id=self.BODY_CAT_ID, subject="I don't get it", text="Invalid message").id
+	template = MessageTemplate.objects.create(body_id=self.reply_id)
+	NetworkerReply.objects.create(template=template, networker=self.user, trigger_body_id=self.correct_message_body_id)
+	# Manually add items instead of requiring other_user_has_item to add 2 different items
+	add_inv_item(self.other_user, self.wrong_attachment_id, 1)
+	add_inv_item(self.other_user, self.correct_attachment_id, 1)
 
 class NoMessage(TestCase):
 	SETUP = body, two_users
@@ -32,7 +50,8 @@ class NoMessage_Friend(TestCase):
 		self.assertTrue(self.other_user.messages.filter(id=message.id, sender_id=self.user.id, body_id=self.BODY.id).exists())
 
 class Message(TestCase):
-	SETUP = message,
+	# other_user is human, user is a networker
+	SETUP = message, friends, networker, networker_message
 
 	def test_delete_message_wrong_user(self):
 		with self.assertRaises(RuntimeError):
@@ -51,6 +70,27 @@ class Message(TestCase):
 	def test_open_message_ok(self):
 		open_message(self.user, self.message.id)
 		self.assertTrue(self.user.messages.get(id=self.message.id).is_read)
+
+	def test_send_message_wrong_body(self): 
+		message = create_message(self.other_user, self.user.id, self.wrong_message_body_id)
+		send_message(message, None)
+		self.assertTrue(self.other_user.messages.filter(sender=self.user, body_id=MLNMessage.I_DONT_GET_IT).exists())
+
+	def test_send_message_wrong_attachment(self): 
+		# 1. Verify the networker replies with "I don't get it".
+		message = create_message(self.other_user, self.user.id, self.wrong_message_body_id)
+		attachment = create_attachment(message, self.wrong_attachment_id, 1)
+		send_message(message, attachment)
+		self.assertTrue(self.other_user.messages.filter(sender=self.user, body_id=MLNMessage.I_DONT_GET_IT).exists())
+		# 2. Verify that attachments were sent back
+		reply = self.other_user.messages.get(sender=self.user, body_id=MLNMessage.I_DONT_GET_IT)
+		self.assertTrue(reply.attachments.filter(item=attachment.item, qty=attachment.qty))
+
+	def test_send_message_reply(self): 
+		# Verify the networker replies with the correct response
+		message = create_message(self.other_user, self.user.id, self.correct_message_body_id)
+		send_message(message, None)
+		self.assertTrue(self.other_user.messages.filter(sender_id=self.user.id, body_id=self.reply_id).exists())
 
 class CreateAttachment_NoStack(TestCase):
 	SETUP = message, item
