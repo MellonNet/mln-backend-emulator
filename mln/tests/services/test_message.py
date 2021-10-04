@@ -30,6 +30,7 @@ def networker_message(self):
 	MessageBody.objects.create(id=MLNMessage.I_DONT_GET_IT, category_id=self.BODY_CAT_ID, subject="I don't get it", text="Invalid message").id
 	template = MessageTemplate.objects.create(body_id=self.reply_id)
 	NetworkerReply.objects.create(template=template, networker=self.user, trigger_body_id=self.correct_message_body_id)
+	NetworkerReply.objects.create(template=template, networker=self.user, trigger_attachment_id=self.correct_attachment_id)
 	# Manually add items instead of requiring other_user_has_item to add 2 different items
 	add_inv_item(self.other_user, self.wrong_attachment_id, 1)
 	add_inv_item(self.other_user, self.correct_attachment_id, 1)
@@ -48,6 +49,7 @@ class NoMessage_Friend(TestCase):
 		message = create_message(self.user, self.other_user.id, self.BODY.id)
 		send_message(message, None)
 		self.assertTrue(self.other_user.messages.filter(id=message.id, sender_id=self.user.id, body_id=self.BODY.id).exists())
+		self.assertFalse(self.user.messages.filter(sender_id=self.other_user).exists())  # ensure no networker reply was sent
 
 class Message(TestCase):
 	# other_user is human, user is a networker
@@ -86,10 +88,17 @@ class Message(TestCase):
 		reply = self.other_user.messages.get(sender=self.user, body_id=MLNMessage.I_DONT_GET_IT)
 		self.assertTrue(reply.attachments.filter(item=attachment.item, qty=attachment.qty))
 
-	def test_send_message_reply(self): 
+	def test_send_message_correct_body(self): 
 		# Verify the networker replies with the correct response
 		message = create_message(self.other_user, self.user.id, self.correct_message_body_id)
 		send_message(message, None)
+		self.assertTrue(self.other_user.messages.filter(sender_id=self.user.id, body_id=self.reply_id).exists())
+
+	def test_send_message_correct_attachment(self): 
+		# Verify the networker replies with the correct response
+		message = create_message(self.other_user, self.user.id, self.wrong_message_body_id)
+		attachment = create_attachment(message, self.correct_attachment_id, 1)
+		send_message(message, attachment)
 		self.assertTrue(self.other_user.messages.filter(sender_id=self.user.id, body_id=self.reply_id).exists())
 
 class CreateAttachment_NoStack(TestCase):
