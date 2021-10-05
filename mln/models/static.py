@@ -345,7 +345,7 @@ class NetworkerMessageTriggerLegacy(models.Model):
 	trigger = models.TextField(blank=True, null=True)
 	source = models.TextField()
 	notes = models.TextField(blank=True, null=True)
-	updated = models.ForeignKey(NetworkerReply, related_name="legacy", on_delete=models.CASCADE, blank=True, null=True)
+	updated = models.ForeignKey(NetworkerReply, related_name="legacy", on_delete=models.SET_NULL, blank=True, null=True)
 
 	def __str__(self):
 		return "From %s: %s" % (self.networker, self.body)
