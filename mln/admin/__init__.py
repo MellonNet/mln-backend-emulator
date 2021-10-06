@@ -9,7 +9,7 @@ from django.db.models import Q
 from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
 from ..models.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReply, StartingStack, Question
+from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageBodyType, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReply, StartingStack, Question
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
@@ -29,15 +29,36 @@ class FriendshipAdmin(admin.ModelAdmin):
 
 custom[Friendship] = FriendshipAdmin
 
-has_trigger = lambda obj: NetworkerMessageTriggerLegacy.objects.filter(body=obj).exists() or NetworkerFriendshipCondition.objects.filter(Q(success_body=obj) | Q(failure_body=obj)).exists()
+MBT = MessageBodyType
+def has_trigger(msg): return (
+	msg.type in {MBT.MODULE, MBT.ITEM, MBT.USER, MBT.SYSTEM, MBT.BETA, MBT.INTEGRATION, MBT.UNPUBLISHED, MBT.OTHER, None} or  # unsupported
+	(msg.type == MBT.FRIEND and NetworkerFriendshipCondition.objects.filter(Q(success_body=msg) | Q(failure_body=msg)).exists()) or
+	(msg.type == MBT.REPLY and NetworkerReply.objects.filter(template__body=msg).exists())
+)
+
 has_trigger.short_description = "has trigger"
 has_trigger.boolean = True
+
+class HasHandlerFilter(admin.SimpleListFilter):
+	title = 'handler'
+	parameter_name = "handler"
+	default_value = None
+
+	def lookups(self, request, model_admin):
+		"""Returns a list of (URL id, human-readable name)."""
+		return [("true", "Has handler"), ("false", "No handler")]
+
+	def queryset(self, request, queryset):
+		"""Returns a queryset of messages that match the requested handler status"""
+		if self.value() is None: return queryset
+		messages = [msg.id for msg in queryset.all() if has_trigger(msg) == (self.value() == "true")]
+		return queryset.filter(id__in=messages)
 
 class MessageBodyAdmin(admin.ModelAdmin):
 	list_display = "subject", "text", "type", has_trigger
 	search_fields = "subject", "text"
 	filter_vertical = "easy_replies",
-	list_filter = "category", "type"
+	list_filter = "category", "type", HasHandlerFilter
 
 custom[MessageBody] = MessageBodyAdmin
 

@@ -243,7 +243,7 @@ class MessageBody(models.Model):
 	type = EnumField(MessageBodyType, null=True, blank=True)
 	subject = models.CharField(max_length=128)
 	text = models.TextField()
-	easy_replies = models.ManyToManyField("self", related_name="+", symmetrical=False)
+	easy_replies = models.ManyToManyField("self", related_name="+", symmetrical=False, blank=True)
 
 	class Meta:
 		ordering = "subject", "text"
