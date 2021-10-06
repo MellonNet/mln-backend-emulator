@@ -240,7 +240,7 @@ class MessageBody(models.Model):
 	A common example is an easy reply of "Thanks", used by various message texts.
 	"""
 	category = models.ForeignKey(MessageBodyCategory, related_name="+", on_delete=models.CASCADE)
-	type = EnumField(MessageBodyType, null=True)
+	type = EnumField(MessageBodyType, null=True, blank=True)
 	subject = models.CharField(max_length=128)
 	text = models.TextField()
 	easy_replies = models.ManyToManyField("self", related_name="+", symmetrical=False)
