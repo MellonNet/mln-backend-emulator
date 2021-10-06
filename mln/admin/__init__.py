@@ -30,14 +30,14 @@ class FriendshipAdmin(admin.ModelAdmin):
 custom[Friendship] = FriendshipAdmin
 
 MBT = MessageBodyType
-def has_trigger(msg): return (
+has_handler = lambda msg: (
 	msg.type in {MBT.MODULE, MBT.ITEM, MBT.USER, MBT.SYSTEM, MBT.BETA, MBT.INTEGRATION, MBT.UNPUBLISHED, MBT.OTHER, None} or  # unsupported
 	(msg.type == MBT.FRIEND and NetworkerFriendshipCondition.objects.filter(Q(success_body=msg) | Q(failure_body=msg)).exists()) or
 	(msg.type == MBT.REPLY and NetworkerReply.objects.filter(template__body=msg).exists())
 )
 
-has_trigger.short_description = "has trigger"
-has_trigger.boolean = True
+has_handler.short_description = "has handler"
+has_handler.boolean = True
 
 class HasHandlerFilter(admin.SimpleListFilter):
 	title = 'handler'
@@ -51,14 +51,14 @@ class HasHandlerFilter(admin.SimpleListFilter):
 	def queryset(self, request, queryset):
 		"""Returns a queryset of messages that match the requested handler status"""
 		if self.value() is None: return queryset
-		messages = [msg.id for msg in queryset.all() if has_trigger(msg) == (self.value() == "true")]
+		messages = [msg.id for msg in queryset.all() if has_handler(msg) == (self.value() == "true")]
 		return queryset.filter(id__in=messages)
 
 class MessageBodyAdmin(admin.ModelAdmin):
-	list_display = "subject", "text", "type", has_trigger
+	list_display = "subject", "text", "type", has_handler
 	search_fields = "subject", "text"
 	filter_vertical = "easy_replies",
-	list_filter = "category", "type", HasHandlerFilter
+	list_filter = "type", HasHandlerFilter, "category"
 
 custom[MessageBody] = MessageBodyAdmin
 
@@ -141,7 +141,7 @@ networker_reply_admin.attachment = lambda _, reply: next(iter(reply.template.att
 networker_reply_admin.attachment.short_description = "Attachment"
 networker_reply_admin.list_display = "networker", "trigger", "response", "attachment"
 networker_reply_admin.list_display_links = "response",
-networker_reply_admin.search_fields = "template__networker__username", "template__attachments__item__name",  "template__body__subject", "template__body__text", "message_attachment__name", "message_body__subject", "message_body__text"
+networker_reply_admin.search_fields = "networker__username", "template__attachments__item__name",  "template__body__subject", "template__body__text", "trigger_attachment__name", "trigger_body__subject", "trigger_body__text"
 
 # Item infos
 
