@@ -2,8 +2,10 @@
 Config for displaying MLN's models in the django admin.
 Most of the code here is for displaying various settings models inline with the model admin interface they correspond to, for example showing blueprint requirements for a blueprint item.
 """
+from django import forms
 from django.apps import apps
 from django.contrib import admin
+from django.contrib.admin.helpers import ActionForm
 from django.db.models import Q
 
 from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
@@ -28,6 +30,8 @@ class FriendshipAdmin(admin.ModelAdmin):
 	list_filter = "status",
 
 custom[Friendship] = FriendshipAdmin
+
+# ----- MessageBody -----
 
 MBT = MessageBodyType
 has_handler = lambda msg: (
@@ -54,13 +58,27 @@ class HasHandlerFilter(admin.SimpleListFilter):
 		messages = [msg.id for msg in queryset.all() if has_handler(msg) == (self.value() == "true")]
 		return queryset.filter(id__in=messages)
 
+class MessageBodyTypeForm(ActionForm):
+	"""Allows the user to pick a MessageBodyType before performing an action."""
+	type = forms.ChoiceField(choices=[(name, name.lower()) for name in MBT.__members__.keys()])
+
 class MessageBodyAdmin(admin.ModelAdmin):
 	list_display = "subject", "text", "type", has_handler
 	search_fields = "subject", "text"
 	filter_vertical = "easy_replies",
 	list_filter = "type", HasHandlerFilter, "category"
+	action_form = MessageBodyTypeForm
+	actions = ["change_type"]
+
+	@admin.action(description="Change message type")
+	def change_type(self, request, queryset):
+		type_str = request.POST["type"]
+		type_ = MessageBodyType[type_str]
+		queryset.update(type=type_)
 
 custom[MessageBody] = MessageBodyAdmin
+
+# ----- End of MessageBody -----
 
 class DeliveryArcadeTileAdmin(admin.ModelAdmin):
 	list_display = "module", "tile_id", "x", "y"
