@@ -1,5 +1,5 @@
-from ..models.dynamic import FriendshipStatus, Message
-from ..models.static import MessageBody
+from ..models.dynamic import Attachment, FriendshipStatus, Message
+from ..models.static import MessageBody, MLNMessage, NetworkerReply
 from .friend import are_friends
 from .inventory import add_inv_item, remove_inv_item
 
@@ -17,7 +17,7 @@ def _get_message(user, message_id):
 def create_attachment(message, item_id, qty):
 	"""Remove items from the user's inventory and attach it to the message."""
 	remove_inv_item(message.sender, item_id, qty)
-	message.attachments.create(item_id=item_id, qty=qty)
+	return Attachment(message=message, item_id=item_id, qty=qty)
 
 def delete_message(user, message_id):
 	"""Delete a message from the user's inbox, detaching any attachments."""
@@ -49,7 +49,31 @@ def open_message(user, message_id):
 	message.save()
 	return message
 
-def send_message(user, recipient_id, body_id):
-	"""Send a message to someone."""
+def create_message(user, recipient_id, body_id): 
+	"""Creates a message in-memory. To actually send, use send_message."""
 	_check_recipient(user, recipient_id)
-	return Message.objects.create(sender=user, recipient_id=recipient_id, body_id=body_id)
+	return Message(sender=user, recipient_id=recipient_id, body_id=body_id)
+
+def send_message(message, attachment=None):
+	"""Send a message to someone. If the recipient is a networker, sends a reply too"""
+	if not message.recipient.profile.is_networker:  # send the message directly
+		message.save()
+		if attachment is not None:
+			attachment.save()
+		return
+	# Check for a networker's reply and send that to the user directly
+	for reply in NetworkerReply.objects.filter(networker=message.recipient):
+		if reply.should_reply(message, attachment):
+			send_template(reply.template, message.recipient, message.sender)
+			break
+	else:  # networker doesn't have a reply for this message
+		reply = Message.objects.create(sender=message.recipient, recipient=message.sender, body_id=MLNMessage.I_DONT_GET_IT)
+		if attachment is not None:  # send any attachment back to the user
+			attachment.message = reply
+			attachment.save()
+
+def send_template(template, sender, recipient): 
+	"""Sends a MessageTemplate along with any MessageTemplateAttachments."""
+	message = Message.objects.create(sender=sender, recipient=recipient, body=template.body)
+	for attachment in template.attachments.all():
+		message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
