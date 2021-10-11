@@ -2,14 +2,16 @@
 Config for displaying MLN's models in the django admin.
 Most of the code here is for displaying various settings models inline with the model admin interface they correspond to, for example showing blueprint requirements for a blueprint item.
 """
+from django import forms
 from django.apps import apps
 from django.contrib import admin
+from django.contrib.admin.helpers import ActionForm
 from django.db.models import Q
 
 from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
 from ..models.module import Module, ModuleSaveConcertArcade, ModuleSaveSoundtrack, module_settings_classes
 from ..models.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReply, StartingStack, Question
+from ..models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageBodyType, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReply, StartingStack, Question
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
@@ -29,17 +31,54 @@ class FriendshipAdmin(admin.ModelAdmin):
 
 custom[Friendship] = FriendshipAdmin
 
-has_trigger = lambda obj: NetworkerMessageTriggerLegacy.objects.filter(body=obj).exists() or NetworkerFriendshipCondition.objects.filter(Q(success_body=obj) | Q(failure_body=obj)).exists()
-has_trigger.short_description = "has trigger"
-has_trigger.boolean = True
+# ----- MessageBody -----
+
+MBT = MessageBodyType
+has_handler = lambda msg: (
+	msg.type in {MBT.MODULE, MBT.ITEM, MBT.USER, MBT.SYSTEM, MBT.BETA, MBT.INTEGRATION, MBT.UNPUBLISHED, MBT.OTHER} or  # unsupported
+	(msg.type == MBT.FRIEND and NetworkerFriendshipCondition.objects.filter(Q(success_body=msg) | Q(failure_body=msg)).exists()) or
+	(msg.type == MBT.REPLY and NetworkerReply.objects.filter(template__body=msg).exists())
+)
+
+has_handler.short_description = "has handler"
+has_handler.boolean = True
+
+class HasHandlerFilter(admin.SimpleListFilter):
+	title = 'handler'
+	parameter_name = "handler"
+	default_value = None
+
+	def lookups(self, request, model_admin):
+		"""Returns a list of (URL id, human-readable name)."""
+		return [("true", "Has handler"), ("false", "No handler")]
+
+	def queryset(self, request, queryset):
+		"""Returns a queryset of messages that match the requested handler status"""
+		if self.value() is None: return queryset
+		messages = [msg.id for msg in queryset.all() if has_handler(msg) == (self.value() == "true")]
+		return queryset.filter(id__in=messages)
+
+class MessageBodyTypeForm(ActionForm):
+	"""Allows the user to pick a MessageBodyType before performing an action."""
+	type = forms.ChoiceField(choices=[(name, name.lower()) for name in MBT.__members__.keys()])
 
 class MessageBodyAdmin(admin.ModelAdmin):
-	list_display = "subject", "text", has_trigger
+	list_display = "subject", "text", "type", has_handler
 	search_fields = "subject", "text"
 	filter_vertical = "easy_replies",
-	list_filter = "category",
+	list_filter = "type", HasHandlerFilter, "category"
+	action_form = MessageBodyTypeForm
+	actions = ["change_type"]
+
+	@admin.action(description="Change message type")
+	def change_type(self, request, queryset):
+		type_str = request.POST["type"]
+		type_ = MessageBodyType[type_str]
+		queryset.update(type=type_)
 
 custom[MessageBody] = MessageBodyAdmin
+
+# ----- End of MessageBody -----
 
 class DeliveryArcadeTileAdmin(admin.ModelAdmin):
 	list_display = "module", "tile_id", "x", "y"
@@ -120,7 +159,7 @@ networker_reply_admin.attachment = lambda _, reply: next(iter(reply.template.att
 networker_reply_admin.attachment.short_description = "Attachment"
 networker_reply_admin.list_display = "networker", "trigger", "response", "attachment"
 networker_reply_admin.list_display_links = "response",
-networker_reply_admin.search_fields = "template__networker__username", "template__attachments__item__name",  "template__body__subject", "template__body__text", "message_attachment__name", "message_body__subject", "message_body__text"
+networker_reply_admin.search_fields = "networker__username", "template__attachments__item__name",  "template__body__subject", "template__body__text", "trigger_attachment__name", "trigger_body__subject", "trigger_body__text"
 
 # Item infos
 

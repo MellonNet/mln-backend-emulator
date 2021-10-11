@@ -227,6 +227,18 @@ class MessageBodyCategory(models.Model):
 	def __str__(self):
 		return self.name
 
+class MessageBodyType(Enum): 
+	MODULE = auto()
+	ITEM = auto()
+	FRIEND = auto()
+	REPLY = auto()
+	USER = auto()
+	SYSTEM = auto()
+	BETA = auto()
+	INTEGRATION = auto()
+	UNPUBLISHED = auto()
+	OTHER = auto()
+
 class MessageBody(models.Model):
 	"""
 	A message text, consisting of subject and body.
@@ -236,9 +248,11 @@ class MessageBody(models.Model):
 	A common example is an easy reply of "Thanks", used by various message texts.
 	"""
 	category = models.ForeignKey(MessageBodyCategory, related_name="+", on_delete=models.CASCADE)
+	type = EnumField(MessageBodyType, null=True, blank=True)
 	subject = models.CharField(max_length=128)
 	text = models.TextField()
-	easy_replies = models.ManyToManyField("self", related_name="+", symmetrical=False)
+	notes = models.TextField(default="", blank=True)
+	easy_replies = models.ManyToManyField("self", related_name="+", symmetrical=False, blank=True)
 
 	class Meta:
 		ordering = "subject", "text"
