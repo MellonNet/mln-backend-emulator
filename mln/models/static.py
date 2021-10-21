@@ -194,60 +194,6 @@ class MessageReplyType(Enum):
 	EASY_REPLY_ONLY = 2
 	NO_REPLY = 3
 
-class NetworkerFriendshipCondition(models.Model):
-	"""Stores what a networker requires to accept a friend request, and the messages to be sent on success or failure."""
-	networker = models.OneToOneField(User, related_name="friendship_condition", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
-	condition = models.ForeignKey(ItemInfo, related_name="+", blank=True, null=True, on_delete=models.SET_NULL, limit_choices_to=Q(type=ItemType.BADGE) | Q(type=ItemType.BLUEPRINT) | Q(type=ItemType.ITEM) | Q(type=ItemType.MASTERPIECE))
-	success_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
-	failure_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
-
-class NetworkerFriendshipConditionSource(models.Model):
-	"""Not related to MLN's core data model: Sources for manually associated friendship conditions."""
-	condition = models.OneToOneField(NetworkerFriendshipCondition, related_name="source", on_delete=models.CASCADE)
-	source = models.TextField()
-
-	def __str__(self):
-		return self.source
-
-class NetworkerPageSource(models.Model):
-	"""Documentation only: Note whether a reconstructed networker page has a graphical source, or is tentatively reconstructed from a description."""
-	networker = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
-	source = models.TextField()
-
-class Question(models.Model):
-	"""A question for the "About me" section."""
-	text = models.CharField(max_length=64)
-	mandatory = models.BooleanField()
-
-	def __str__(self):
-		return self.text
-
-class Answer(models.Model):
-	"""An answer to an "About me" question."""
-	question = models.ForeignKey(Question, related_name="+", on_delete=models.CASCADE)
-	text = models.CharField(max_length=64)
-
-	def __str__(self):
-		return self.text
-
-class Color(models.Model):
-	"""A color, used for page and module backgrounds."""
-	color = models.IntegerField()
-
-	def __str__(self):
-		return hex(self.color)
-
-class ModuleSkin(models.Model):
-	"""A skin (background pattern) of a module."""
-	name = models.CharField(max_length=64)
-
-	def __str__(self):
-		return self.name
-
-class StartingStack(Stack):
-	"""A stack that users start off with in their inventory when they create an account."""
-	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
-
 class MessageTemplate(models.Model): 
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
 
@@ -262,24 +208,6 @@ class MessageTemplateAttachment(Stack):
 
 	class Meta: 
 		constraints = (models.UniqueConstraint(fields=("template", "item"), name="messsage_template_attachment_unique_template_item"),)
-
-class NetworkerReply(models.Model): 
-	template = models.ForeignKey(MessageTemplate, related_name="+", on_delete=models.CASCADE)
-	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, blank=True, null=True, limit_choices_to={"profile__is_networker": True})
-	trigger_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
-	trigger_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
-
-	class Meta:
-		verbose_name_plural = "Networker replies"
-
-	def __str__(self): 
-		return "Reply when sending %s to %s: %s" % (self.trigger_attachment or self.trigger_body, self.networker, self.template.body.subject)
-
-	def should_reply(self, message, attachment): 
-		return (
-			(self.trigger_body is not None and message.body == self.trigger_body) or
-			(self.trigger_attachment is not None and attachment is not None and attachment.item == self.trigger_attachment)
-		)
 
 class ModuleEditorType(Enum):
 	CONCERT_I_ARCADE = auto()
@@ -368,6 +296,78 @@ class ModuleMessage(models.Model):
 	module = models.ForeignKey(ItemInfo, related_name="friend_messages", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
 	message = models.OneToOneField(MessageTemplate, related_name="+", on_delete=models.CASCADE)
 	probability = models.PositiveSmallIntegerField()
+
+class NetworkerFriendshipCondition(models.Model):
+	"""Stores what a networker requires to accept a friend request, and the messages to be sent on success or failure."""
+	networker = models.OneToOneField(User, related_name="friendship_condition", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
+	condition = models.ForeignKey(ItemInfo, related_name="+", blank=True, null=True, on_delete=models.SET_NULL, limit_choices_to=Q(type=ItemType.BADGE) | Q(type=ItemType.BLUEPRINT) | Q(type=ItemType.ITEM) | Q(type=ItemType.MASTERPIECE))
+	success_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
+	failure_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
+
+class NetworkerFriendshipConditionSource(models.Model):
+	"""Not related to MLN's core data model: Sources for manually associated friendship conditions."""
+	condition = models.OneToOneField(NetworkerFriendshipCondition, related_name="source", on_delete=models.CASCADE)
+	source = models.TextField()
+
+	def __str__(self):
+		return self.source
+
+class NetworkerPageSource(models.Model):
+	"""Documentation only: Note whether a reconstructed networker page has a graphical source, or is tentatively reconstructed from a description."""
+	networker = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
+	source = models.TextField()
+
+class Question(models.Model):
+	"""A question for the "About me" section."""
+	text = models.CharField(max_length=64)
+	mandatory = models.BooleanField()
+
+	def __str__(self):
+		return self.text
+
+class Answer(models.Model):
+	"""An answer to an "About me" question."""
+	question = models.ForeignKey(Question, related_name="+", on_delete=models.CASCADE)
+	text = models.CharField(max_length=64)
+
+	def __str__(self):
+		return self.text
+
+class Color(models.Model):
+	"""A color, used for page and module backgrounds."""
+	color = models.IntegerField()
+
+	def __str__(self):
+		return hex(self.color)
+
+class ModuleSkin(models.Model):
+	"""A skin (background pattern) of a module."""
+	name = models.CharField(max_length=64)
+
+	def __str__(self):
+		return self.name
+
+class StartingStack(Stack):
+	"""A stack that users start off with in their inventory when they create an account."""
+	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
+
+class NetworkerReply(models.Model): 
+	template = models.ForeignKey(MessageTemplate, related_name="+", on_delete=models.CASCADE)
+	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, blank=True, null=True, limit_choices_to={"profile__is_networker": True})
+	trigger_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+	trigger_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+
+	class Meta:
+		verbose_name_plural = "Networker replies"
+
+	def __str__(self): 
+		return "Reply when sending %s to %s: %s" % (self.trigger_attachment or self.trigger_body, self.networker, self.template.body.subject)
+
+	def should_reply(self, message, attachment): 
+		return (
+			(self.trigger_body is not None and message.body == self.trigger_body) or
+			(self.trigger_attachment is not None and attachment is not None and attachment.item == self.trigger_attachment)
+		)
 
 class NetworkerMessageTriggerLegacy(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""

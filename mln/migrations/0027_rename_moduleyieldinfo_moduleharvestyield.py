@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
 			old_name='ModuleYieldInfo',
 			new_name='ModuleHarvestYield',
 		),
+
 		# Add some related_name's and item constraints
 		migrations.AlterField(
 			model_name='moduleharvestyield',
@@ -32,7 +33,7 @@ class Migration(migrations.Migration):
 			field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='setup_costs', to='mln.iteminfo'),
 		),
 
-		# Create ModuleOwnerYield and ModuleGuestYield
+		# Create ModuleOwnerYield
 		migrations.CreateModel(
 			name='ModuleOwnerYield',
 			fields=[
