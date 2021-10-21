@@ -236,15 +236,6 @@ class ModuleEditorType(Enum):
 	TRIO_PERFORMANCE = auto()
 	NETWORKER_PIC = auto()
 
-class ModuleInfo(models.Model):
-	"""Stores whether the module is executable, setupable, and its editor type. The editor type defines which save data the module uses."""
-	item = models.OneToOneField(ItemInfo, related_name="module_info", on_delete=models.CASCADE)
-	is_executable = models.BooleanField()
-	editor_type = EnumField(ModuleEditorType, null=True, blank=True)
-
-	def __str__(self):
-		return str(self.item)
-
 class ModuleExecutionCost(Stack):
 	"""
 	Defines the cost guests will have to pay to click on the module.
@@ -256,30 +247,12 @@ class ModuleExecutionCost(Stack):
 	class Meta:
 		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_execution_cost_unique_module_item_item"),)
 
-class ModuleSetupCost(Stack):
-	"""
-	Defines the cost owner will have to pay to set up a module.
-	This can be retrieved by the owner as long as the module isn't ready for harvest or hasn't been executed.
-	"""
-	module_item = models.ForeignKey(ItemInfo, related_name="setup_costs", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
-	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.ITEM})
-
-	class Meta:
-		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_setup_cost_unique_module_item_item"),)
-
 class ModuleGuestYield(Stack): 
 	module = models.ForeignKey(ItemInfo, related_name="guest_yields", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
 	probability = models.PositiveSmallIntegerField()
 
 	class Meta:
 		constraints = (models.UniqueConstraint(fields=("module", "item"), name="module_guest_yield_unique_module_item"),)
-
-class ModuleOwnerYield(Stack): 
-	module = models.ForeignKey(ItemInfo, related_name="owner_yields", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
-	probability = models.PositiveSmallIntegerField()
-
-	class Meta:
-		constraints = (models.UniqueConstraint(fields=("module", "item"), name="module_owner_yield_unique_module_item"),)
 
 class ModuleHarvestYield(models.Model):
 	"""Defines the item the module "grows", its harvest cap, its growth rate, and the click growth rate."""
@@ -292,10 +265,37 @@ class ModuleHarvestYield(models.Model):
 	def __str__(self):
 		return str(self.item)
 
+class ModuleInfo(models.Model):
+	"""Stores whether the module is executable, setupable, and its editor type. The editor type defines which save data the module uses."""
+	item = models.OneToOneField(ItemInfo, related_name="module_info", on_delete=models.CASCADE)
+	is_executable = models.BooleanField()
+	editor_type = EnumField(ModuleEditorType, null=True, blank=True)
+
+	def __str__(self):
+		return str(self.item)
+
 class ModuleMessage(models.Model): 
 	module = models.ForeignKey(ItemInfo, related_name="friend_messages", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
 	message = models.OneToOneField(MessageTemplate, related_name="+", on_delete=models.CASCADE)
 	probability = models.PositiveSmallIntegerField()
+
+class ModuleOwnerYield(Stack): 
+	module = models.ForeignKey(ItemInfo, related_name="owner_yields", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+	probability = models.PositiveSmallIntegerField()
+
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("module", "item"), name="module_owner_yield_unique_module_item"),)
+
+class ModuleSetupCost(Stack):
+	"""
+	Defines the cost owner will have to pay to set up a module.
+	This can be retrieved by the owner as long as the module isn't ready for harvest or hasn't been executed.
+	"""
+	module_item = models.ForeignKey(ItemInfo, related_name="setup_costs", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.ITEM})
+
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_setup_cost_unique_module_item_item"),)
 
 class NetworkerFriendshipCondition(models.Model):
 	"""Stores what a networker requires to accept a friend request, and the messages to be sent on success or failure."""
