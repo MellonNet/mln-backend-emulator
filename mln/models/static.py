@@ -202,7 +202,7 @@ class ModuleSetupCost(Stack):
 	class Meta:
 		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_setup_cost_unique_module_item_item"),)
 
-class ModuleYieldInfo(models.Model):
+class ModuleHarvestYield(models.Model):
 	"""Defines the item the module "grows", its harvest cap, its growth rate, and the click growth rate."""
 	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
 	yield_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BLUEPRINT) | Q(type=ItemType.ITEM))

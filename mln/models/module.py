@@ -8,7 +8,7 @@ from django.db import models
 from django.utils.timezone import now
 
 from .dynamic import DAY, get_or_none
-from .static import ArcadePrize, ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
+from .static import ArcadePrize, ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleHarvestYield, ModuleInfo, ModuleSetupCost
 from ..services.inventory import add_inv_item, remove_inv_item
 
 class Module(models.Model):
