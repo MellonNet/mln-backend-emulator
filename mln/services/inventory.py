@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db.models import Q
 
 from ..models.static import ItemInfo
 
@@ -35,6 +36,10 @@ def remove_inv_item(user, item_id, qty=1):
 	else:
 		raise RuntimeError("%s has fewer items than the %i requested to delete" % (stack, qty))
 
+def return_invalid_modules(user): 
+	for module in user.modules.filter(Q(pos_x__isnull=True) | Q(pos_y__isnull=True)): 
+		add_inv_item(user, module.item_id)
+		module.delete()
 
 def assert_has_item(user, item_id, qty=1, field_name=None):
 	"""
