@@ -58,14 +58,14 @@ class Migration(migrations.Migration):
 			model_name='moduleguestyield',
 			name='arcade_prize_unique_module_item_item',
 		),
-		migrations.AddConstraint(
-			model_name='moduleguestyield',
-			constraint=models.UniqueConstraint(fields=('module', 'item'), name='module_guest_yield_unique_module_item'),
-		),
 		migrations.RenameField(
 			model_name='moduleguestyield',
 			old_name='module_item',
 			new_name='module',
+		),
+		migrations.AddConstraint(
+			model_name='moduleguestyield',
+			constraint=models.UniqueConstraint(fields=('module', 'item'), name='module_guest_yield_unique_module_item'),
 		),
 		migrations.AlterField(
 			model_name='moduleguestyield',
