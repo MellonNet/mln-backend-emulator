@@ -132,87 +132,6 @@ class BlueprintRequirement(Stack):
 	def __str__(self):
 		return "%s needs %s" % (self.blueprint_item, super().__str__())
 
-class ModuleEditorType(Enum):
-	CONCERT_I_ARCADE = auto()
-	CONCERT_II_ARCADE = auto()
-	DELIVERY_ARCADE = auto()
-	DESTRUCTOID_ARCADE = auto()
-	DR_INFERNO_ROBOT_SIM = auto()
-	FACTORY_GENERIC = auto()
-	FACTORY_NON_GENERIC = auto()
-	FRIEND_SHARE = auto()
-	FRIENDLY_FELIX_CONCERT = auto()
-	GALLERY_GENERIC = auto()
-	GALLERY_NON_GENERIC = auto()
-	GENERIC = auto()
-	GROUP_PERFORMANCE = auto()
-	HOP_ARCADE = auto()
-	LOOP_SHOPPE = auto()
-	NETWORKER_TEXT = auto()
-	NETWORKER_TRADE = auto()
-	PLASTIC_PELLET_INDUCTOR = auto()
-	ROCKET_GAME = auto()
-	SOUNDTRACK = auto()
-	STICKER = auto()
-	STICKER_SHOPPE = auto()
-	TRADE = auto()
-	TRIO_PERFORMANCE = auto()
-	NETWORKER_PIC = auto()
-
-class ModuleInfo(models.Model):
-	"""Stores whether the module is executable, setupable, and its editor type. The editor type defines which save data the module uses."""
-	item = models.OneToOneField(ItemInfo, related_name="module_info", on_delete=models.CASCADE)
-	is_executable = models.BooleanField()
-	editor_type = EnumField(ModuleEditorType, null=True, blank=True)
-
-	def __str__(self):
-		return str(self.item)
-
-class ArcadePrize(Stack):
-	"""
-	A prize of an arcade module.
-	If the arcade is won, it can be obtained at the probability given in the success_rate attribute, in percent.
-	The sum of the success rates of all prizes of an arcade should always be 100.
-	"""
-	module_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE)
-	success_rate = models.PositiveSmallIntegerField()
-
-	class Meta:
-		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="arcade_prize_unique_module_item_item"),)
-
-class ModuleExecutionCost(Stack):
-	"""
-	Defines the cost guests will have to pay to click on the module.
-	The paid items are typically not transferred to the module owner, they are deleted from the system.
-	"""
-	module_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE)
-	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.ITEM})
-
-	class Meta:
-		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_execution_cost_unique_module_item_item"),)
-
-class ModuleSetupCost(Stack):
-	"""
-	Defines the cost owner will have to pay to set up a module.
-	This can be retrieved by the owner as long as the module isn't ready for harvest or hasn't been executed.
-	"""
-	module_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE)
-	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.ITEM})
-
-	class Meta:
-		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_setup_cost_unique_module_item_item"),)
-
-class ModuleHarvestYield(models.Model):
-	"""Defines the item the module "grows", its harvest cap, its growth rate, and the click growth rate."""
-	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
-	yield_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BLUEPRINT) | Q(type=ItemType.ITEM))
-	max_yield = models.PositiveSmallIntegerField()
-	yield_per_day = models.PositiveSmallIntegerField()
-	clicks_per_yield = models.PositiveSmallIntegerField()
-
-	def __str__(self):
-		return str(self.item)
-
 class MessageBodyCategory(models.Model):
 	"""A category used for grouping message bodies in the "compose message" interface."""
 	name = models.CharField(max_length=32)
@@ -361,6 +280,92 @@ class NetworkerReply(models.Model):
 			(self.trigger_body is not None and message.body == self.trigger_body) or
 			(self.trigger_attachment is not None and attachment is not None and attachment.item == self.trigger_attachment)
 		)
+
+class ModuleEditorType(Enum):
+	CONCERT_I_ARCADE = auto()
+	CONCERT_II_ARCADE = auto()
+	DELIVERY_ARCADE = auto()
+	DESTRUCTOID_ARCADE = auto()
+	DR_INFERNO_ROBOT_SIM = auto()
+	FACTORY_GENERIC = auto()
+	FACTORY_NON_GENERIC = auto()
+	FRIEND_SHARE = auto()
+	FRIENDLY_FELIX_CONCERT = auto()
+	GALLERY_GENERIC = auto()
+	GALLERY_NON_GENERIC = auto()
+	GENERIC = auto()
+	GROUP_PERFORMANCE = auto()
+	HOP_ARCADE = auto()
+	LOOP_SHOPPE = auto()
+	NETWORKER_TEXT = auto()
+	NETWORKER_TRADE = auto()
+	PLASTIC_PELLET_INDUCTOR = auto()
+	ROCKET_GAME = auto()
+	SOUNDTRACK = auto()
+	STICKER = auto()
+	STICKER_SHOPPE = auto()
+	TRADE = auto()
+	TRIO_PERFORMANCE = auto()
+	NETWORKER_PIC = auto()
+
+class ModuleInfo(models.Model):
+	"""Stores whether the module is executable, setupable, and its editor type. The editor type defines which save data the module uses."""
+	item = models.OneToOneField(ItemInfo, related_name="module_info", on_delete=models.CASCADE)
+	is_executable = models.BooleanField()
+	editor_type = EnumField(ModuleEditorType, null=True, blank=True)
+
+	def __str__(self):
+		return str(self.item)
+
+class ModuleExecutionCost(Stack):
+	"""
+	Defines the cost guests will have to pay to click on the module.
+	The paid items are typically not transferred to the module owner, they are deleted from the system.
+	"""
+	module_item = models.ForeignKey(ItemInfo, related_name="execution_costs", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.ITEM})
+
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_execution_cost_unique_module_item_item"),)
+
+class ModuleSetupCost(Stack):
+	"""
+	Defines the cost owner will have to pay to set up a module.
+	This can be retrieved by the owner as long as the module isn't ready for harvest or hasn't been executed.
+	"""
+	module_item = models.ForeignKey(ItemInfo, related_name="setup_costs", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+	item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to={"type": ItemType.ITEM})
+
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_setup_cost_unique_module_item_item"),)
+
+class ModuleGuestYield(Stack): 
+	module_item = models.ForeignKey(ItemInfo, related_name="guest_yields", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_guest_yield_unique_module_item_item"),)
+
+class ModuleOwnerYield(Stack): 
+	module_item = models.ForeignKey(ItemInfo, related_name="owner_yields", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_owner_yield_unique_module_item_item"),)
+
+class ModuleHarvestYield(models.Model):
+	"""Defines the item the module "grows", its harvest cap, its growth rate, and the click growth rate."""
+	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+	yield_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.BLUEPRINT) | Q(type=ItemType.ITEM))
+	max_yield = models.PositiveSmallIntegerField()
+	yield_per_day = models.PositiveSmallIntegerField()
+	clicks_per_yield = models.PositiveSmallIntegerField()
+
+	def __str__(self):
+		return str(self.item)
+
+class ModuleMessage(models.Model): 
+	module = models.ForeignKey(ItemInfo, related_name="friend_messages", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+	message = models.OneToOneField(MessageTemplate, related_name="+", on_delete=models.CASCADE)
+	success_rate = models.PositiveSmallIntegerField()
 
 class NetworkerMessageTriggerLegacy(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""

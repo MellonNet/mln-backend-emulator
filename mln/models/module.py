@@ -8,7 +8,7 @@ from django.db import models
 from django.utils.timezone import now
 
 from .dynamic import DAY, get_or_none
-from .static import ArcadePrize, ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleHarvestYield, ModuleInfo, ModuleSetupCost
+from .static import ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleHarvestYield, ModuleInfo, ModuleSetupCost
 from ..services.inventory import add_inv_item, remove_inv_item
 
 class Module(models.Model):
@@ -147,7 +147,7 @@ class Module(models.Model):
 		"""Select a random arcade prize for an arcade winner."""
 		chance = random.randrange(100)
 		sum = 0
-		for prize in ArcadePrize.objects.filter(module_item_id=self.item_id):
+		for prize in self.guest_yields.all():
 			sum += prize.success_rate
 			if sum > chance:
 				add_inv_item(user, prize.item_id, prize.qty)
