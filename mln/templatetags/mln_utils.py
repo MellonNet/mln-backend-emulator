@@ -156,6 +156,10 @@ def replyable(message):
 	else:
 		return MessageReplyType.NORMAL_REPLY_ONLY.value
 
+@register.filter
+def get_valid_modules(owner): 
+	return owner.modules.filter(pos_x__isnull=False, pos_y__isnull=False)
+
 # Fix for Django template compilation, to remove whitespace from templates.
 # The two tokenize functions are changed to avoid generating a TextNode when the text content is only whitespace.
 # The TextNode constructor is changed to remove as much whitespace as possible from the content.
