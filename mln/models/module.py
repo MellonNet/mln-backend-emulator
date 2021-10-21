@@ -42,7 +42,7 @@ class Module(models.Model):
 		"""Calculate the yield of this module (how many items you can harvest), as well as the time and clicks that remain."""
 		if self.is_setupable() and not self.is_setup:
 			return 0, 0, 0
-		yield_info = get_or_none(ModuleYieldInfo, item_id=self.item_id)
+		yield_info = get_or_none(ModuleHarvestYield, item_id=self.item_id)
 		if yield_info is None:
 			return 0, 0, 0
 		time_since_harvest = now() - self.last_harvest_time
@@ -65,7 +65,7 @@ class Module(models.Model):
 
 	def get_yield_item_id(self):
 		"""Get the id of the item this module yields."""
-		return ModuleYieldInfo.objects.get(item_id=self.item_id).yield_item_id
+		return ModuleHarvestYield.objects.get(item_id=self.item_id).yield_item_id
 
 	def harvest(self):
 		"""
