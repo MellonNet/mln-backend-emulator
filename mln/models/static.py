@@ -340,16 +340,18 @@ class ModuleSetupCost(Stack):
 		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_setup_cost_unique_module_item_item"),)
 
 class ModuleGuestYield(Stack): 
-	module_item = models.ForeignKey(ItemInfo, related_name="guest_yields", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+	module = models.ForeignKey(ItemInfo, related_name="guest_yields", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+	probability = models.PositiveSmallIntegerField()
 
 	class Meta:
-		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_guest_yield_unique_module_item_item"),)
+		constraints = (models.UniqueConstraint(fields=("module", "item"), name="module_guest_yield_unique_module_item"),)
 
 class ModuleOwnerYield(Stack): 
-	module_item = models.ForeignKey(ItemInfo, related_name="owner_yields", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+	module = models.ForeignKey(ItemInfo, related_name="owner_yields", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
+	probability = models.PositiveSmallIntegerField()
 
 	class Meta:
-		constraints = (models.UniqueConstraint(fields=("module_item", "item"), name="module_owner_yield_unique_module_item_item"),)
+		constraints = (models.UniqueConstraint(fields=("module", "item"), name="module_owner_yield_unique_module_item"),)
 
 class ModuleHarvestYield(models.Model):
 	"""Defines the item the module "grows", its harvest cap, its growth rate, and the click growth rate."""
@@ -365,7 +367,7 @@ class ModuleHarvestYield(models.Model):
 class ModuleMessage(models.Model): 
 	module = models.ForeignKey(ItemInfo, related_name="friend_messages", on_delete=models.CASCADE, limit_choices_to=Q(type=ItemType.MODULE))
 	message = models.OneToOneField(MessageTemplate, related_name="+", on_delete=models.CASCADE)
-	success_rate = models.PositiveSmallIntegerField()
+	probability = models.PositiveSmallIntegerField()
 
 class NetworkerMessageTriggerLegacy(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""

@@ -163,7 +163,7 @@ networker_reply_admin.search_fields = "networker__username", "template__attachme
 
 # Item infos
 
-item_info_admin = make_inline(ItemInfo, ModuleInfo, (ModuleGuestYield, {"fk_name": "module_item"}), (ModuleExecutionCost, {"fk_name": "module_item"}), (ModuleSetupCost, {"fk_name": "module_item"}), (ModuleHarvestYield, {"fk_name": "item"}), (BlueprintInfo, {"fk_name": "item"}), (BlueprintRequirement, {"fk_name": "blueprint_item"}), get_inlines=get_item_info_inlines)
+item_info_admin = make_inline(ItemInfo, ModuleInfo, (ModuleGuestYield, {"fk_name": "module"}), (ModuleExecutionCost, {"fk_name": "module_item"}), (ModuleSetupCost, {"fk_name": "module_item"}), (ModuleHarvestYield, {"fk_name": "item"}), (BlueprintInfo, {"fk_name": "item"}), (BlueprintRequirement, {"fk_name": "blueprint_item"}), get_inlines=get_item_info_inlines)
 item_info_admin.list_display = "name", "type"
 item_info_admin.search_fields = "name",
 item_info_admin.list_filter = "type",
