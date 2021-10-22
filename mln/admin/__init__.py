@@ -136,7 +136,7 @@ message_admin.search_fields = "sender__username", "recipient__username", "body__
 friend_cond_admin = make_inline(NetworkerFriendshipCondition, NetworkerFriendshipConditionSource)
 friend_cond_admin.list_display = "networker", "condition", "success_body", "failure_body", "source"
 friend_cond_admin.list_display_links = "networker",
-friend_cond_admin.search_fields = "networker", "condition", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source__source"
+friend_cond_admin.search_fields = "networker__username", "condition__name", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source__source"
 
 trigger_admin_legacy = make_inline(NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy)
 trigger_admin_legacy.list_display = "networker", "body", "trigger", "source", "notes"
