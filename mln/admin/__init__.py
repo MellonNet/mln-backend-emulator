@@ -108,16 +108,13 @@ def get_item_info_inlines(obj):
 	elif obj.type == ItemType.MODULE:
 		yield ModuleInfo
 		yield ModuleHarvestYield
-		yield	ModuleGuestYield
+		yield ModuleGuestYield
 		yield ModuleOwnerYield
 		yield ModuleMessage
-		yield ModuleSetupCost
-		# if obj.module_info.editor_type not in (ModuleEditorType.LOOP_SHOPPE, ModuleEditorType.NETWORKER_TRADE, ModuleEditorType.STICKER_SHOPPE, ModuleEditorType.TRADE):
-			# setup cost
+		if obj.module_info.editor_type not in (ModuleEditorType.LOOP_SHOPPE, ModuleEditorType.NETWORKER_TRADE, ModuleEditorType.STICKER_SHOPPE, ModuleEditorType.TRADE):
+			yield ModuleSetupCost
 		if obj.module_info.is_executable:
 			yield ModuleExecutionCost
-		# if obj.module_info.editor_type in (ModuleEditorType.CONCERT_I_ARCADE, ModuleEditorType.CONCERT_II_ARCADE, ModuleEditorType.DELIVERY_ARCADE, ModuleEditorType.DESTRUCTOID_ARCADE, ModuleEditorType.DR_INFERNO_ROBOT_SIM, ModuleEditorType.HOP_ARCADE):
-		# guest yield
 
 def get_settings_inlines(obj):
 	inlines = obj.get_settings_classes()
@@ -167,7 +164,7 @@ networker_reply_admin.search_fields = "networker__username", "template__attachme
 
 # Item infos
 
-item_info_admin = make_inline(ItemInfo, ModuleInfo, (ModuleGuestYield, {"fk_name": "module"}), (ModuleOwnerYield, {"fk_name": "module"}), ModuleMessage, (ModuleExecutionCost, {"fk_name": "module_item"}), (ModuleSetupCost, {"fk_name": "module_item"}), (ModuleHarvestYield, {"fk_name": "item"}), (BlueprintInfo, {"fk_name": "item"}), (BlueprintRequirement, {"fk_name": "blueprint_item"}), get_inlines=get_item_info_inlines)
+item_info_admin = make_inline(ItemInfo, ModuleInfo, (ModuleGuestYield, {"fk_name": "module_item"}), (ModuleOwnerYield, {"fk_name": "module_item"}), ModuleMessage, (ModuleExecutionCost, {"fk_name": "module_item"}), (ModuleSetupCost, {"fk_name": "module_item"}), (ModuleHarvestYield, {"fk_name": "item"}), (BlueprintInfo, {"fk_name": "item"}), (BlueprintRequirement, {"fk_name": "blueprint_item"}), get_inlines=get_item_info_inlines)
 item_info_admin.list_display = "name", "type"
 item_info_admin.search_fields = "name",
 item_info_admin.list_filter = "type",

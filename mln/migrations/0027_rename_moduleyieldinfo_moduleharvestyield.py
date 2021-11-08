@@ -40,13 +40,13 @@ class Migration(migrations.Migration):
 				('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
 				('qty', models.PositiveSmallIntegerField()),
 				('item', models.ForeignKey(on_delete=models.deletion.CASCADE, related_name='+', to='mln.iteminfo')),
-				('module', models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='owner_yields', to='mln.iteminfo')),
+				('module_item', models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='owner_yields', to='mln.iteminfo')),
 				('probability', models.PositiveSmallIntegerField()),
 			],
 		),
 		migrations.AddConstraint(
 			model_name='moduleowneryield',
-			constraint=models.UniqueConstraint(fields=('module', 'item'), name='module_owner_yield_unique_module_item'),
+			constraint=models.UniqueConstraint(fields=('module_item', 'item'), name='module_owner_yield_unique_module_item_item'),
 		),
 
 		# ArcadePrize --> ModuleGuestYield
@@ -58,18 +58,13 @@ class Migration(migrations.Migration):
 			model_name='moduleguestyield',
 			name='arcade_prize_unique_module_item_item',
 		),
-		migrations.RenameField(
-			model_name='moduleguestyield',
-			old_name='module_item',
-			new_name='module',
-		),
 		migrations.AddConstraint(
 			model_name='moduleguestyield',
-			constraint=models.UniqueConstraint(fields=('module', 'item'), name='module_guest_yield_unique_module_item'),
+			constraint=models.UniqueConstraint(fields=('module_item', 'item'), name='module_guest_yield_unique_module_item_item'),
 		),
 		migrations.AlterField(
 			model_name='moduleguestyield',
-			name='module',
+			name='module_item',
 			field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='guest_yields', to='mln.iteminfo'),
 		),
 		migrations.RenameField(
@@ -85,7 +80,7 @@ class Migration(migrations.Migration):
 				('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
 				('probability', models.PositiveSmallIntegerField()),
 				('message', models.OneToOneField(on_delete=models.deletion.CASCADE, related_name='+', to='mln.messagetemplate')),
-				('module', models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='friend_messages', to='mln.iteminfo')),
+				('module_item', models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='friend_messages', to='mln.iteminfo')),
 			],
 		),
 	]
