@@ -113,40 +113,42 @@ class Command(BaseCommand):
 				t[ModuleHarvestYield].append(ModuleHarvestYield(item_id=id, yield_item_id=yield_item_id, max_yield=max_yield, yield_per_day=yield_per_day, clicks_per_yield=clicks_per_yield))
 
 				# Guest yield info --> ModuleGuestYield
-				for guest_yield in yield_elem.findAll("guestYield"): 
+				for guest_yield in yield_elem.findall("guestYield/items"): 
 					probability = 100  # owner yields do have probability, but they're not in the XML
 					item_id = int(guest_yield.get("itemID"))
 					qty = int(guest_yield.get("qty"))
 					t[ModuleGuestYield].append(ModuleGuestYield(module_item_id=id, item_id=item_id, qty=qty, probability=probability))
 
 				# Owner yield info --> ModuleOwnerYield
-				for owner_yield in yield_elem.findAll("ownerYield"): 
+				for owner_yield in yield_elem.findall("ownerYield/items"): 
 					probability = int(owner_yield.get("success", "100"))
 					item_id = int(owner_yield.get("itemID"))
 					qty = int(owner_yield.get("qty"))
 					t[ModuleOwnerYield].append(ModuleOwnerYield(module_item_id=id, item_id=item_id, qty=qty, probability=probability))
 
 				# execution cost info --> ModuleExecutionCost
-				for execution_cost in yield_elem.findAll("guestCost"):
+				for execution_cost in yield_elem.findall("guestCost/items"):
 					cost_item_id = int(execution_cost.get("itemID"))
 					cost_qty = int(execution_cost.get("qty"))
 					t[ModuleExecutionCost].append(ModuleExecutionCost(module_item_id=id, item_id=cost_item_id, qty=cost_qty))
 
 				# setup cost info --> ModuleSetupCost
-				for setup_cost in yield_elem.findAll("ownerLaunchCost"):
+				for setup_cost in yield_elem.findall("ownerLaunchCost/items"):
 					cost_item_id = int(setup_cost.get("itemID"))
 					cost_qty = int(setup_cost.get("qty"))
 					t[ModuleSetupCost].append(ModuleSetupCost(module_item_id=id, item_id=cost_item_id, qty=cost_qty))
 
 				# Messages (with items) sent to users on the module owner's friendlist
-				for friend_yield in yield_elem.findAll("friendYield"): 
+				for friend_yield in yield_elem.findall("friendYield/items"): 
 					item_id = int(friend_yield.get("itemID"))
 					qty = int(friend_yield.get("qty"))
 					probability = 100  # not in the XML data
+					# We need to explicitly check for duplicates here because we create a new MessageTemplate otherwise.
+					# There is no other way to detect if a MessageTemplate is being used for a ModuleMessage.
+					if ModuleMessage.objects.filter(module_item_id=id).exists(): continue
 					message_placeholder = MessageTemplate.objects.create(body_id=46304)  # Message body placeholder
 					t[MessageTemplate].append(message_placeholder)
 					t[MessageTemplateAttachment].append(MessageTemplateAttachment(template_id=message_placeholder.id, item_id=item_id, qty=qty))
-					attachment = t[MessageTemplateAttachment][-1]
 					t[ModuleMessage].append(ModuleMessage(module_item_id=id, message_id=message_placeholder.id, probability=probability))
 
 		for question_elem in xml.findall("questions/question"):
