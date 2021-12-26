@@ -83,4 +83,9 @@ class Migration(migrations.Migration):
 				('module_item', models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='friend_messages', to='mln.iteminfo')),
 			],
 		),
+
+		migrations.AddConstraint(
+		  model_name='modulemessage',
+		  constraint=models.UniqueConstraint(fields=('module_item',), name='module_message_unique_module_item'),
+		),
 	]

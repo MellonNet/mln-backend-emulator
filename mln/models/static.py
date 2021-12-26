@@ -290,6 +290,9 @@ class ModuleMessage(models.Model):
 	message = models.OneToOneField(MessageTemplate, related_name="+", on_delete=models.CASCADE)
 	probability = models.PositiveSmallIntegerField()
 
+	class Meta:
+		constraints = (models.UniqueConstraint(fields=("module_item",), name="module_message_unique_module_item"),)
+
 class ModuleOwnerYield(Stack): 
 	"""
 	Defines the item(s) granted to the owner of the module when clicked. 
