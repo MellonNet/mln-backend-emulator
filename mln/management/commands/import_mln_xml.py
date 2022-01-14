@@ -65,6 +65,7 @@ class Command(BaseCommand):
 				text = body.get("text")
 				t[MessageBody].append(MessageBody(id=id, category_id=category_id, subject=subject, text=text))
 
+		MessageBody.objects.update_or_create(id=1, category_id=1, subject="Placeholder", text="This should not appear")
 		for body_elem in xml.findall("messages/category/body"):
 			from_id = int(body_elem.get("id"))
 			for easy_reply in body_elem.findall("easyReplies/easyReply"):
@@ -146,7 +147,7 @@ class Command(BaseCommand):
 					# We need to explicitly check for duplicates here because we create a new MessageTemplate otherwise.
 					# There is no other way to detect if a MessageTemplate is being used for a ModuleMessage.
 					if ModuleMessage.objects.filter(module_item_id=id).exists(): continue
-					message_placeholder = MessageTemplate.objects.create(body_id=46304)  # Message body placeholder
+					message_placeholder = MessageTemplate.objects.create(body_id=1)  # Message body placeholder
 					t[MessageTemplate].append(message_placeholder)
 					t[MessageTemplateAttachment].append(MessageTemplateAttachment(template_id=message_placeholder.id, item_id=item_id, qty=qty))
 					t[ModuleMessage].append(ModuleMessage(module_item_id=id, message_id=message_placeholder.id, probability=probability))
