@@ -2,7 +2,7 @@ import xml.etree.ElementTree as et
 
 from django.core.management.base import BaseCommand
 
-from mln.models.static import Answer, ArcadePrize, BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleSkin, ModuleYieldInfo, StartingStack, Question
+from mln.models.static import Answer, BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleGuestYield, ModuleHarvestYield, ModuleInfo, ModuleMessage, ModuleOwnerYield, ModuleSetupCost, ModuleSkin, StartingStack, Question
 
 href_types = {
 	"Concert I Arcade Game": ModuleEditorType.CONCERT_I_ARCADE,
@@ -39,12 +39,39 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		EasyReply = MessageBody.easy_replies.through
-		tables = ItemInfo, BlueprintInfo, BlueprintRequirement, ModuleInfo, ModuleYieldInfo, ArcadePrize, ModuleExecutionCost, ModuleSetupCost, MessageBodyCategory, MessageBody, EasyReply, Question, Answer, Color, ModuleSkin, StartingStack
+		tables = ItemInfo, BlueprintInfo, BlueprintRequirement, MessageTemplate, MessageTemplateAttachment, ModuleInfo, ModuleExecutionCost, ModuleGuestYield, ModuleHarvestYield, ModuleMessage, ModuleOwnerYield, ModuleSetupCost, MessageBodyCategory, MessageBody, EasyReply, Question, Answer, Color, ModuleSkin, StartingStack
 		t = {}
 		for table in tables:
 			t[table] = []
 
 		xml = et.parse(options["path"])
+
+		for category in xml.findall("messages/category"):
+			category_id = int(category.get("id"))
+			name = category.get("name")
+			hidden = category.get("hidden") is not None
+			background_color = int(category.get("Category_Background_Color"), 16)
+			button_color = category.get("Category_Button_Color").strip()
+			button_color = int(button_color, 16) if button_color else 0
+			text_color = category.get("Category_Text_Color").strip()
+			text_color = int(text_color, 16) if text_color else 0
+			t[MessageBodyCategory].append(MessageBodyCategory(id=category_id, name=name, hidden=hidden, background_color=background_color, button_color=button_color, text_color=text_color))
+
+			for body in category:
+				id = int(body.get("id"))
+				subject = body.get("subject")
+				if subject == "":
+					continue
+				text = body.get("text")
+				t[MessageBody].append(MessageBody(id=id, category_id=category_id, subject=subject, text=text))
+
+		MessageBody.objects.update_or_create(id=1, category_id=1, subject="Placeholder", text="This should not appear")
+		for body_elem in xml.findall("messages/category/body"):
+			from_id = int(body_elem.get("id"))
+			for easy_reply in body_elem.findall("easyReplies/easyReply"):
+				to_id = int(easy_reply.get("id"))
+				t[EasyReply].append(EasyReply(from_messagebody_id=from_id, to_messagebody_id=to_id))
+
 
 		for item_info in xml.findall("items/item"):
 			id = int(item_info.get("id"))
@@ -75,61 +102,54 @@ class Command(BaseCommand):
 				t[ModuleInfo].append(ModuleInfo(item_id=id, is_executable=is_executable, editor_type=editor_type))
 
 				yield_elem = item_info.find("yield")
-				if yield_elem is not None:
-					yield_item_id = int(yield_elem.get("itemId"))
-					if yield_item_id == 0:
-						continue # weird trophy room
-					max_yield = int(yield_elem.get("maxPerDay"))
-					yield_per_day = int(yield_elem.get("perDay"))
-					clicks_per_yield = int(yield_elem.get("voteAmount"))
-					t[ModuleYieldInfo].append(ModuleYieldInfo(item_id=id, yield_item_id=yield_item_id, max_yield=max_yield, yield_per_day=yield_per_day, clicks_per_yield=clicks_per_yield))
+				if yield_elem is None: continue
 
-					guest_yield = yield_elem.find("guestYield")
-					if guest_yield is not None:
-						for yield_stack in guest_yield:
-							if yield_stack.get("successRate") is None:
-								continue
-							prize_item_id = int(yield_stack.get("itemID"))
-							prize_qty = int(yield_stack.get("qty"))
-							success_rate = int(yield_stack.get("successRate"))
-							t[ArcadePrize].append(ArcadePrize(module_item_id=id, item_id=prize_item_id, qty=prize_qty, success_rate=success_rate))
-					guest_cost = yield_elem.find("guestCost")
-					if guest_cost is not None:
-						for cost in guest_cost:
-							cost_item_id = int(cost.get("itemID"))
-							cost_qty = int(cost.get("qty"))
-							t[ModuleExecutionCost].append(ModuleExecutionCost(module_item_id=id, item_id=cost_item_id, qty=cost_qty))
-					owner_launch_cost = yield_elem.find("ownerLaunchCost")
-					if owner_launch_cost is not None:
-						for cost in owner_launch_cost:
-							cost_item_id = int(cost.get("itemID"))
-							cost_qty = int(cost.get("qty"))
-							t[ModuleSetupCost].append(ModuleSetupCost(module_item_id=id, item_id=cost_item_id, qty=cost_qty))
+				# Harvest info --> ModuleHarvestYield
+				yield_item_id = int(yield_elem.get("itemId"))
+				if yield_item_id == 0:  # special case for trophy room modules
+					continue 
+				max_yield = int(yield_elem.get("maxPerDay"))
+				yield_per_day = int(yield_elem.get("perDay"))
+				clicks_per_yield = int(yield_elem.get("voteAmount"))
+				t[ModuleHarvestYield].append(ModuleHarvestYield(item_id=id, yield_item_id=yield_item_id, max_yield=max_yield, yield_per_day=yield_per_day, clicks_per_yield=clicks_per_yield))
 
-		for category in xml.findall("messages/category"):
-			category_id = int(category.get("id"))
-			name = category.get("name")
-			hidden = category.get("hidden") is not None
-			background_color = int(category.get("Category_Background_Color"), 16)
-			button_color = category.get("Category_Button_Color").strip()
-			button_color = int(button_color, 16) if button_color else 0
-			text_color = category.get("Category_Text_Color").strip()
-			text_color = int(text_color, 16) if text_color else 0
-			t[MessageBodyCategory].append(MessageBodyCategory(id=category_id, name=name, hidden=hidden, background_color=background_color, button_color=button_color, text_color=text_color))
+				# Guest yield info --> ModuleGuestYield
+				for guest_yield in yield_elem.findall("guestYield/items"): 
+					probability = 100  # owner yields do have probability, but they're not in the XML
+					item_id = int(guest_yield.get("itemID"))
+					qty = int(guest_yield.get("qty"))
+					t[ModuleGuestYield].append(ModuleGuestYield(module_item_id=id, item_id=item_id, qty=qty, probability=probability))
 
-			for body in category:
-				id = int(body.get("id"))
-				subject = body.get("subject")
-				if subject == "":
-					continue
-				text = body.get("text")
-				t[MessageBody].append(MessageBody(id=id, category_id=category_id, subject=subject, text=text))
+				# Owner yield info --> ModuleOwnerYield
+				for owner_yield in yield_elem.findall("ownerYield/items"): 
+					probability = int(owner_yield.get("success", "100"))
+					item_id = int(owner_yield.get("itemID"))
+					qty = int(owner_yield.get("qty"))
+					t[ModuleOwnerYield].append(ModuleOwnerYield(module_item_id=id, item_id=item_id, qty=qty, probability=probability))
 
-		for body_elem in xml.findall("messages/category/body"):
-			from_id = int(body_elem.get("id"))
-			for easy_reply in body_elem.findall("easyReplies/easyReply"):
-				to_id = int(easy_reply.get("id"))
-				t[EasyReply].append(EasyReply(from_messagebody_id=from_id, to_messagebody_id=to_id))
+				# execution cost info --> ModuleExecutionCost
+				for execution_cost in yield_elem.findall("guestCost/items"):
+					cost_item_id = int(execution_cost.get("itemID"))
+					cost_qty = int(execution_cost.get("qty"))
+					t[ModuleExecutionCost].append(ModuleExecutionCost(module_item_id=id, item_id=cost_item_id, qty=cost_qty))
+
+				# setup cost info --> ModuleSetupCost
+				for setup_cost in yield_elem.findall("ownerLaunchCost/items"):
+					cost_item_id = int(setup_cost.get("itemID"))
+					cost_qty = int(setup_cost.get("qty"))
+					t[ModuleSetupCost].append(ModuleSetupCost(module_item_id=id, item_id=cost_item_id, qty=cost_qty))
+
+				# Messages (with items) sent to users on the module owner's friendlist
+				for friend_yield in yield_elem.findall("friendYield/items"): 
+					item_id = int(friend_yield.get("itemID"))
+					qty = int(friend_yield.get("qty"))
+					probability = 100  # not in the XML data
+					# We need to explicitly check for duplicates here because we create a new MessageTemplate otherwise.
+					# There is no other way to detect if a MessageTemplate is being used for a ModuleMessage.
+					if ModuleMessage.objects.filter(module_item_id=id).exists(): continue
+					message_placeholder = MessageTemplate.objects.create(body_id=1)  # Message body placeholder
+					t[MessageTemplateAttachment].append(MessageTemplateAttachment(template_id=message_placeholder.id, item_id=item_id, qty=qty))
+					t[ModuleMessage].append(ModuleMessage(module_item_id=id, message_id=message_placeholder.id, probability=probability))
 
 		for question_elem in xml.findall("questions/question"):
 			q_id = int(question_elem.get("id"))
@@ -155,6 +175,6 @@ class Command(BaseCommand):
 			t[StartingStack].append(StartingStack(item_id=item_id, qty=qty))
 
 		for key, value in t.items():
-			key.objects.bulk_create(value)
+			key.objects.bulk_create(value, ignore_conflicts=True)
 
 		print("Import successful.")

@@ -8,7 +8,7 @@ from django.db import models
 from django.utils.timezone import now
 
 from .dynamic import DAY, get_or_none
-from .static import ArcadePrize, ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleYieldInfo
+from .static import ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleHarvestYield, ModuleInfo, ModuleSetupCost
 from ..services.inventory import add_inv_item, remove_inv_item
 
 class Module(models.Model):
@@ -42,7 +42,7 @@ class Module(models.Model):
 		"""Calculate the yield of this module (how many items you can harvest), as well as the time and clicks that remain."""
 		if self.is_setupable() and not self.is_setup:
 			return 0, 0, 0
-		yield_info = get_or_none(ModuleYieldInfo, item_id=self.item_id)
+		yield_info = get_or_none(ModuleHarvestYield, item_id=self.item_id)
 		if yield_info is None:
 			return 0, 0, 0
 		time_since_harvest = now() - self.last_harvest_time
@@ -65,7 +65,7 @@ class Module(models.Model):
 
 	def get_yield_item_id(self):
 		"""Get the id of the item this module yields."""
-		return ModuleYieldInfo.objects.get(item_id=self.item_id).yield_item_id
+		return ModuleHarvestYield.objects.get(item_id=self.item_id).yield_item_id
 
 	def harvest(self):
 		"""
@@ -147,7 +147,7 @@ class Module(models.Model):
 		"""Select a random arcade prize for an arcade winner."""
 		chance = random.randrange(100)
 		sum = 0
-		for prize in ArcadePrize.objects.filter(module_item_id=self.item_id):
+		for prize in self.guest_yields.all():
 			sum += prize.success_rate
 			if sum > chance:
 				add_inv_item(user, prize.item_id, prize.qty)
