@@ -65,7 +65,9 @@ class Command(BaseCommand):
 				text = body.get("text")
 				t[MessageBody].append(MessageBody(id=id, category_id=category_id, subject=subject, text=text))
 
+		MessageBodyCategory.objects.update_or_create(id=1, name="Placeholder", hidden=True, background_color=0, button_color=0, text_color=0)
 		MessageBody.objects.update_or_create(id=1, category_id=1, subject="Placeholder", text="This should not appear")
+
 		for body_elem in xml.findall("messages/category/body"):
 			from_id = int(body_elem.get("id"))
 			for easy_reply in body_elem.findall("easyReplies/easyReply"):
@@ -107,21 +109,21 @@ class Command(BaseCommand):
 				# Harvest info --> ModuleHarvestYield
 				yield_item_id = int(yield_elem.get("itemId"))
 				if yield_item_id == 0:  # special case for trophy room modules
-					continue 
+					continue
 				max_yield = int(yield_elem.get("maxPerDay"))
 				yield_per_day = int(yield_elem.get("perDay"))
 				clicks_per_yield = int(yield_elem.get("voteAmount"))
 				t[ModuleHarvestYield].append(ModuleHarvestYield(item_id=id, yield_item_id=yield_item_id, max_yield=max_yield, yield_per_day=yield_per_day, clicks_per_yield=clicks_per_yield))
 
 				# Guest yield info --> ModuleGuestYield
-				for guest_yield in yield_elem.findall("guestYield/items"): 
+				for guest_yield in yield_elem.findall("guestYield/items"):
 					probability = 100  # owner yields do have probability, but they're not in the XML
 					item_id = int(guest_yield.get("itemID"))
 					qty = int(guest_yield.get("qty"))
 					t[ModuleGuestYield].append(ModuleGuestYield(module_item_id=id, item_id=item_id, qty=qty, probability=probability))
 
 				# Owner yield info --> ModuleOwnerYield
-				for owner_yield in yield_elem.findall("ownerYield/items"): 
+				for owner_yield in yield_elem.findall("ownerYield/items"):
 					probability = int(owner_yield.get("success", "100"))
 					item_id = int(owner_yield.get("itemID"))
 					qty = int(owner_yield.get("qty"))
@@ -140,7 +142,7 @@ class Command(BaseCommand):
 					t[ModuleSetupCost].append(ModuleSetupCost(module_item_id=id, item_id=cost_item_id, qty=cost_qty))
 
 				# Messages (with items) sent to users on the module owner's friendlist
-				for friend_yield in yield_elem.findall("friendYield/items"): 
+				for friend_yield in yield_elem.findall("friendYield/items"):
 					item_id = int(friend_yield.get("itemID"))
 					qty = int(friend_yield.get("qty"))
 					probability = 100  # not in the XML data
