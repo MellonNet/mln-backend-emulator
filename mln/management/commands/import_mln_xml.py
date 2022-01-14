@@ -148,7 +148,6 @@ class Command(BaseCommand):
 					# There is no other way to detect if a MessageTemplate is being used for a ModuleMessage.
 					if ModuleMessage.objects.filter(module_item_id=id).exists(): continue
 					message_placeholder = MessageTemplate.objects.create(body_id=1)  # Message body placeholder
-					t[MessageTemplate].append(message_placeholder)
 					t[MessageTemplateAttachment].append(MessageTemplateAttachment(template_id=message_placeholder.id, item_id=item_id, qty=qty))
 					t[ModuleMessage].append(ModuleMessage(module_item_id=id, message_id=message_placeholder.id, probability=probability))
 
