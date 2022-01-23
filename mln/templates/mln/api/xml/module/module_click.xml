@@ -1,0 +1,22 @@
+{% extends "../base.xml" %}
+
+{% block content %}
+<votes remaining="{{ available_votes }}" />
+
+{# The below refer to outcomes of executing the module: #}
+{#   competitionResult.guestWon: Did the guest get anything? #}
+{#   inventory.added.itemid: The item that the guest yielded #}
+{#   inventory.added.qty: How many items the guest received. #} 
+
+{% block content2 %}
+{% if result %}
+<competitionResult guestWon="True" />
+<inventory>
+	<added itemid="{{ result.item_id }}" qty="{{ result.qty }}" />
+</inventory>
+{% endif %}
+<moduleState isSetup="{{ module.is_clickable }}" />
+
+{% endblock %}
+
+{% endblock %}

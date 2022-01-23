@@ -1,7 +1,7 @@
 {% load mln_utils %}
 {% for module in page_owner|get_valid_modules %}
 	<item type="module" itemID="{{ module.item_id }}" instanceID="{{ module.id }}"
-		{% if module.is_setup %}
+		{% if module.is_clickable %}
 		isSetup="True"
 		{% endif %}
 	>

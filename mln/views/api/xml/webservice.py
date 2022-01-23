@@ -19,7 +19,7 @@ from .friend import handle_friend_process_blocking, handle_friend_process_invita
 from .page import handle_page_get_new, handle_page_save_layout, handle_page_save_options
 from .misc import handle_blueprint_use, handle_inventory_module_get, handle_user_get_my_avatar, handle_user_save_my_avatar, handle_user_save_my_statements
 from .message import handle_message_delete, handle_message_detach, handle_message_easy_reply, handle_message_easy_reply_with_attachments, handle_message_get, handle_message_list, handle_message_send, handle_message_send_with_attachment
-from .module import handle_get_module_bgs, handle_module_collect_winnings, handle_module_details, handle_module_execute, handle_module_harvest, handle_module_setup, handle_module_teardown, handle_module_vote
+from .module import handle_get_module_bgs, handle_module_click, handle_module_collect_winnings, handle_module_details, handle_module_harvest, handle_module_setup, handle_module_teardown
 from .module_settings import handle_module_save_settings
 
 log = logging.getLogger(__name__)
@@ -53,11 +53,11 @@ handlers = {
 	"MessageSendWithAttachment": handle_message_send_with_attachment,
 	"ModuleCollectWinnings": (handle_module_collect_winnings, "mln/api/xml/module/module_collect_winnings.xml"),
 	"ModuleDetails": (handle_module_details, "mln/api/xml/module/module_details.xml"),
-	"ModuleExecute": (handle_module_execute, "mln/api/xml/module/module_execute.xml"),
+	"ModuleExecute": (handle_module_click, "mln/api/xml/module/module_click.xml"),
 	"ModuleHarvest": handle_module_harvest,
 	"ModuleSaveSettings": (handle_module_save_settings, "mln/api/xml/module/module_save_settings.xml"),
 	"ModuleSetup": handle_module_setup,
-	"ModuleVote": (handle_module_vote, "mln/api/xml/module/module_vote.xml"),
+	"ModuleVote": (handle_module_click, "mln/api/xml/module/module_click.xml"),
 	"ModuleTeardown": handle_module_teardown,
 	"UserGetMyAvatar": (handle_user_get_my_avatar, "mln/api/xml/misc/user_get_my_avatar.xml"),
 	"UserSaveMyAvatar": handle_user_save_my_avatar,

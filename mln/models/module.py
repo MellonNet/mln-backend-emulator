@@ -8,8 +8,10 @@ from django.db import models
 from django.utils.timezone import now
 
 from .dynamic import DAY, get_or_none
-from .static import ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleHarvestYield, ModuleInfo, ModuleSetupCost
+from .dynamic import FriendshipStatus
+from .static import ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleGuestYield, ModuleHarvestYield, ModuleInfo, ModuleMessage, ModuleOwnerYield, ModuleSetupCost
 from ..services.inventory import add_inv_item, remove_inv_item
+from ..services.message import send_template
 
 class Module(models.Model):
 	"""
@@ -23,7 +25,7 @@ class Module(models.Model):
 	last_harvest_time = models.DateTimeField(default=now)
 	clicks_since_last_harvest = models.PositiveSmallIntegerField(default=0)
 	total_clicks = models.PositiveIntegerField(default=0)
-	is_setup = models.BooleanField(default=False) # this is actually only relevant for some modules, refactor?
+	is_setup = models.BooleanField(null=True, blank=True)
 
 	class Meta:
 		constraints = (models.UniqueConstraint(fields=("owner", "pos_x", "pos_y"), name="module_unique_owner_pos"),)
@@ -59,6 +61,15 @@ class Module(models.Model):
 		final_yield = min(time_yield + click_yield, yield_info.max_yield)
 		return final_yield, time_remainder, click_remainder
 
+	def _get_random_friend(self): 
+		# Wouldn't help to use Q objects because we wouldn't know which user is the friend
+		incoming = self.owner.incoming_friendships.filter(from_user__profile__is_networker=False, status=FriendshipStatus.FRIEND)
+		outgoing = self.owner.outgoing_friendships.filter(to_user__profile__is_networker=False, status=FriendshipStatus.FRIEND)
+		incoming_friends = [friendship.from_user for friendship in incoming]
+		outgoing_friends = [friendship.to_user for friendship in outgoing]
+		friends = incoming_friends + outgoing_friends
+		return random.choice(friends)
+
 	def calc_yield_qty(self):
 		"""Calculate the yield of this module."""
 		return self._calc_yield_info()[0]
@@ -66,6 +77,11 @@ class Module(models.Model):
 	def get_yield_item_id(self):
 		"""Get the id of the item this module yields."""
 		return ModuleHarvestYield.objects.get(item_id=self.item_id).yield_item_id
+
+	def is_clickable(self): 
+		"""Returns True if the user set up their module, or it doesn't need setup"""
+		result = self.is_setup is True or self.is_setup is None
+		return result
 
 	def harvest(self):
 		"""
@@ -79,21 +95,6 @@ class Module(models.Model):
 		self.clicks_since_last_harvest = click_remainder
 		self.is_setup = False
 		self.save()
-
-	def vote(self, voter):
-		"""
-		Vote on the module. Add a click to the module, and remove one from the voter's available votes.
-		Raise ValueError if the voter is the module owner.
-		"""
-		if voter == self.owner:
-			raise ValueError("Can't vote on own module")
-		if voter.profile.available_votes <= 0:
-			raise RuntimeError("Voter has no votes left")
-		self.clicks_since_last_harvest += 1
-		self.total_clicks += 1
-		self.save()
-		voter.profile.available_votes -= 1
-		voter.profile.save()
 
 	def setup(self):
 		"""
@@ -126,22 +127,40 @@ class Module(models.Model):
 		self.is_setup = False
 		self.save()
 
-	def execute(self, executer):
-		"""Execute the module. If there is an execution cost, remove the cost from the user."""
-		self.vote(executer)
-		if ModuleSetupTrade in self.get_settings_classes():
-			trade = ModuleSetupTrade.objects.get(module=self)
-			remove_inv_item(executer, trade.request_item_id, trade.request_qty)
-			add_inv_item(executer, trade.give_item_id, trade.give_qty)
-			if self.get_info().editor_type == ModuleEditorType.TRADE:
-				add_inv_item(self.owner, trade.request_item_id, trade.request_qty)
-				self.is_setup = False
-			# give item was already taken from owner at setup
-		else:
-			costs = ModuleExecutionCost.objects.filter(module_item_id=self.item_id)
-			for cost in costs:
-				remove_inv_item(executer, cost.item_id, cost.qty)
+	def click(self, clicker): 
+		"""Updates clicks and distributes relevant rewards."""
+		if clicker == self.owner:  # can't click on own module
+			raise ValueError("Can't vote on own module")
+		elif clicker.profile.available_votes <= 0:  # must have clicks
+			raise RuntimeError("Voter has no votes left")
+		elif not self.is_clickable(): 
+			raise RuntimeError("This module is not set up")
+		# Update clicks for both module and owner
+		clicker.profile.available_votes -= 1
+		clicker.profile.save()
+		self.clicks_since_last_harvest += 1
+		self.total_clicks += 1
+		# Distribute items to owner, clicker, and owner's friends
+		for cost in ModuleExecutionCost.objects.filter(module_item_id=self.item_id):
+			remove_inv_item(clicker, cost.item_id, cost.qty)
+		guest_yield = None
+		for guest_yield in ModuleGuestYield.objects.filter(module_item_id=self.item_id):
+			if random.random() < (guest_yield.probability / 100): 
+				add_inv_item(clicker, guest_yield.item_id, guest_yield.qty)
+		for owner_yield in ModuleOwnerYield.objects.filter(module_item_id=self.item_id):
+			if random.random() < (owner_yield.probability / 100): 
+				add_inv_item(self.owner, owner_yield.item_id, owner_yield.qty)
+		for friend_message in ModuleMessage.objects.filter(module_item_id=self.item_id):
+			if random.random() < (friend_message.probability / 100): 
+				random_friend = self._get_random_friend()
+				send_template(template=friend_reward.message, sender=self.owner, recipient=random_friend)
+		# if module was set up, take it down
+		if self.is_setup and not self.owner.profile.is_networker:
+			self.is_setup = False
 		self.save()
+		# The guest yields were already handled, no further action needed. 
+		# This value is simply returned for the front-end's convenience.
+		return guest_yield
 
 	def select_arcade_prize(self, user):
 		"""Select a random arcade prize for an arcade winner."""
