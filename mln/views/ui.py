@@ -8,12 +8,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
-from ..services.inventory import return_invalid_modules
+from ..services.inventory import refund_invalid_modules
 
 @login_required
 def private_view(request):
 	"""MLN's private view. Only available for logged in users."""
-	return_invalid_modules(request.user)
+	refund_invalid_modules(request.user)
 	return render(request, "mln/ui/private_view.html")
 
 def public_view(request, page_owner_name):

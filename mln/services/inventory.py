@@ -36,10 +36,11 @@ def remove_inv_item(user, item_id, qty=1):
 	else:
 		raise RuntimeError("%s has fewer items than the %i requested to delete" % (stack, qty))
 
-def return_invalid_modules(user): 
-	for module in user.modules.filter(Q(pos_x__isnull=True) | Q(pos_y__isnull=True)): 
+def refund_invalid_modules(user): 
+	corrupt_modules = user.modules.filter(Q(pos_x__isnull=True) | Q(pos_y__isnull=True))
+	for module in corrupt_modules: 
 		add_inv_item(user, module.item_id)
-		module.delete()
+	corrupt_modules.delete()
 
 def assert_has_item(user, item_id, qty=1, field_name=None):
 	"""
