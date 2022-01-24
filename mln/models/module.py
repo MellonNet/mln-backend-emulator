@@ -29,7 +29,7 @@ class Module(models.Model):
 		constraints = (models.UniqueConstraint(fields=("owner", "pos_x", "pos_y"), name="module_unique_owner_pos"),)
 
 	def __str__(self):
-		return "%s's %s at pos (%i, %i), %i clicks" % (self.owner, self.item.name, self.pos_x, self.pos_y, self.total_clicks)
+		return "%s's %s at pos (%s, %s), %i clicks" % (self.owner, self.item.name, self.pos_x, self.pos_y, self.total_clicks)
 
 	def get_info(self):
 		"""Get the ModuleInfo for this module."""
