@@ -1,22 +1,25 @@
 {% extends "../base.xml" %}
 
+{# The votes need to be in a block named "content" #}
 {% block content %}
 <votes remaining="{{ available_votes }}" />
 
-{# The below refer to outcomes of executing the module: #}
-{#   competitionResult.guestWon: Did the guest get anything? #}
-{#   inventory.added.itemid: The item that the guest yielded #}
-{#   inventory.added.qty: How many items the guest received. #} 
-
+{# ...while the animations need to be in a nested block named "content2" #}
 {% block content2 %}
+<moduleState isSetup="{{ module.is_clickable }}" />
+
+{# The below refer to outcomes of executing the module:       #}
+{#   competitionResult.guestWon: Did the guest get anything?  #}
+{#     Note that "competition" here doesn't only mean battles #}
+{#   inventory.added.itemid: The item that the guest yielded  #}
+{#   inventory.added.qty: How many items the guest received.  #} 
+
 {% if result %}
 <competitionResult guestWon="True" />
 <inventory>
 	<added itemid="{{ result.item_id }}" qty="{{ result.qty }}" />
 </inventory>
 {% endif %}
-<moduleState isSetup="{{ module.is_clickable }}" />
 
 {% endblock %}
-
 {% endblock %}

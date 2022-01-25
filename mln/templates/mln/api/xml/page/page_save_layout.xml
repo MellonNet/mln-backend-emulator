@@ -1,5 +1,5 @@
 {% extends "../base.xml" %}
 {% load mln_utils %}
 {% block content %}
-{% include "./write_page_modules.xml" with page_owner=user %}
+{% include "./write_page_modules.xml" with page_owner=user viewing_user=viewing_user %}
 {% endblock %}

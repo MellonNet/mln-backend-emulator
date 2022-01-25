@@ -2,17 +2,15 @@
 
 from django.db import migrations, models
 
-
 class Migration(migrations.Migration):
+	dependencies = [
+		('mln', '0027_rename_moduleyieldinfo_moduleharvestyield'),
+	]
 
-    dependencies = [
-        ('mln', '0027_rename_moduleyieldinfo_moduleharvestyield'),
-    ]
-
-    operations = [
-        migrations.AlterField(
-            model_name='module',
-            name='is_setup',
-            field=models.BooleanField(blank=True, null=True),
-        ),
-    ]
+	operations = [
+		migrations.AlterField(
+			model_name='module',
+			name='is_setup',
+			field=models.BooleanField(blank=True, default=False, null=True),
+		),
+	]

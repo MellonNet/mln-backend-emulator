@@ -25,13 +25,19 @@ class Module(models.Model):
 	last_harvest_time = models.DateTimeField(default=now)
 	clicks_since_last_harvest = models.PositiveSmallIntegerField(default=0)
 	total_clicks = models.PositiveIntegerField(default=0)
-	is_setup = models.BooleanField(null=True, blank=True)
+	is_setup = models.BooleanField(null=True, blank=True, default=False)
 
 	class Meta:
 		constraints = (models.UniqueConstraint(fields=("owner", "pos_x", "pos_y"), name="module_unique_owner_pos"),)
 
 	def __str__(self):
 		return "%s's %s at pos (%s, %s), %i clicks" % (self.owner, self.item.name, self.pos_x, self.pos_y, self.total_clicks)
+
+	def save(self, *args, **kwargs):
+		"""Check if module isn't set up when it doesn't even need to be."""
+		if not self.is_setupable() and self.is_setup is False: 
+			self.is_setup = None
+		super().save(*args, **kwargs)
 
 	def get_info(self):
 		"""Get the ModuleInfo for this module."""
@@ -62,6 +68,7 @@ class Module(models.Model):
 		return final_yield, time_remainder, click_remainder
 
 	def _get_random_friend(self): 
+		"""Returns a random friend from the module owner's friend list."""
 		# Wouldn't help to use Q objects because we wouldn't know which user is the friend
 		incoming = self.owner.incoming_friendships.filter(from_user__profile__is_networker=False, status=FriendshipStatus.FRIEND)
 		outgoing = self.owner.outgoing_friendships.filter(to_user__profile__is_networker=False, status=FriendshipStatus.FRIEND)
@@ -79,9 +86,8 @@ class Module(models.Model):
 		return ModuleHarvestYield.objects.get(item_id=self.item_id).yield_item_id
 
 	def is_clickable(self): 
-		"""Returns True if the user set up their module, or it doesn't need setup"""
-		result = self.is_setup is True or self.is_setup is None
-		return result
+		"""Returns True if the owner set up this module, or it doesn't need setup."""
+		return self.is_setup is None or self.is_setup is True 
 
 	def harvest(self):
 		"""
@@ -99,10 +105,14 @@ class Module(models.Model):
 	def setup(self):
 		"""
 		Set up the module with items.
+
+		Raises a RuntimeError if the module is already setup, or cannot be setup.
 		Raise RuntimeError if the owner doesn't have the required items in their inventory.
 		"""
 		if self.is_setup:
 			return
+		if not self._needs_setup():
+			raise RuntimeError("Module is not setupable.")
 		if ModuleSetupTrade in self.get_settings_classes():
 			trade = ModuleSetupTrade.objects.get(module=self)
 			remove_inv_item(self.owner, trade.give_item_id, trade.give_qty)
@@ -115,7 +125,7 @@ class Module(models.Model):
 		self.save()
 
 	def teardown(self):
-		"""Remove the set up items."""
+		"""Remove the set up items, raising an error if it's not setup."""
 		if not self.is_setup:
 			return
 		if ModuleSetupTrade in self.get_settings_classes():
@@ -127,20 +137,22 @@ class Module(models.Model):
 		self.is_setup = False
 		self.save()
 
-	def click(self, clicker): 
-		"""Updates clicks and distributes relevant rewards."""
-		if clicker == self.owner:  # can't click on own module
+	def _update_clicks(self, clicker):
+		"""Updates clicks for both the clicker and the module."""
+		if clicker == self.owner:  # user can't click on own module
 			raise ValueError("Can't vote on own module")
-		elif clicker.profile.available_votes <= 0:  # must have clicks
+		elif clicker.profile.available_votes <= 0:  # user must have clicks
 			raise RuntimeError("Voter has no votes left")
-		elif not self.is_clickable(): 
+		elif not self.is_clickable():  # module must be set-up
 			raise RuntimeError("This module is not set up")
-		# Update clicks for both module and owner
 		clicker.profile.available_votes -= 1
 		clicker.profile.save()
 		self.clicks_since_last_harvest += 1
 		self.total_clicks += 1
-		# Distribute items to owner, clicker, and owner's friends
+		self.save()
+
+	def _distribute_items(self, clicker): 
+		"""Distribute items to owner, clicker, and owner's friends."""
 		for cost in ModuleExecutionCost.objects.filter(module_item_id=self.item_id):
 			remove_inv_item(clicker, cost.item_id, cost.qty)
 		guest_yield = None
@@ -153,11 +165,17 @@ class Module(models.Model):
 		for friend_message in ModuleMessage.objects.filter(module_item_id=self.item_id):
 			if random.random() < (friend_message.probability / 100): 
 				random_friend = self._get_random_friend()
-				send_template(template=friend_reward.message, sender=self.owner, recipient=random_friend)
+				send_template(template=friend_message.message, sender=self.owner, recipient=random_friend)
+		return guest_yield
+
+	def click(self, clicker): 
+		"""Updates clicks and distributes relevant rewards."""
+		self._update_clicks(clicker)
+		guest_yield = self._distribute_items(clicker)
 		# if module was set up, take it down
 		if self.is_setup and not self.owner.profile.is_networker:
 			self.is_setup = False
-		self.save()
+			self.save()
 		# The guest yields were already handled, no further action needed. 
 		# This value is simply returned for the front-end's convenience.
 		return guest_yield
