@@ -227,10 +227,4 @@ def handle_module_save_settings(user, request):
 	setup = request.find("result/setup")
 	for cls in module.get_settings_classes():
 		_deserialize_cls(cls, module, save, setup)
-
-	info = module.get_info()
-	if info.is_executable and not module.is_setupable():
-		module.is_setup = True
-		module.save()
-
 	return {"module": module}
