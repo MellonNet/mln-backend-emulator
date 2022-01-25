@@ -35,13 +35,13 @@ class Module(models.Model):
 
 	def save(self, *args, **kwargs):
 		"""Check if module isn't set up when it doesn't even need to be."""
-		if not self.is_setupable() and self.is_setup is False: 
+		if not self._is_setupable() and self.is_setup is False: 
 			self.is_setup = None
 		super().save(*args, **kwargs)
 
 	def _calc_yield_info(self):
 		"""Calculate the yield of this module (how many items you can harvest), as well as the time and clicks that remain."""
-		if self.is_setupable() and not self.is_setup:
+		if self._is_setupable() and not self.is_setup:
 			return 0, 0, 0
 		yield_info = get_or_none(ModuleHarvestYield, item_id=self.item_id)
 		if yield_info is None:
@@ -62,20 +62,35 @@ class Module(models.Model):
 
 	def _distribute_items(self, clicker): 
 		"""Distribute items to owner, clicker, and owner's friends."""
-		for cost in ModuleExecutionCost.objects.filter(module_item_id=self.item_id):
+		for cost in self.item.execution_costs.all():
 			remove_inv_item(clicker, cost.item_id, cost.qty)
-		guest_yield = None
-		for guest_yield in ModuleGuestYield.objects.filter(module_item_id=self.item_id):
-			if random.random() < (guest_yield.probability / 100): 
-				add_inv_item(clicker, guest_yield.item_id, guest_yield.qty)
-		for owner_yield in ModuleOwnerYield.objects.filter(module_item_id=self.item_id):
+		guest_yield = self._get_guest_yield(self.item.guest_yields.all())
+		if guest_yield is not None: 
+			add_inv_item(clicker, guest_yield.item_id, guest_yield.qty)
+		for owner_yield in self.item.owner_yields.all():
 			if random.random() < (owner_yield.probability / 100): 
 				add_inv_item(self.owner, owner_yield.item_id, owner_yield.qty)
-		for friend_message in ModuleMessage.objects.filter(module_item_id=self.item_id):
+		for friend_message in self.item.friend_messages.all():
 			if random.random() < (friend_message.probability / 100): 
 				random_friend = self._get_random_friend()
 				send_template(template=friend_message.message, sender=self.owner, recipient=random_friend)
 		return guest_yield
+
+	def _get_guest_yield(self, yields):
+		if len(yields) == 0: return None  # no yield for clicking
+		elif len(yields) == 1:  # standard, one-item yield
+			result = yields[0]
+			if random.random() < (result.probability / 100): return result
+			else: return None
+		else:  # lottery
+			random_number = random.randrange(100)
+			sum = 0
+			for prize in yields: 
+				sum += prize.probability
+				if sum > random_number: 
+					return prize
+			else: 
+				raise RuntimeError(f"Couldn't choose a guest yield for {self}")
 
 	def _get_info(self):
 		"""Get the ModuleInfo for this module."""
@@ -145,23 +160,12 @@ class Module(models.Model):
 		add_inv_item(self.owner, self.get_yield_item_id(), qty=harvest_qty)
 		self.last_harvest_time = now() - time_remainder
 		self.clicks_since_last_harvest = click_remainder
-		self.is_setup = False
+		self.is_setup = False  # will automatically be fixed if not _is_setupable
 		self.save()
 
 	def is_clickable(self): 
 		"""Returns True if the owner set up this module, or it doesn't need setup."""
 		return self.is_setup is None or self.is_setup is True 
-
-	def select_arcade_prize(self, user):
-		"""Select a random arcade prize for an arcade winner."""
-		chance = random.randrange(100)
-		sum = 0
-		for prize in self.guest_yields.all():
-			sum += prize.success_rate
-			if sum > chance:
-				add_inv_item(user, prize.item_id, prize.qty)
-				return prize
-		raise RuntimeError("Should have chosen a prize but didn't for some reason")
 
 	def setup(self):
 		"""
