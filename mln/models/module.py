@@ -62,21 +62,32 @@ class Module(models.Model):
 
 	def _distribute_items(self, clicker): 
 		"""Distribute items to owner, clicker, and owner's friends."""
-		for cost in self.item.execution_costs.all():
-			remove_inv_item(clicker, cost.item_id, cost.qty)
-		guest_yield = self._get_guest_yield(self.item.guest_yields.all())
-		if guest_yield is not None: 
-			add_inv_item(clicker, guest_yield.item_id, guest_yield.qty)
-		for owner_yield in self.item.owner_yields.all():
-			if random.random() < (owner_yield.probability / 100): 
-				add_inv_item(self.owner, owner_yield.item_id, owner_yield.qty)
-		for friend_message in self.item.friend_messages.all():
-			if random.random() < (friend_message.probability / 100): 
-				random_friend = self._get_random_friend()
-				send_template(template=friend_message.message, sender=self.owner, recipient=random_friend)
-		return guest_yield
+		if ModuleSetupTrade in self.get_settings_classes():  # handle trades
+			trade = self.setup_trade
+			remove_inv_item(clicker, trade.request_item.id, trade.request_qty)
+			add_inv_item(self.owner, trade.request_item.id, trade.request_qty)
+			add_inv_item(clicker, trade.give_item.id, trade.give_qty)
 
-	def _get_guest_yield(self, yields):
+		for cost in self.item.execution_costs.all():  # take from clicker
+			remove_inv_item(clicker, cost.item_id, cost.qty)
+
+		guest_yield = self._get_yield(self.item.guest_yields.all())
+		if guest_yield is not None:  # give to clicker
+			add_inv_item(clicker, guest_yield.item_id, guest_yield.qty)
+
+		owner_yield = self._get_yield(self.item.owner_yields.all())
+		if owner_yield is not None:  # give to owner
+			add_inv_item(self.owner, owner_yield.item_id, owner_yield.qty)
+
+		friend_message = self._get_yield(self.item.friend_messages.all())
+		if friend_message is not None:  # give to friend
+			random_friend = get_random_friend()
+			send_template(template=friend_message.message, sender=self.owner, recipient=random_friend)
+
+		return guest_yield  # returned for the frontend
+
+	def _get_yield(self, yields):
+		"""Chooses an available yield based on its assigned probability."""
 		if len(yields) == 0: return None  # no yield for clicking
 		elif len(yields) == 1:  # standard, one-item yield
 			result = yields[0]
@@ -90,11 +101,7 @@ class Module(models.Model):
 				if sum > random_number: 
 					return prize
 			else: 
-				raise RuntimeError(f"Couldn't choose a guest yield for {self}")
-
-	def _get_info(self):
-		"""Get the ModuleInfo for this module."""
-		return ModuleInfo.objects.get(item_id=self.item_id)
+				raise RuntimeError(f"Couldn't choose a yield for {self}. Possible yields: {yields}")
 
 	def _get_random_friend(self): 
 		"""Returns a random friend from the module owner's friend list."""
@@ -107,7 +114,7 @@ class Module(models.Model):
 		return random.choice(friends)
 
 	def _is_setupable(self):
-		return self._get_info().editor_type == ModuleEditorType.TRADE or ModuleSetupCost.objects.filter(module_item_id=self.item_id).exists()
+		return self.item.module_info.editor_type == ModuleEditorType.TRADE or self.item.setup_costs.exists()
 
 	def _update_clicks(self, clicker):
 		"""Updates clicks for both the clicker and the module."""
@@ -125,10 +132,7 @@ class Module(models.Model):
 
 	def get_settings_classes(self):
 		"""Get the save data classes for this module."""
-		info = self._get_info()
-		if info.editor_type is None:
-			return ()
-		return module_settings_classes[info.editor_type]
+		return module_settings_classes[self.item.module_info.editor_type]
 
 	def get_yield_item_id(self):
 		"""Get the id of the item this module yields."""
@@ -175,11 +179,11 @@ class Module(models.Model):
 		Raise RuntimeError if the owner doesn't have the required items in their inventory.
 		"""
 		if self.is_setup:
-			return
-		if not self._needs_setup():
+			return 
+		if not self._is_setupable():
 			raise RuntimeError("Module is not setupable.")
 		if ModuleSetupTrade in self.get_settings_classes():
-			trade = ModuleSetupTrade.objects.get(module=self)
+			trade = self.setup_trade
 			remove_inv_item(self.owner, trade.give_item_id, trade.give_qty)
 		else:
 			costs = ModuleSetupCost.objects.filter(module_item_id=self.item_id)
@@ -194,7 +198,7 @@ class Module(models.Model):
 		if not self.is_setup:
 			return
 		if ModuleSetupTrade in self.get_settings_classes():
-			trade = ModuleSetupTrade.objects.get(module=self)
+			trade = self.setup_trade
 			add_inv_item(self.owner, trade.give_item_id, trade.give_qty)
 		else:
 			for cost in ModuleSetupCost.objects.filter(module_item_id=self.item_id):
@@ -233,4 +237,5 @@ module_settings_classes = {
 	ModuleEditorType.STICKER_SHOPPE: (ModuleSaveGeneric, ModuleSetupTrade),
 	ModuleEditorType.TRADE: (ModuleSaveGeneric, ModuleSetupTrade),
 	ModuleEditorType.TRIO_PERFORMANCE: (ModuleSaveGeneric, ModuleSetupTrioPerformance),
+	None: (),
 }

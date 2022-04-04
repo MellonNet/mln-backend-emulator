@@ -123,6 +123,10 @@ class ModuleSetupTrade(models.Model):
 	"""
 	Save data for trade modules, including networker trade modules.
 	Saved are the item and quantity the owner offers and the item and quantity the owner seeks.
+
+	This class cannot be broken down into ModuleSetupCost, ModuleExecutionCost, etc. because
+	users can modify the costs/yields per module, whereas those classes work across all 
+	modules sharing the same ModuleInfo. 
 	"""
 	module = models.OneToOneField(Module, related_name="setup_trade", on_delete=models.CASCADE)
 	give_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE)
