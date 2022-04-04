@@ -65,7 +65,6 @@ class Command(BaseCommand):
 				text = body.get("text")
 				t[MessageBody].append(MessageBody(id=id, category_id=category_id, subject=subject, text=text))
 
-		MessageBodyCategory.objects.update_or_create(id=1, name="Placeholder", hidden=True, background_color=0, button_color=0, text_color=0)
 		MessageBody.objects.update_or_create(id=1, category_id=1, subject="Placeholder", text="This should not appear")
 
 		for body_elem in xml.findall("messages/category/body"):
