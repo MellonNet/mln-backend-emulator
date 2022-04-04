@@ -10,7 +10,7 @@ from django.utils.timezone import now
 from .dynamic import DAY, get_or_none
 from .dynamic import FriendshipStatus
 from .static import ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleGuestYield, ModuleHarvestYield, ModuleInfo, ModuleMessage, ModuleOwnerYield, ModuleSetupCost
-from ..services.inventory import add_inv_item, remove_inv_item
+from ..services.inventory import add_inv_item, assert_has_item, remove_inv_item
 from ..services.message import send_template
 
 class Module(models.Model):
@@ -64,11 +64,13 @@ class Module(models.Model):
 		"""Distribute items to owner, clicker, and owner's friends."""
 		if ModuleSetupTrade in self.get_settings_classes():  # handle trades
 			trade = self.setup_trade
+			assert_has_item(clicker, trade.request_item.id, trade.request_qty)
 			remove_inv_item(clicker, trade.request_item.id, trade.request_qty)
 			add_inv_item(self.owner, trade.request_item.id, trade.request_qty)
 			add_inv_item(clicker, trade.give_item.id, trade.give_qty)
 
 		for cost in self.item.execution_costs.all():  # take from clicker
+			assert_has_item(clicker, cost.item_id, cost.qty)
 			remove_inv_item(clicker, cost.item_id, cost.qty)
 
 		guest_yield = self._get_yield(self.item.guest_yields.all())
@@ -176,7 +178,7 @@ class Module(models.Model):
 		"""
 		Set up the module with items.
 
-		Raises a RuntimeError if the module is already setup, or cannot be setup.
+		No-op if the module is already setup, raises a RuntimeError if it cannot be setup.
 		Raise RuntimeError if the owner doesn't have the required items in their inventory.
 		"""
 		if self.is_setup:
