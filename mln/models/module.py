@@ -35,13 +35,13 @@ class Module(models.Model):
 
 	def save(self, *args, **kwargs):
 		"""Check if module isn't set up when it doesn't even need to be."""
-		if not self._is_setupable() and self.is_setup is False: 
+		if not self._needs_setup() and self.is_setup is False: 
 			self.is_setup = None
 		super().save(*args, **kwargs)
 
 	def _calc_yield_info(self):
 		"""Calculate the yield of this module (how many items you can harvest), as well as the time and clicks that remain."""
-		if self._is_setupable() and not self.is_setup:
+		if self._needs_setup() and not self.is_setup:
 			return 0, 0, 0
 		yield_info = get_or_none(ModuleHarvestYield, item_id=self.item_id)
 		if yield_info is None:
@@ -113,7 +113,7 @@ class Module(models.Model):
 		friends = incoming_friends + outgoing_friends
 		return random.choice(friends)
 
-	def _is_setupable(self):
+	def _needs_setup(self):
 		return self.item.module_info.editor_type == ModuleEditorType.TRADE or self.item.setup_costs.exists()
 
 	def _update_clicks(self, clicker):
@@ -147,7 +147,7 @@ class Module(models.Model):
 		self._update_clicks(clicker)
 		guest_yield = self._distribute_items(clicker)
 		# if module was set up, take it down
-		if self.is_setup and not self.owner.profile.is_networker:
+		if self.is_setup:
 			self.is_setup = False
 			self.save()
 		# The guest yields were already handled, no further action needed. 
@@ -164,12 +164,13 @@ class Module(models.Model):
 		add_inv_item(self.owner, self.get_yield_item_id(), qty=harvest_qty)
 		self.last_harvest_time = now() - time_remainder
 		self.clicks_since_last_harvest = click_remainder
-		self.is_setup = False  # will automatically be fixed if not _is_setupable
+		if self.is_setup: self.is_setup = False  # will automatically be fixed if not _needs_setup
 		self.save()
 
 	def is_clickable(self): 
 		"""Returns True if the owner set up this module, or it doesn't need setup."""
-		return self.is_setup is None or self.is_setup is True 
+		# self.is_setup = None means it doesn't need setup, so we explicitly check for False.
+		return self.owner.profile.is_networker or self.is_setup is not False
 
 	def setup(self):
 		"""
@@ -180,7 +181,7 @@ class Module(models.Model):
 		"""
 		if self.is_setup:
 			return 
-		if not self._is_setupable():
+		if not self._needs_setup():
 			raise RuntimeError("Module is not setupable.")
 		if ModuleSetupTrade in self.get_settings_classes():
 			trade = self.setup_trade
