@@ -57,12 +57,13 @@ class GetModuleBgs(TestCase, metaclass=req_resp):
 	DIR = "module"
 	TESTS = "get_module_bgs",
 
-class ModuleCollectWinnings(TestCase, metaclass=req_resp):
-	SETUP = other_user_has_arcade_module,
-	DIR = "module"
-	TESTS = "module_collect_winnings_not_won", "module_collect_winnings_won",
+# --- Not yet implemented ---
+# class ModuleCollectWinnings(TestCase, metaclass=req_resp):
+# 	SETUP = other_user_has_arcade_module,
+# 	DIR = "module"
+# 	TESTS = "module_collect_winnings_not_won", "module_collect_winnings_won",
 
-func = ModuleCollectWinnings.test_module_collect_winnings_won
+# func = ModuleCollectWinnings.test_module_collect_winnings_won
 
 class ModuleDetails(TestCase, metaclass=req_resp):
 	SETUP = configured_generic_module,
