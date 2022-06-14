@@ -1,4 +1,4 @@
-from ....models.module import Module
+from ....models.dynamic.module import Module
 from ....models.static import ItemInfo, ItemType
 
 def handle_get_module_bgs(user, request):

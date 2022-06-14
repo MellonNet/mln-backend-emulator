@@ -2,7 +2,8 @@ import xml.etree.ElementTree as et
 
 from django.core.management.base import BaseCommand
 
-from mln.models.static import Answer, BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleExecutionCost, ModuleGuestYield, ModuleHarvestYield, ModuleInfo, ModuleMessage, ModuleOwnerYield, ModuleSetupCost, ModuleSkin, StartingStack, Question
+from mln.models.static import Answer, BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleSetupCost, ModuleSkin, StartingStack, Question
+from mln.models.static.module_handlers import ModuleExecutionCost, ModuleGuestYield, ModuleMessage, ModuleOwnerYield
 
 href_types = {
 	"Concert I Arcade Game": ModuleEditorType.CONCERT_I_ARCADE,

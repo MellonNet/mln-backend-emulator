@@ -1,3 +1,5 @@
+import random
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -129,4 +131,4 @@ def choose_friend(user, allow_networkers=False):
 	incoming_friends = [friendship.from_user for friendship in incoming]
 	outgoing_friends = [friendship.to_user for friendship in outgoing]
 	friends = incoming_friends + outgoing_friends
-	return random.choice(friends)
+	if friends: return random.choice(friends)

@@ -1,6 +1,6 @@
 """Handlers for module specific save data updates."""
-from ....models.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerPic, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance, RocketGameTheme
-from ....models.module_settings_arcade import DestructoidBlockSkin, DestructoidCharacterSkin, HopArcadeElement, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
+from ....models.dynamic.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerPic, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance, RocketGameTheme
+from ....models.dynamic.module_settings_arcade import DestructoidBlockSkin, DestructoidCharacterSkin, HopArcadeElement, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
 from ....services.module_settings import create_or_update, get_or_create_module
 
 def _deserialize_concert_arcade(save, setup):

@@ -19,6 +19,8 @@
 <inventory>
 	<added itemid="{{ result.item_id }}" qty="{{ result.qty }}" />
 </inventory>
+{% else %}
+<competitionResult guestWon="False" />
 {% endif %}
 
 {% endblock %}
