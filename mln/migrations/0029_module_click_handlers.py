@@ -62,4 +62,9 @@ class Migration(migrations.Migration):
             name='probability',
             field=models.PositiveSmallIntegerField(default=100),
         ),
+        migrations.AddField(
+            model_name='module',
+            name='yield_since_last_harvest',
+            field=models.PositiveSmallIntegerField(default=0),
+        ),
     ]

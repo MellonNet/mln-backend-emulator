@@ -10,7 +10,8 @@ from django.utils.timezone import now
 
 from .dynamic import DAY, get_or_none
 from .dynamic import FriendshipStatus
-from ..static import ItemInfo, ItemType, MessageTemplate, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleSetupCost, Stack
+from ..static import ItemInfo, ItemType, MessageTemplate, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleOutcome, ModuleSetupCost, Stack
+from ..static.module_handlers import CLICK_HANDLERS
 
 from ...services.inventory import add_inv_item, assert_has_item, remove_inv_item
 from ...services.friend import choose_friend
@@ -27,6 +28,7 @@ class Module(models.Model):
 	pos_y = models.PositiveSmallIntegerField(null=True, blank=True, validators=(MaxValueValidator(3),))
 	last_harvest_time = models.DateTimeField(default=now)
 	clicks_since_last_harvest = models.PositiveSmallIntegerField(default=0)
+	yield_since_last_harvest = models.PositiveSmallIntegerField(default=0)
 	total_clicks = models.PositiveIntegerField(default=0)
 	is_setup = models.BooleanField(null=True, blank=True, default=False)
 	did_guest_win = None  # NOT a ForeignKey, is temporary storage for each click
@@ -46,10 +48,10 @@ class Module(models.Model):
 	def _calc_yield_info(self):
 		"""Calculate the yield of this module (how many items you can harvest), as well as the time and clicks that remain."""
 		if self._needs_setup() and not self.is_setup:
-			return 0, 0, 0
+			return self.yield_since_last_harvest, 0, 0
 		yield_info = get_or_none(ModuleHarvestYield, item_id=self.item_id)
 		if yield_info is None:
-			return 0, 0, 0
+			return self.yield_since_last_harvest, 0, 0
 		time_since_harvest = now() - self.last_harvest_time
 		if yield_info.yield_per_day == 0:
 			time_yield = 0
@@ -61,36 +63,8 @@ class Module(models.Model):
 			click_remainder = self.clicks_since_last_harvest
 		else:
 			click_yield, click_remainder = divmod(self.clicks_since_last_harvest, yield_info.clicks_per_yield)
-		final_yield = min(time_yield + click_yield, yield_info.max_yield)
+		final_yield = min(time_yield + click_yield + self.yield_since_last_harvest, yield_info.max_yield)
 		return final_yield, time_remainder, click_remainder
-
-	def _distribute_items(self, clicker): 
-		"""Distribute items to owner, clicker, and owner's friends."""
-		if ModuleSetupTrade in self.get_settings_classes():  # handle trades
-			trade = self.setup_trade
-			assert_has_item(clicker, trade.request_item.id, trade.request_qty)
-			remove_inv_item(clicker, trade.request_item.id, trade.request_qty)
-			add_inv_item(self.owner, trade.request_item.id, trade.request_qty)
-			add_inv_item(clicker, trade.give_item.id, trade.give_qty)
-
-		for cost in self.item.execution_costs.all():  # take from clicker
-			assert_has_item(clicker, cost.item_id, cost.qty)
-			remove_inv_item(clicker, cost.item_id, cost.qty)
-
-		guest_yield = self._get_yield(self.item.guest_yields.all())
-		if guest_yield is not None:  # give to clicker
-			add_inv_item(clicker, guest_yield.item_id, guest_yield.qty)
-
-		owner_yield = self._get_yield(self.item.owner_yields.all())
-		if owner_yield is not None:  # give to owner
-			add_inv_item(self.owner, owner_yield.item_id, owner_yield.qty)
-
-		friend_message = self._get_yield(self.item.friend_messages.all())
-		if friend_message is not None:  # give to friend
-			random_friend = get_random_friend()
-			send_template(template=friend_message.message, sender=self.owner, recipient=random_friend)
-
-		return guest_yield  # returned for the frontend
 
 	def _get_yield(self, yields):
 		"""Chooses an available yield based on its assigned probability."""
@@ -140,15 +114,39 @@ class Module(models.Model):
 
 	def click(self, clicker): 
 		"""Updates clicks and distributes relevant rewards."""
+		# Handle most click handlers
+		self.did_guest_win = random.choice([True, False])
+		for model in CLICK_HANDLERS: 
+			for handler in model.objects.filter(module_item_id=self.item_id):
+				handler.on_click(self, clicker)
+
+		# Handle trades separately
+		if ModuleSetupTrade in self.get_settings_classes():  # handle trades
+			trade = self.setup_trade
+			assert_has_item(clicker, trade.request_item.id, trade.request_qty)
+			remove_inv_item(clicker, trade.request_item.id, trade.request_qty)
+			add_inv_item(self.owner, trade.request_item.id, trade.request_qty)
+			add_inv_item(clicker, trade.give_item.id, trade.give_qty)
+
+		# Handle guest yields separately
+		result = None  # we return the guest yield to the UI
+		if (self.item.module_info.click_outcome != ModuleOutcome.ARCADE): 
+			guest_yield = self._get_yield(self.item.moduleguestyields.all())
+			if guest_yield is not None:
+				guest_yield.on_click(self, clicker)
+				if guest_yield.should_yield(self): 
+					result = guest_yield
+
+		# Update information about the module
 		self._update_clicks(clicker)
-		guest_yield = self._distribute_items(clicker)
-		# if module was set up, take it down
-		if self.is_setup:
+		if self.is_setup and self.did_guest_win:
 			self.is_setup = False
 			self.save()
-		# The guest yields were already handled, no further action needed. 
-		# This value is simply returned for the front-end's convenience.
-		return guest_yield
+		return result
+
+	def add_to_harvest(self, qty): 
+		self.yield_since_last_harvest += qty
+		self.save()
 
 	def harvest(self):
 		"""
@@ -158,6 +156,7 @@ class Module(models.Model):
 		"""
 		harvest_qty, time_remainder, click_remainder = self._calc_yield_info()
 		add_inv_item(self.owner, self.get_yield_item_id(), qty=harvest_qty)
+		self.yield_since_last_harvest = 0
 		self.last_harvest_time = now() - time_remainder
 		self.clicks_since_last_harvest = click_remainder
 		if self.is_setup: self.is_setup = False  # will automatically be fixed if not _needs_setup

@@ -106,7 +106,7 @@ class ModuleOwnerYield(ModuleClickYield):
 		else: raise RuntimeError("Unknown module outcome: %s" % outcome)
 
 	def distribute_items(self, module, clicker): 	
-		module.add_to_harvest(self.item_id, self.qty)
+		module.add_to_harvest(self.qty)
 
 # Excluding [ModuleGuestYield], those are handled separately.
 CLICK_HANDLERS = (ModuleMessage, ModuleExecutionCost, ModuleOwnerYield)
