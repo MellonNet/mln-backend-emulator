@@ -2,7 +2,7 @@ import xml.etree.ElementTree as et
 
 from django.core.management.base import BaseCommand
 
-from mln.models.static import Answer, BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleSetupCost, ModuleSkin, StartingStack, Question
+from mln.models.static import Answer, BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleOutcome, ModuleSetupCost, ModuleSkin, StartingStack, Question
 from mln.models.static.module_handlers import ModuleExecutionCost, ModuleGuestYield, ModuleMessage, ModuleOwnerYield
 
 href_types = {
@@ -101,9 +101,25 @@ class Command(BaseCommand):
 					editor_type = ModuleEditorType.NETWORKER_PIC
 				else:
 					editor_type = href_types[href[href.rindex("/")+1:href.rindex(".")]]
-				t[ModuleInfo].append(ModuleInfo(item_id=id, is_executable=is_executable, editor_type=editor_type))
 
 				yield_elem = item_info.find("yield")
+				clickOutcome = ModuleOutcome.NUM_CLICKS
+				if is_executable and (yield_elem is None or int(item_info.find("yield").get("voteAmount")) <= 1):
+					clickOutcome = ModuleOutcome.PROBABILITY
+				if yield_elem is not None:
+					if len(yield_elem.findall("guestCost/items")) > 0 and yield_elem.findall("guestCost/items")[0].get("itemID") == "72401":
+						clickOutcome = ModuleOutcome.ARCADE
+					elif len(yield_elem.findall("guestCost/items")) > 0 and len(yield_elem.findall("ownerLaunchCost/items")) > 0:
+						yieldDescription = item_info.get("yieldDescription")
+						if "risk" in yieldDescription or "compete" in yieldDescription or "chance" in yieldDescription or "Battle" in yieldDescription:
+							clickOutcome = ModuleOutcome.BATTLE
+						else:
+							clickOutcome = ModuleOutcome.NUM_CLICKS
+				if id == 50932:
+					# Special case for the Group Performance Module being PROBABILITY instead of NUM_CLICKS, which would lead to double rewards
+					clickOutcome = ModuleOutcome.NUM_CLICKS
+				t[ModuleInfo].append(ModuleInfo(item_id=id, is_executable=is_executable, editor_type=editor_type, click_outcome=clickOutcome))
+
 				if yield_elem is None: continue
 
 				# Harvest info --> ModuleHarvestYield
