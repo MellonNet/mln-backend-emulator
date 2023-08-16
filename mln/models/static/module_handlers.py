@@ -100,7 +100,7 @@ class ModuleOwnerYield(ModuleClickYield):
 	def should_yield(self, module):
 		outcome = self.module_item.module_info.click_outcome  # cache the related_name query
 		if outcome == ModuleOutcome.PROBABILITY: return True
-		elif outcome == ModuleOutcome.NUM_CLICKS: return True
+		elif outcome == ModuleOutcome.NUM_CLICKS: return False # Handled by clicks calculating
 		elif outcome == ModuleOutcome.BATTLE: return not module.did_guest_win
 		elif outcome == ModuleOutcome.ARCADE: return True
 		else: raise RuntimeError("Unknown module outcome: %s" % outcome)
