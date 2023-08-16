@@ -139,7 +139,7 @@ class Module(models.Model):
 
 		# Update information about the module
 		self._update_clicks(clicker)
-		if self.is_setup and self.did_guest_win:
+		if self.is_setup and self.did_guest_win and self.item.module_info.click_outcome != ModuleOutcome.NUM_CLICKS:
 			self.is_setup = False
 			self.save()
 		return result
