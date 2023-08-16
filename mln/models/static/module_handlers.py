@@ -33,7 +33,7 @@ class ModuleMessage(ModuleClickHandler):
 		random_friend = choose_friend(module.owner)
 		if random_friend is None: return  # lol ain't got no friends :(
 		print("Sending mail...")
-		send_template(self.message, module.owner, clicker)
+		send_template(self.message, module.owner, random_friend)
 
 class ModuleClickYield(ModuleClickHandler, Stack): 
 	"""A [ModuleClickHandler] that transfers items in a [Stack]."""
