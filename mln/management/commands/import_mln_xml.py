@@ -129,6 +129,8 @@ class Command(BaseCommand):
 				max_yield = int(yield_elem.get("maxPerDay"))
 				yield_per_day = int(yield_elem.get("perDay"))
 				clicks_per_yield = int(yield_elem.get("voteAmount"))
+				if clicks_per_yield == 0 and clickOutcome == ModuleOutcome.NUM_CLICKS:  # Special case for Transmuting Pools.
+					clicks_per_yield = 1
 				t[ModuleHarvestYield].append(ModuleHarvestYield(item_id=id, yield_item_id=yield_item_id, max_yield=max_yield, yield_per_day=yield_per_day, clicks_per_yield=clicks_per_yield))
 
 				# Guest yield info --> ModuleGuestYield
