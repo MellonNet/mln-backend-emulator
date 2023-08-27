@@ -6,6 +6,7 @@ In debug mode django's staticfiles server is also registered, in production this
 from django.conf import settings
 from django.contrib import admin
 from django.http import Http404
+from django.shortcuts import redirect
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.contrib.auth.forms import UserCreationForm
@@ -17,6 +18,7 @@ def flashvars_handler(request):
 	Contact the server operator if you did not intend to get here.""")
 
 urlpatterns = [
+	path("", lambda x: redirect("mln/private_view/default")),
 	path("mln/", include("mln.urls")),
 	path("ugc/", include("ugc.urls")),
 	path("ugc", flashvars_handler, name="ugc"),
