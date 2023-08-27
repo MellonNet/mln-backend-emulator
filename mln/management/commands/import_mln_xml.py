@@ -38,6 +38,29 @@ class Command(BaseCommand):
 	def add_arguments(self, parser):
 		parser.add_argument("path")
 
+	def get_module_click_outcome(self, item_info):
+		is_executable = item_info.get("isExecutable") == "True"
+		yield_elem = item_info.find("yield")
+
+		clickOutcome = ModuleOutcome.NUM_CLICKS
+		if is_executable and (yield_elem is None or int(item_info.find("yield").get("voteAmount")) <= 1):
+			clickOutcome = ModuleOutcome.PROBABILITY
+		if yield_elem is not None:
+			if len(yield_elem.findall("guestCost/items")) > 0 and yield_elem.findall("guestCost/items")[0].get("itemID") == "72401":
+				clickOutcome = ModuleOutcome.ARCADE
+			elif len(yield_elem.findall("guestCost/items")) > 0 and len(yield_elem.findall("ownerLaunchCost/items")) > 0:
+				yieldDescription = item_info.get("yieldDescription")
+				if "risk" in yieldDescription or "compete" in yieldDescription or "chance" in yieldDescription or "Battle" in yieldDescription:
+					clickOutcome = ModuleOutcome.BATTLE
+				else:
+					clickOutcome = ModuleOutcome.NUM_CLICKS
+
+		if id == 50932:
+			# Special case for the Group Performance Module being PROBABILITY instead of NUM_CLICKS, which would lead to double rewards
+			clickOutcome = ModuleOutcome.NUM_CLICKS
+
+		return clickOutcome
+
 	def handle(self, *args, **options):
 		EasyReply = MessageBody.easy_replies.through
 		tables = ItemInfo, BlueprintInfo, BlueprintRequirement, MessageTemplate, MessageTemplateAttachment, ModuleInfo, ModuleExecutionCost, ModuleGuestYield, ModuleHarvestYield, ModuleMessage, ModuleOwnerYield, ModuleSetupCost, MessageBodyCategory, MessageBody, EasyReply, Question, Answer, Color, ModuleSkin, StartingStack
@@ -93,7 +116,6 @@ class Command(BaseCommand):
 					t[BlueprintRequirement].append(BlueprintRequirement(blueprint_item_id=id, item_id=requirement_id, qty=qty))
 
 			elif type == "module":
-				is_executable = item_info.get("isExecutable") == "True"
 				href = item_info.get("hrefEditor")
 				if href is None:
 					editor_type = None
@@ -102,22 +124,9 @@ class Command(BaseCommand):
 				else:
 					editor_type = href_types[href[href.rindex("/")+1:href.rindex(".")]]
 
+				is_executable = item_info.get("isExecutable") == "True"
 				yield_elem = item_info.find("yield")
-				clickOutcome = ModuleOutcome.NUM_CLICKS
-				if is_executable and (yield_elem is None or int(item_info.find("yield").get("voteAmount")) <= 1):
-					clickOutcome = ModuleOutcome.PROBABILITY
-				if yield_elem is not None:
-					if len(yield_elem.findall("guestCost/items")) > 0 and yield_elem.findall("guestCost/items")[0].get("itemID") == "72401":
-						clickOutcome = ModuleOutcome.ARCADE
-					elif len(yield_elem.findall("guestCost/items")) > 0 and len(yield_elem.findall("ownerLaunchCost/items")) > 0:
-						yieldDescription = item_info.get("yieldDescription")
-						if "risk" in yieldDescription or "compete" in yieldDescription or "chance" in yieldDescription or "Battle" in yieldDescription:
-							clickOutcome = ModuleOutcome.BATTLE
-						else:
-							clickOutcome = ModuleOutcome.NUM_CLICKS
-				if id == 50932:
-					# Special case for the Group Performance Module being PROBABILITY instead of NUM_CLICKS, which would lead to double rewards
-					clickOutcome = ModuleOutcome.NUM_CLICKS
+				clickOutcome = self.get_module_click_outcome(item_info)
 				t[ModuleInfo].append(ModuleInfo(item_id=id, is_executable=is_executable, editor_type=editor_type, click_outcome=clickOutcome))
 
 				if yield_elem is None: continue
