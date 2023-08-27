@@ -160,6 +160,15 @@ class Module(models.Model):
 		self.last_harvest_time = now() - time_remainder
 		self.clicks_since_last_harvest = click_remainder
 		if self.is_setup: self.is_setup = False  # will automatically be fixed if not _needs_setup
+		if ModuleSetupFriendShare in self.get_settings_classes():
+			add_inv_item(self.setup_friend_share.friend, self.get_yield_item_id(), qty=harvest_qty)
+		if ModuleSetupTrioPerformance in self.get_settings_classes():
+			add_inv_item(self.setup_group_performance.friend_0, self.get_yield_item_id(), qty=harvest_qty)
+			add_inv_item(self.setup_group_performance.friend_1, self.get_yield_item_id(), qty=harvest_qty)
+		if ModuleSetupGroupPerformance in self.get_settings_classes():
+			add_inv_item(self.setup_group_performance.friend_0, self.get_yield_item_id(), qty=harvest_qty)
+			add_inv_item(self.setup_group_performance.friend_1, self.get_yield_item_id(), qty=harvest_qty)
+			add_inv_item(self.setup_group_performance.friend_2, self.get_yield_item_id(), qty=harvest_qty)
 		self.save()
 
 	def is_clickable(self): 
