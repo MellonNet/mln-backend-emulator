@@ -210,4 +210,11 @@ class Command(BaseCommand):
 		for key, value in t.items():
 			key.objects.bulk_create(value, ignore_conflicts=True)
 
+		# Pull request 23/25 added a click outcome column. It must be populated in existing modules for votes to work.
+		for module_outcome in ModuleInfo.objects.filter(click_outcome=None):
+			for item_info in xml.findall("items/item"):
+				if str(module_outcome.item_id) == item_info.get("id"):
+					module_outcome.click_outcome = self.get_module_click_outcome(item_info)
+					module_outcome.save()
+
 		print("Import successful.")
