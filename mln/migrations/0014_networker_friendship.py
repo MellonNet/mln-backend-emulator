@@ -6,12 +6,14 @@ import django.db.models.deletion
 import mln.models.static
 
 def migrate_conditions(apps, schema_editor):
-	password = input("\n\nEnter networker password: ")
 	User = apps.get_model("auth", "User")
 	Profile = apps.get_model("mln", "Profile")
 	ItemInfo = apps.get_model("mln", "ItemInfo")
 	NFC = apps.get_model("mln", "NetworkerFriendshipCondition")
 	NFCS = apps.get_model("mln", "NetworkerFriendshipConditionSource")
+	if NFC.objects.count() == 0:
+		return
+	password = input("\n\nEnter networker password: ")
 	for cond in NFC.objects.all():
 		if cond.networker == "Echo":
 			cond.networker = str(User.objects.get(username="Echo").id)
