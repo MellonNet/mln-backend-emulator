@@ -1,8 +1,12 @@
 {% load mln_utils %}
 {% for module in page_owner|get_valid_modules %}
 	<item type="module" itemID="{{ module.item_id }}" instanceID="{{ module.id }}"
-		{% if module.is_setup %}
-		isSetup="True"
+		{# This is a little tricky because not all clickable modules actually need setup. #}
+		{# We want the owner to not take it down but viewers to be able to click. #}
+		{% if page_owner == viewing_user and module.is_setup %}
+			isSetup="True"
+		{% elif page_owner != viewing_user and module.is_clickable %}
+			isSetup="True"
 		{% endif %}
 	>
 		<details posx="{{ module.pos_x }}" posy="{{ module.pos_y }}" />

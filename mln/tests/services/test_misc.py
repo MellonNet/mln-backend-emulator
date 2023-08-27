@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from mln.models.static import ItemInfo, ItemType
+from mln.models.static import ItemInfo, ItemType, ModuleInfo
 from mln.services.inventory import add_inv_item, assert_has_item
 from mln.services.misc import inventory_module_get, use_blueprint
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
@@ -10,6 +10,7 @@ from mln.tests.models.test_static import masterpiece_blueprint_req, blueprint_re
 @cls_setup
 def module(cls):
 	cls.MODULE_ITEM_ID = ItemInfo.objects.create(name="Module Item", type=ItemType.MODULE).id
+	cls.MODULE_INFO_ID = ModuleInfo.objects.create(item_id=cls.MODULE_ITEM_ID, is_executable=False).id
 
 @cls_setup
 def module_2(cls):

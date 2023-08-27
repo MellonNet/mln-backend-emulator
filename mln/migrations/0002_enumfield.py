@@ -3,8 +3,8 @@
 from django.db import migrations, models
 import django.db.models.deletion
 import mln.models.dynamic
-import mln.models.module_settings
-import mln.models.module_settings_arcade
+import mln.models.dynamic.module_settings
+import mln.models.dynamic.module_settings_arcade
 import mln.models.static
 
 

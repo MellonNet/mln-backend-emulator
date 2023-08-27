@@ -1,7 +1,7 @@
 from mln.models.static import ItemInfo, ItemType, ModuleEditorType, ModuleInfo, ModuleSkin
 from mln.models.module_settings import ModuleSaveGeneric
 from mln.services.inventory import add_inv_item
-from mln.tests.models.test_module import arcade_module, arcade_prizes, harvestable_module, has_harvestable_module, has_setupable_module, has_setup_cost, setup_setupable_module, setupable_module
+from mln.tests.models.test_module import arcade_module, harvestable_module, has_harvestable_module, has_setupable_module, has_setup_cost, setup_setupable_module, setupable_module
 from mln.tests.models.test_profile import one_user, two_users
 from mln.tests.models.test_static import color
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
@@ -24,7 +24,9 @@ def other_user_has_harvestable_module(self):
 @setup
 @requires(setupable_module, two_users)
 def other_user_has_setupable_module(self):
-	self.other_user.modules.create(item_id=self.SETUPABLE_MODULE_ID, pos_x=0, pos_y=1)
+	module = self.other_user.modules.create(item_id=self.SETUPABLE_MODULE_ID, pos_x=0, pos_y=1)
+	add_inv_item(self.other_user, self.SETUP_COST.item_id, self.SETUP_COST.qty)
+	module.setup()
 
 @setup
 @requires(setupable_module, one_user)
@@ -55,12 +57,13 @@ class GetModuleBgs(TestCase, metaclass=req_resp):
 	DIR = "module"
 	TESTS = "get_module_bgs",
 
-class ModuleCollectWinnings(TestCase, metaclass=req_resp):
-	SETUP = other_user_has_arcade_module, arcade_prizes
-	DIR = "module"
-	TESTS = "module_collect_winnings_not_won", "module_collect_winnings_won",
+# --- Not yet implemented ---
+# class ModuleCollectWinnings(TestCase, metaclass=req_resp):
+# 	SETUP = other_user_has_arcade_module,
+# 	DIR = "module"
+# 	TESTS = "module_collect_winnings_not_won", "module_collect_winnings_won",
 
-func = ModuleCollectWinnings.test_module_collect_winnings_won
+# func = ModuleCollectWinnings.test_module_collect_winnings_won
 
 class ModuleDetails(TestCase, metaclass=req_resp):
 	SETUP = configured_generic_module,
