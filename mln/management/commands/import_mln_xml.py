@@ -42,24 +42,24 @@ class Command(BaseCommand):
 		is_executable = item_info.get("isExecutable") == "True"
 		yield_elem = item_info.find("yield")
 
-		clickOutcome = ModuleOutcome.NUM_CLICKS
+		click_outcome = ModuleOutcome.NUM_CLICKS
 		if is_executable and (yield_elem is None or int(item_info.find("yield").get("voteAmount")) <= 1):
-			clickOutcome = ModuleOutcome.PROBABILITY
+			click_outcome = ModuleOutcome.PROBABILITY
 		if yield_elem is not None:
 			if len(yield_elem.findall("guestCost/items")) > 0 and yield_elem.findall("guestCost/items")[0].get("itemID") == "72401":
-				clickOutcome = ModuleOutcome.ARCADE
+				click_outcome = ModuleOutcome.ARCADE
 			elif len(yield_elem.findall("guestCost/items")) > 0 and len(yield_elem.findall("ownerLaunchCost/items")) > 0:
-				yieldDescription = item_info.get("yieldDescription")
-				if "risk" in yieldDescription or "compete" in yieldDescription or "chance" in yieldDescription or "Battle" in yieldDescription:
-					clickOutcome = ModuleOutcome.BATTLE
+				yield_description = item_info.get("yieldDescription")
+				if "risk" in yield_description or "compete" in yield_description or "chance" in yield_description or "Battle" in yield_description:
+					click_outcome = ModuleOutcome.BATTLE
 				else:
-					clickOutcome = ModuleOutcome.NUM_CLICKS
+					click_outcome = ModuleOutcome.NUM_CLICKS
 
 		if id == 50932:
 			# Special case for the Group Performance Module being PROBABILITY instead of NUM_CLICKS, which would lead to double rewards
-			clickOutcome = ModuleOutcome.NUM_CLICKS
+			click_outcome = ModuleOutcome.NUM_CLICKS
 
-		return clickOutcome
+		return click_outcome
 
 	def handle(self, *args, **options):
 		EasyReply = MessageBody.easy_replies.through
@@ -126,8 +126,8 @@ class Command(BaseCommand):
 
 				is_executable = item_info.get("isExecutable") == "True"
 				yield_elem = item_info.find("yield")
-				clickOutcome = self.get_module_click_outcome(item_info)
-				t[ModuleInfo].append(ModuleInfo(item_id=id, is_executable=is_executable, editor_type=editor_type, click_outcome=clickOutcome))
+				click_outcome = self.get_module_click_outcome(item_info)
+				t[ModuleInfo].append(ModuleInfo(item_id=id, is_executable=is_executable, editor_type=editor_type, click_outcome=click_outcome))
 
 				if yield_elem is None: continue
 
@@ -138,7 +138,7 @@ class Command(BaseCommand):
 				max_yield = int(yield_elem.get("maxPerDay"))
 				yield_per_day = int(yield_elem.get("perDay"))
 				clicks_per_yield = int(yield_elem.get("voteAmount"))
-				if clicks_per_yield == 0 and clickOutcome == ModuleOutcome.NUM_CLICKS:
+				if clicks_per_yield == 0 and click_outcome == ModuleOutcome.NUM_CLICKS:
 					# Special case for Transmuting Pools.
 					clicks_per_yield = 1
 				if id == 51622 or id == 51623 or id == 51624 or id == 51625:
