@@ -96,7 +96,7 @@ class ModuleSaveUGC(models.Model):
 class ModuleSetupFriendShare(models.Model):
 	"""Save data for 2-person friend share modules, like the BFF module."""
 	module = models.OneToOneField(Module, related_name="setup_friend_share", on_delete=models.CASCADE)
-	friend = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
+	friend = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
 
 	def clean(self):
 		if not are_friends(self.module.owner, self.friend_id):
@@ -105,9 +105,9 @@ class ModuleSetupFriendShare(models.Model):
 class ModuleSetupGroupPerformance(models.Model):
 	"""Save data for the 4-person group performance module."""
 	module = models.OneToOneField(Module, related_name="setup_group_performance", on_delete=models.CASCADE)
-	friend_0 = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
-	friend_1 = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
-	friend_2 = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
+	friend_0 = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
+	friend_1 = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
+	friend_2 = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
 
 	def clean(self):
 		friends = set()
@@ -137,8 +137,8 @@ class ModuleSetupTrade(models.Model):
 class ModuleSetupTrioPerformance(models.Model):
 	"""Save data for the 3-person trio performance module."""
 	module = models.OneToOneField(Module, related_name="setup_trio_performance", on_delete=models.CASCADE)
-	friend_0 = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
-	friend_1 = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
+	friend_0 = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
+	friend_1 = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
 
 	def clean(self):
 		friends = set()
