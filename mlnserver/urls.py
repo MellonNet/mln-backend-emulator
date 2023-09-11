@@ -10,6 +10,7 @@ from django.shortcuts import redirect
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.edit import CreateView
 
 def flashvars_handler(request):
@@ -30,6 +31,7 @@ urlpatterns = [
 		form_class=UserCreationForm,
 		success_url="login"
 	), name="sign_up"),
+	path("accounts/password_change", PasswordChangeView.as_view()),
 	path("admin/", admin.site.urls),
 ]
 
