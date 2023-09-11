@@ -11,6 +11,7 @@ from .views import ui
 from .views.api.xml import webservice
 
 urlpatterns = [
+	path("", lambda x: redirect("private_view/default")),
 	path("status.aspx", lambda x: redirect("login")), # login prompt when clicking on page while not logged in
 	path("private_view/default", ui.private_view, name="private_view"),
 	path("PrivateView/Default.aspx", lambda x: redirect("private_view")),
