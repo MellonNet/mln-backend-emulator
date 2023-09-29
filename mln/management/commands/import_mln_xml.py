@@ -63,10 +63,14 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		EasyReply = MessageBody.easy_replies.through
-		tables = ItemInfo, BlueprintInfo, BlueprintRequirement, MessageTemplate, MessageTemplateAttachment, ModuleInfo, ModuleExecutionCost, ModuleGuestYield, ModuleHarvestYield, ModuleMessage, ModuleOwnerYield, ModuleSetupCost, MessageBodyCategory, MessageBody, EasyReply, Question, Answer, Color, ModuleSkin, StartingStack
+		message_tables = MessageBodyCategory, MessageBody
+		tables = ItemInfo, BlueprintInfo, BlueprintRequirement, MessageTemplate, MessageTemplateAttachment, ModuleInfo, ModuleExecutionCost, ModuleGuestYield, ModuleHarvestYield, ModuleMessage, ModuleOwnerYield, ModuleSetupCost, EasyReply, Question, Answer, Color, ModuleSkin, StartingStack
 		t = {}
 		for table in tables:
 			t[table] = []
+		message_tables_items = {}
+		for table in message_tables:
+			message_tables_items[table] = []
 
 		xml = et.parse(options["path"])
 
@@ -79,7 +83,7 @@ class Command(BaseCommand):
 			button_color = int(button_color, 16) if button_color else 0
 			text_color = category.get("Category_Text_Color").strip()
 			text_color = int(text_color, 16) if text_color else 0
-			t[MessageBodyCategory].append(MessageBodyCategory(id=category_id, name=name, hidden=hidden, background_color=background_color, button_color=button_color, text_color=text_color))
+			message_tables_items[MessageBodyCategory].append(MessageBodyCategory(id=category_id, name=name, hidden=hidden, background_color=background_color, button_color=button_color, text_color=text_color))
 
 			for body in category:
 				id = int(body.get("id"))
@@ -87,9 +91,12 @@ class Command(BaseCommand):
 				if subject == "":
 					continue
 				text = body.get("text")
-				t[MessageBody].append(MessageBody(id=id, category_id=category_id, subject=subject, text=text))
+				message_tables_items[MessageBody].append(MessageBody(id=id, category_id=category_id, subject=subject, text=text))
 
-		MessageBody.objects.update_or_create(id=1, category_id=1, subject="Placeholder", text="This should not appear")
+		# Messages must be created first to reduce constraint violations later with friend yields.
+		message_tables_items[MessageBody].append(MessageBody(id=1, category_id=1, subject="Placeholder", text="This should not appear"))
+		for key, value in message_tables_items.items():
+			key.objects.bulk_create(value, ignore_conflicts=True)
 
 		for body_elem in xml.findall("messages/category/body"):
 			from_id = int(body_elem.get("id"))
@@ -180,7 +187,7 @@ class Command(BaseCommand):
 					# We need to explicitly check for duplicates here because we create a new MessageTemplate otherwise.
 					# There is no other way to detect if a MessageTemplate is being used for a ModuleMessage.
 					if ModuleMessage.objects.filter(module_item_id=id).exists(): continue
-					message_placeholder = MessageTemplate.objects.create(body_id=1)  # Message body placeholder
+					message_placeholder = MessageTemplate.objects.create(body_id=id)  # Message body placeholder
 					t[MessageTemplateAttachment].append(MessageTemplateAttachment(template_id=message_placeholder.id, item_id=item_id, qty=qty))
 					t[ModuleMessage].append(ModuleMessage(module_item_id=id, message_id=message_placeholder.id, probability=probability))
 
