@@ -129,8 +129,9 @@ class Module(models.Model):
 			add_inv_item(clicker, trade.give_item.id, trade.give_qty)
 
 		# Handle guest yields separately
+		outcome = self.item.module_info.click_outcome
 		result = None  # we return the guest yield to the UI
-		if (self.item.module_info.click_outcome != ModuleOutcome.ARCADE): 
+		if (outcome != ModuleOutcome.ARCADE): 
 			guest_yield = self._get_yield(self.item.moduleguestyields.all())
 			if guest_yield is not None:
 				guest_yield.on_click(self, clicker)
@@ -139,7 +140,8 @@ class Module(models.Model):
 
 		# Update information about the module
 		self._update_clicks(clicker)
-		if self.is_setup and self.did_guest_win and self.item.module_info.click_outcome != ModuleOutcome.NUM_CLICKS:
+		if self.is_setup and self.did_guest_win and outcome not in (ModuleOutcome.NUM_CLICKS, ModuleOutcome.ARCADE):
+			# Tear down the module if the guest won
 			self.is_setup = False
 			self.save()
 		return result
