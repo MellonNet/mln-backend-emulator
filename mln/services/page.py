@@ -25,6 +25,14 @@ def page_save_layout(user, modules):
 			add_inv_item(user, module.item_id)
 	removed_modules.delete()
 
+	# Handle swaps: first set every module's position to None, then re-set in the right places
+	for instance_id, item_id, pos_x, pos_y in modules:
+		if instance_id is None: continue  # a module that is being created won't cause issues
+		module = user.modules.get(id=instance_id)
+		module.pos_x = None
+		module.pos_y = None
+		module.save()
+
 	# todo: database info on how wide modules are, improved overlapping checks based on that info
 	for instance_id, item_id, pos_x, pos_y in modules:
 		if instance_id is not None:
