@@ -140,7 +140,7 @@ class Module(models.Model):
 
 		# Update information about the module
 		self._update_clicks(clicker)
-		if self.is_setup and self.did_guest_win and outcome not in (ModuleOutcome.NUM_CLICKS, ModuleOutcome.ARCADE):
+		if self.is_setup and self.did_guest_win and outcome != ModuleOutcome.NUM_CLICKS:
 			# Tear down the module if the guest won
 			self.is_setup = False
 			self.save()
