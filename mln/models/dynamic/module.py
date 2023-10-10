@@ -150,6 +150,12 @@ class Module(models.Model):
 		self.yield_since_last_harvest += qty
 		self.save()
 
+	def grant_arcade_prize(self, clicker):
+		all_prizes = self.item.moduleguestyields.all()
+		prize = self._get_yield(all_prizes)
+		add_inv_item(clicker, prize.item_id, prize.qty)
+		return prize
+
 	def harvest(self):
 		"""
 		Harvest the module.
