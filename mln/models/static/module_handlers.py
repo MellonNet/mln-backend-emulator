@@ -82,7 +82,7 @@ class ModuleGuestYield(ModuleClickYield):
 		if outcome == ModuleOutcome.PROBABILITY: return True
 		elif outcome == ModuleOutcome.NUM_CLICKS: return True
 		elif outcome == ModuleOutcome.BATTLE: return module.did_guest_win
-		elif outcome == ModuleOutcome.ARCADE: return module.did_guest_win
+		elif outcome == ModuleOutcome.ARCADE: return False  # reward should be calculated using Module._get_yield
 		else: raise RuntimeError("Unknown module outcome: %s" % outcome)
 
 	def distribute_items(self, module, clicker): 

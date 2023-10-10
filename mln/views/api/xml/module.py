@@ -19,7 +19,7 @@ def handle_module_collect_winnings(user, request):
 	won = request.get("won") == "True"
 	# todo: arcade stats
 	if won:
-		prize = module.select_arcade_prize(user)
+		prize = module.grant_arcade_prize(user)
 		return {"won": won, "prize": prize}
 	else:
 		return {"won": won}
