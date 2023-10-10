@@ -50,8 +50,8 @@ class Module(models.Model):
 		"""Calculate the yield of this module (how many items you can harvest), as well as the time and clicks that remain."""
 		if self._needs_setup() and not self.is_setup:
 			yield_info = get_or_none(ModuleHarvestYield, item_id=self.item_id)
-			limit = float("inf") if yield_info is None else yield_info.max_yield
-			return min(limit, self.yield_since_last_harvest), timedelta(seconds=0), 0
+			yield = self.yield_since_last_harvest if yield_info is None else min(self.yield_since_last_harvest, yield_info.max_yield)
+			return yield, timedelta(seconds=0), 0
 		yield_info = get_or_none(ModuleHarvestYield, item_id=self.item_id)
 		if yield_info is None:
 			return self.yield_since_last_harvest, timedelta(seconds=0), 0
