@@ -71,14 +71,11 @@ def remove_friend(user, relation_id):
 	"""
 	Remove a friend from the user's friend list.
 	Raise RuntimeError if
-	- the friendship does not exist
-	- the relation does not relate to this user, or
-	- the relation is not a friend or blocked relation.
+	- the friendship does not exist, or
+	- the relation does not relate to this user
 	Raise MLNError if the the user is blocked.
 	"""
 	relation = _get_friendship(user, relation_id)
-	if relation.status not in (FriendshipStatus.FRIEND, FriendshipStatus.BLOCKED):
-		raise RuntimeError("%s is not a friend or blocked relation" % relation)
 	if relation.status == FriendshipStatus.BLOCKED and relation.from_user != user:
 		raise MLNError(MLNError.YOU_ARE_BLOCKED)
 	relation.delete()
