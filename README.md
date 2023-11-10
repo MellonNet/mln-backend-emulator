@@ -21,7 +21,7 @@ Initialize the database by running `python manage.py migrate`. This will create 
 
 Included in the content files should be an XML file called `editorial-redux-v6.xml`. Run `python manage.py import_mln_xml <path>`, where <path> is the path to this file. This will import the original MLN data.
 
-Note: The editorial XML unfortunately doesn't contain any information about networkers. This means that the server won't have any networkers, even after importing the MLN data. We're trying to piece together networker information ourselves, using the MLN wiki and screenshots of pages. However this information is likely incomplete, so while we may be able to reconstruct networkers to the point where you can achieve all ranks, we probably won't be able to get the layout of the modules on their pages completely correct. Once we've completed piecing together the networker data we'll also make this data available to you if you want to host your own server.
+Note: The editorial XML unfortunately doesn't contain any information about networkers. This means that the server won't have any networkers, even after importing the MLN data. We're trying to piece together networker information ourselves, using the MLN wiki and screenshots of pages. However this information is likely incomplete, so while we may be able to reconstruct networkers to the point where you can achieve all ranks, we probably won't be able to get the layout of the modules on their pages completely correct. Networks can be imported from XML files using `python manage.py import_networkers_xml <path>`, but these XML files are not provided with the content files.
 
 ## Run the server
 
@@ -48,6 +48,8 @@ Do *not* use this way of running the server in production (if you actually want 
 		* Setup & Teardown
 		* Voting & Execution
 		* Arcade
+        * Random items sometimes sent to friends when you click on modules
+        * Items guests can receive in "battle" modules or similar
 	* Avatar & About me
 	* Badges
 	* Page skins & colors
@@ -55,12 +57,10 @@ Do *not* use this way of running the server in production (if you actually want 
 * Gallery & Factory
 * Creation lab
 * Networker friendship conditions
+* Networker mail replies
 
 
 ### Not yet implemented
-* Networker mail replies
-* Random items sometimes sent to friends when you click on modules
-* Items guests can receive in "battle" modules or similar
 * Module-dependent sticker backgrounds
 * Statistics
 	* Module stats
