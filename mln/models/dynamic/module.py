@@ -131,6 +131,8 @@ class Module(models.Model):
 			remove_inv_item(clicker, trade.request_item.id, trade.request_qty)
 			add_inv_item(self.owner, trade.request_item.id, trade.request_qty)
 			add_inv_item(clicker, trade.give_item.id, trade.give_qty)
+			self.is_setup = False
+			self.save()
 
 		# Handle guest yields separately
 		outcome = self.item.module_info.click_outcome
