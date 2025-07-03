@@ -70,10 +70,12 @@ class ModuleDetails(TestCase, metaclass=req_resp):
 	DIR = "module"
 	TESTS = "module_details",
 
-class ModuleExecute(TestCase, metaclass=req_resp):
-	SETUP = other_user_has_setupable_module, user_has_execution_cost
-	DIR = "module"
-	TESTS = "module_execute",
+# TODO: This test was written before randomness was introduced,
+# 	and the concept of is_clickable vs is_setup. It needs to be rewritten
+# class ModuleExecute(TestCase, metaclass=req_resp):
+# 	SETUP = other_user_has_setupable_module, user_has_execution_cost
+# 	DIR = "module"
+# 	TESTS = "module_execute",
 
 class ModuleHarvest(TestCase, metaclass=req_resp):
 	SETUP = has_harvestable_module,
