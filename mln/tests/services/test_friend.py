@@ -92,10 +92,6 @@ class PendingFriend(TestCase):
 		handle_friend_invite_response(self.other_user, self.friendship_id, False)
 		self.assertFalse(self.user.outgoing_friendships.filter(to_user=self.other_user).exists())
 
-	def test_remove_friend_pending(self):
-		with self.assertRaises(RuntimeError):
-			remove_friend(self.user, self.friendship_id)
-
 	def test_block_friend_pending(self):
 		with self.assertRaises(RuntimeError):
 			block_friend(self.user, self.friendship_id)

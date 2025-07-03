@@ -2,8 +2,9 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 from unittest.mock import patch
 
-from mln.models.module_settings import ModuleSetupTrade
-from mln.models.static import ItemInfo, ItemType, ModuleEditorType, ModuleExecutionCost, ModuleInfo, ModuleSetupCost, ModuleHarvestYield
+from mln.models.dynamic.module_settings import ModuleSetupTrade
+from mln.models.static import *
+from mln.models.static.module_handlers import *
 from mln.services.inventory import add_inv_item
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.models.dupe_testcase import DupeTest
