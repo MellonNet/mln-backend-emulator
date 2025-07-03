@@ -3,8 +3,9 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models.dynamic import Profile
+from .models.dynamic import Profile, Friendship, FriendshipStatus, get_or_none
 from .models.static import StartingStack
+from .services.friend import add_networker_friend
 from .services.inventory import add_inv_item
 
 @receiver(post_save, sender=User)
@@ -14,6 +15,11 @@ def create_user_profile(sender, instance, created, **kwargs):
 		profile = Profile.objects.create(user=instance)
 		for stack in StartingStack.objects.all():
 			add_inv_item(instance, stack.item_id, stack.qty)
+		# Find and add Echo as a friend
+		echo = get_or_none(User, username="Echo")
+		if echo is not None and echo != instance:  # skip when creating Echo himself!
+			# Will send Echo's greeting message too
+			add_networker_friend(user=instance, networker=echo)
 
 @receiver(pre_save)
 def pre_save_full_clean_handler(sender, instance, *args, **kwargs):
