@@ -1,5 +1,5 @@
-from mln.models.static import ItemInfo, ItemType, ModuleEditorType, ModuleInfo, ModuleSkin
-from mln.models.module_settings import ModuleSaveGeneric
+from mln.models.static import *
+from mln.models.dynamic.module_settings import ModuleSaveGeneric
 from mln.services.inventory import add_inv_item
 from mln.tests.models.test_module import arcade_module, harvestable_module, has_harvestable_module, has_setupable_module, has_setup_cost, setup_setupable_module, setupable_module
 from mln.tests.models.test_profile import one_user, two_users
