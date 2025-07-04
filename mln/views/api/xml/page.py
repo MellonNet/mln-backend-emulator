@@ -59,6 +59,16 @@ def handle_page_get_new(viewing_user, request):
 					else:
 						friendship_status = "Pending In"
 
+	# For public views, exclude friends who are both networkers and marked as secret.
+	# Secret networkers can still see their own complete friend list.
+	is_secret = getattr(page_owner.profile, "is_secret", False)
+	if not viewing_own:
+		friends = [
+			(friendship, friend, status)
+			for (friendship, friend, status) in friends
+			if not (getattr(friend.profile, "is_networker", False) and getattr(friend.profile, "is_secret", False))
+		]
+
 	context = {
 		"page_owner": page_owner,
 		"viewing_user": viewing_user,
