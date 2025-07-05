@@ -8,7 +8,7 @@ def add_inv_item(user, item_id, qty=1):
 	Add one or more items to the user's inventory.
 	Always use this function instead of creating InventoryStacks directly.
 	This function creates a stack only if it does not already exist, and otherwise adds to the existing stack.
-	If this is the first time the user has obtained this item, it will also trigger the first_obtained_item message (if applicable).
+	- If this is the first time the user has obtained this item, it will also trigger the first_obtained_item message (if applicable).
 	"""
 	try:
 		stack = user.inventory.get(item_id=item_id)
@@ -26,7 +26,7 @@ def remove_inv_item(user, item_id, qty=1):
 	Remove one or more items from the user's inventory.
 	Always use this function instead of modifying InventoryStacks directly.
 	This function subtracts the number of items from the stack, and deletes the stack if no more items are left.
-	Raise RuntimeError if the stack to remove items from does not exist, or if it has fewer items than should be removed.
+	- Raise RuntimeError if the stack to remove items from does not exist, or if it has fewer items than should be removed.
 	"""
 	try:
 		stack = user.inventory.get(item_id=item_id)
@@ -49,7 +49,7 @@ def refund_invalid_modules(user):
 def assert_has_item(user, item_id, qty=1, field_name=None):
 	"""
 	Raise ValidationError if the user has less than qty items in their inventory.
-	Never raises an error for networkers.
+	- Never raises an error for networkers.
 	"""
 	if user.profile.is_networker:
 		# networkers can do anything without needing items

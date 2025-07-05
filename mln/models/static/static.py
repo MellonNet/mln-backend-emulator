@@ -356,6 +356,7 @@ class NetworkerReply(models.Model):
 	
 	# Used when there is no direct interaction with a networker
 	def should_send(self, item_obtained_id):
+		"""Check if this reply should be sent when an item is obtained."""
 		return self.trigger_item_obtained is not None and item_obtained_id == self.trigger_item_obtained.id
 
 class NetworkerMessageTriggerLegacy(models.Model):

@@ -79,6 +79,7 @@ def send_template(template, sender, recipient):
 		message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
 
 def first_obtained_item(user, item_id):
+	"""Send the first_obtained_item message to the user if applicable."""
 	for reply in NetworkerReply.objects.filter(trigger_item_obtained_id=item_id):
 		if reply.should_send(item_id):
 			send_template(reply.template, reply.networker, user)
