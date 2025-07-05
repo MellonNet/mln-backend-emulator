@@ -340,6 +340,7 @@ class NetworkerReply(models.Model):
 	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, blank=True, null=True, limit_choices_to={"profile__is_networker": True})
 	trigger_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
 	trigger_attachment = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+	trigger_item_obtained = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE, null=True, blank=True, limit_choices_to=Q(type=ItemType.BADGE) | Q(type=ItemType.BLUEPRINT) | Q(type=ItemType.ITEM) | Q(type=ItemType.MASTERPIECE) | Q(type=ItemType.MODULE) | Q(type=ItemType.MOVIE) | Q(type=ItemType.SKIN))
 
 	class Meta:
 		verbose_name_plural = "Networker replies"
@@ -352,6 +353,10 @@ class NetworkerReply(models.Model):
 			(self.trigger_body is not None and message.body == self.trigger_body) or
 			(self.trigger_attachment is not None and attachment is not None and attachment.item == self.trigger_attachment)
 		)
+	
+	# Used when there is no direct interaction with a networker
+	def should_send(self, item_obtained_id):
+		return self.trigger_item_obtained is not None and item_obtained_id == self.trigger_item_obtained.id
 
 class NetworkerMessageTriggerLegacy(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""

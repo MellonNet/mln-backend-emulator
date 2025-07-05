@@ -8,6 +8,7 @@ def add_inv_item(user, item_id, qty=1):
 	Add one or more items to the user's inventory.
 	Always use this function instead of creating InventoryStacks directly.
 	This function creates a stack only if it does not already exist, and otherwise adds to the existing stack.
+	If this is the first time the user has obtained this item, it will also trigger the first_obtained_item message (if applicable).
 	"""
 	try:
 		stack = user.inventory.get(item_id=item_id)
@@ -15,7 +16,10 @@ def add_inv_item(user, item_id, qty=1):
 		stack.save()
 		return stack
 	except ObjectDoesNotExist:
-		return user.inventory.create(item_id=item_id, qty=qty)
+		stack = user.inventory.create(item_id=item_id, qty=qty)
+		from .message import first_obtained_item
+		first_obtained_item(user, item_id)
+		return stack
 
 def remove_inv_item(user, item_id, qty=1):
 	"""

@@ -77,3 +77,9 @@ def send_template(template, sender, recipient):
 	message = Message.objects.create(sender=sender, recipient=recipient, body=template.body)
 	for attachment in template.attachments.all():
 		message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
+
+def first_obtained_item(user, item_id):
+	for reply in NetworkerReply.objects.filter(trigger_item_obtained_id=item_id):
+		if reply.should_send(item_id):
+			send_template(reply.template, reply.networker, user)
+			return
