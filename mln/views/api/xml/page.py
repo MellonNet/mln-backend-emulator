@@ -61,8 +61,7 @@ def handle_page_get_new(viewing_user, request):
 
 	# For public views, exclude friends who are both networkers and marked as secret.
 	# Secret networkers can still see their own complete friend list.
-	is_secret = getattr(page_owner.profile, "is_secret", False)
-	if not viewing_own:
+	if not is_private_view and not viewing_own:
 		friends = [
 			(friendship, friend, status)
 			for (friendship, friend, status) in friends
