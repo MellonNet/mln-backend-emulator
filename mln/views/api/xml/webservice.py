@@ -13,7 +13,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from ....models.static import MLNError
+from mln.models import *
 from ....templatetags.mln_utils import render_to_string_stripped
 from .friend import handle_friend_process_blocking, handle_friend_process_invitation, handle_friend_remove_member, handle_friend_send_invitation
 from .page import handle_page_get_new, handle_page_save_layout, handle_page_save_options

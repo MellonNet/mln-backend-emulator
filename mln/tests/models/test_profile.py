@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from mln.models.static import ItemInfo, ItemType
+from mln.models import *
 from mln.services.inventory import add_inv_item
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.models.test_static import item

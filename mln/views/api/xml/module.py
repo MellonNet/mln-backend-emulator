@@ -1,5 +1,4 @@
-from ....models.dynamic.module import Module
-from ....models.static import ItemInfo, ItemType
+from mln.models import *
 
 def handle_get_module_bgs(user, request):
 	item_id = int(request.get("id")) # todo: do something with this

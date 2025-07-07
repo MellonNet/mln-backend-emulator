@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from mln.models.static import ItemInfo, ItemType, ModuleInfo
+from mln.models import *
 from mln.services.inventory import add_inv_item, assert_has_item
 from mln.services.misc import inventory_module_get, use_blueprint
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
@@ -103,7 +103,7 @@ class UseBlueprint_Ok(TestCase):
 
 class CraftMasterpiece_Ok(TestCase):
 	SETUP = has_masterpiece_blueprint, has_masterpiece_requirement
-	
+
 	def test(self):
 		use_blueprint(self.user, self.MASTERPIECE_BLUEPRINT_ID)
 		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_REQUIREMENT_ID).exists())
@@ -112,7 +112,7 @@ class CraftMasterpiece_Ok(TestCase):
 
 class CraftMasterpiece_Dupe(TestCase):
 	SETUP = has_masterpiece_blueprint, has_masterpiece_requirement, has_masterpiece
-	
+
 	def test(self):
 		use_blueprint(self.user, self.MASTERPIECE_BLUEPRINT_ID)
 		self.assertFalse(self.user.inventory.filter(item_id=self.MASTERPIECE_REQUIREMENT_ID).exists())

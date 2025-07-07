@@ -2,7 +2,8 @@ import logging
 
 from django.urls import reverse
 
-from mln.models.static import MLNError
+from mln.models import *
+
 from mln.tests.models.test_profile import one_user
 from mln.tests.setup_testcase import TestCase
 from mln.tests.views.api.xml.handler_testcase import req_resp

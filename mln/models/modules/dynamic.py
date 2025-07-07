@@ -12,31 +12,12 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils.timezone import now
 
-from ..static import Answer, Color, EnumField, ItemInfo, ItemType, MessageBody, Stack, Question
+from .. import *
 from ...services.inventory import assert_has_item
 
 DAY = datetime.timedelta(days=1)
 
-class Message(models.Model):
-	"""
-	A message sent from one user to another.
-	User messages can only be sent to friends, while messages sent by networkers don't have this restriction.
-	Message contents are determined by a prefabricated message text that can be chosen.
-	In the case of replies, the original message is also stored, so that the subject can be displayed as RE: <original>.
-	Messages can have attachments.
-	"""
-	sender = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
-	recipient = models.ForeignKey(User, related_name="messages", on_delete=models.CASCADE)
-	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
-	reply_body = models.ForeignKey(MessageBody, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-	is_read = models.BooleanField(default=False)
-
-	def __str__(self):
-		if self.reply_body_id is not None:
-			subject = "RE: "+self.reply_body.subject
-		else:
-			subject = self.body.subject
-		return "Message from %s to %s, subject \"%s\", is read: %s" % (self.sender, self.recipient, subject, self.is_read)
+from ..messages import Message
 
 class Attachment(Stack):
 	"""An attachment, a stack sent with a message."""

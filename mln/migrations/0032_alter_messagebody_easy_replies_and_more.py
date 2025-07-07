@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import mln.models.static.static
+import mln.models
 
 
 class Migration(migrations.Migration):
@@ -20,21 +20,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='moduleexecutioncost',
             name='module_item',
-            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.static.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='mln.iteminfo'),
+            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='mln.iteminfo'),
         ),
         migrations.AlterField(
             model_name='moduleguestyield',
             name='module_item',
-            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.static.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='mln.iteminfo'),
+            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='mln.iteminfo'),
         ),
         migrations.AlterField(
             model_name='modulemessage',
             name='module_item',
-            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.static.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='mln.iteminfo'),
+            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='mln.iteminfo'),
         ),
         migrations.AlterField(
             model_name='moduleowneryield',
             name='module_item',
-            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.static.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='mln.iteminfo'),
+            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='mln.iteminfo'),
         ),
     ]

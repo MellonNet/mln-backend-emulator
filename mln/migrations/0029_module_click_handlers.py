@@ -2,8 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import mln.models.static
-
+import mln.models
 
 class Migration(migrations.Migration):
 
@@ -20,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='moduleinfo',
             name='click_outcome',
-            field=mln.models.static.EnumField(mln.models.static.ModuleOutcome, blank=True, null=True),
+            field=mln.models.utils.EnumField(mln.models.ModuleOutcome, blank=True, null=True),
         ),
         migrations.AlterField(
             model_name='moduleexecutioncost',
@@ -30,12 +29,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='moduleexecutioncost',
             name='module_item',
-            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='moduleexecutioncosts', to='mln.iteminfo'),
+            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='moduleexecutioncosts', to='mln.iteminfo'),
         ),
         migrations.AlterField(
             model_name='moduleguestyield',
             name='module_item',
-            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='moduleguestyields', to='mln.iteminfo'),
+            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='moduleguestyields', to='mln.iteminfo'),
         ),
         migrations.AlterField(
             model_name='moduleguestyield',
@@ -45,7 +44,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='modulemessage',
             name='module_item',
-            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='modulemessages', to='mln.iteminfo'),
+            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='modulemessages', to='mln.iteminfo'),
         ),
         migrations.AlterField(
             model_name='modulemessage',
@@ -55,7 +54,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='moduleowneryield',
             name='module_item',
-            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='moduleowneryields', to='mln.iteminfo'),
+            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=django.db.models.deletion.CASCADE, related_name='moduleowneryields', to='mln.iteminfo'),
         ),
         migrations.AlterField(
             model_name='moduleowneryield',

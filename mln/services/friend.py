@@ -3,9 +3,7 @@ import random
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
-from ..models.dynamic import Friendship, FriendshipStatus, Profile, get_or_none
-from ..models.static import MLNError, NetworkerFriendshipCondition
-
+from mln.models import *
 from .inventory import has_item
 
 def _get_friendship(user, relation_id):
@@ -124,17 +122,3 @@ def unblock_friend(user, relation_id):
 		raise MLNError(MLNError.YOU_ARE_BLOCKED)
 	relation.status = FriendshipStatus.FRIEND
 	relation.save()
-
-def are_friends(user, other_user_id):
-	"""Return whether the users are friends."""
-	return user.outgoing_friendships.filter(to_user_id=other_user_id, status=FriendshipStatus.FRIEND).exists() or user.incoming_friendships.filter(from_user_id=other_user_id, status=FriendshipStatus.FRIEND).exists()
-
-def choose_friend(user, allow_networkers=False):
-	"""Returns a random friend from the user's friend list."""
-	# Wouldn't help to use Q objects because we wouldn't know which user is the friend
-	incoming = user.incoming_friendships.filter(from_user__profile__is_networker=allow_networkers, status=FriendshipStatus.FRIEND)
-	outgoing = user.outgoing_friendships.filter(to_user__profile__is_networker=allow_networkers, status=FriendshipStatus.FRIEND)
-	incoming_friends = [friendship.from_user for friendship in incoming]
-	outgoing_friends = [friendship.to_user for friendship in outgoing]
-	friends = incoming_friends + outgoing_friends
-	if friends: return random.choice(friends)
