@@ -1,5 +1,5 @@
-from ..models.dynamic import Attachment, FriendshipStatus, Message
-from ..models.static import MessageBody, MLNMessage, NetworkerReply
+from mln.models import *
+
 from .friend import are_friends
 from .inventory import add_inv_item, remove_inv_item
 
@@ -49,7 +49,7 @@ def open_message(user, message_id):
 	message.save()
 	return message
 
-def create_message(user, recipient_id, body_id): 
+def create_message(user, recipient_id, body_id):
 	"""Creates a message in-memory. To actually send, use send_message."""
 	_check_recipient(user, recipient_id)
 	return Message(sender=user, recipient_id=recipient_id, body_id=body_id)
@@ -71,9 +71,3 @@ def send_message(message, attachment=None):
 		if attachment is not None:  # send any attachment back to the user
 			attachment.message = reply
 			attachment.save()
-
-def send_template(template, sender, recipient): 
-	"""Sends a MessageTemplate along with any MessageTemplateAttachments."""
-	message = Message.objects.create(sender=sender, recipient=recipient, body=template.body)
-	for attachment in template.attachments.all():
-		message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)

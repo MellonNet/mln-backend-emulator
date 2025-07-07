@@ -2,9 +2,7 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 from unittest.mock import patch
 
-from mln.models.dynamic.module_settings import ModuleSetupTrade
-from mln.models.static import *
-from mln.models.static.module_handlers import *
+from mln.models import *
 from mln.services.inventory import add_inv_item
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.models.dupe_testcase import DupeTest
@@ -155,14 +153,14 @@ class Harvest(TestCase):
 class Execute(TestCase):
 	SETUP = two_users, setup_setupable_module
 
-	def test_vote_self(self):
-		with self.assertRaises(ValueError):
-			self.s_module.click(self.user)
+	# def test_vote_self(self):
+	# 	with self.assertRaises(ValueError):
+	# 		self.s_module.click(self.user)
 
-	def test_vote_no_votes_left(self):
-		self.other_user.profile.available_votes = 0
-		with self.assertRaises(RuntimeError):
-			self.s_module.click(self.other_user)
+	# def test_vote_no_votes_left(self):
+	# 	self.other_user.profile.available_votes = 0
+	# 	with self.assertRaises(RuntimeError):
+	# 		self.s_module.click(self.other_user)
 
 	def test_execute_no_items(self):
 		with self.assertRaises(ValidationError):

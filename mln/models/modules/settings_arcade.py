@@ -1,11 +1,6 @@
-"""Models for arcade module save data."""
-from enum import auto, Enum
+from ..utils import *
 
-from django.core.validators import MaxValueValidator
-from django.db import models
-
-from .module import Module
-from ..static import EnumField
+from .module import *
 
 class ModuleSaveArcade(models.Model):
 	"""

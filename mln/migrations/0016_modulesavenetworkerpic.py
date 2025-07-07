@@ -2,12 +2,12 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import mln.models.static
+import mln.models
 
 def migrate_networker_pics(apps, schema_editor):
 	Module = apps.get_model("mln", "Module")
 	MSNP = apps.get_model("mln", "ModuleSaveNetworkerPic")
-	for module in Module.objects.filter(item__module_info__editor_type=mln.models.static.ModuleEditorType.NETWORKER_PIC):
+	for module in Module.objects.filter(item__module_info__editor_type=mln.models.ModuleEditorType.NETWORKER_PIC):
 		for sticker in module.save_sticker.all():
 			MSNP.objects.create(module=module, picture=sticker.item)
 			break
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
 			fields=[
 				('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
 				('module', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='save_networker_pic', to='mln.Module')),
-				('picture', models.ForeignKey(limit_choices_to={'type': mln.models.static.ItemType(10)}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.ItemInfo')),
+				('picture', models.ForeignKey(limit_choices_to={'type': mln.models.ItemType(10)}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.ItemInfo')),
 			],
 		),
 		migrations.RunPython(migrate_networker_pics),

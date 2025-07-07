@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 
-from mln.models.dynamic import FriendshipStatus
-from mln.models.static import MLNError
+from mln.models import *
 from mln.services.friend import block_friend, handle_friend_invite_response, remove_friend, send_friend_invite, unblock_friend
 from mln.tests.setup_testcase import requires, setup, TestCase
 from mln.tests.models.test_profile import four_users, one_user, three_users, two_users

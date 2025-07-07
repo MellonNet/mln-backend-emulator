@@ -1,22 +1,14 @@
-"""The model for modules. Module settings are in their own files."""
 import random
+import datetime
 
-from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
-from django.db import models
-from django.db.models import Q
-from django.utils.timezone import now
-from datetime import timedelta
 
-from .dynamic import DAY, get_or_none
-from .dynamic import FriendshipStatus
-from ..static import ItemInfo, ItemType, MessageTemplate, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleOutcome, ModuleSetupCost, Stack
-from ..static.module_handlers import CLICK_HANDLERS
+from ..utils import *
+from ..items import *
 
-from ...services.inventory import add_inv_item, assert_has_item, remove_inv_item
-from ...services.friend import choose_friend
-from ...services.message import send_template
+from .info import *
+from .harvest import *
+from .handlers import *
 
 class Module(models.Model):
 	"""
@@ -225,35 +217,5 @@ class Module(models.Model):
 		self.is_setup = False
 		self.save()
 
-from .module_settings import ModuleSaveGeneric, ModuleSaveNetworkerPic, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
-from .module_settings_arcade import ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
-
-"""Settings class registry. This links module editor types to settings classes."""
-module_settings_classes = {
-	ModuleEditorType.CONCERT_I_ARCADE: (ModuleSaveConcertArcade,),
-	ModuleEditorType.CONCERT_II_ARCADE: (ModuleSaveConcertArcade,),
-	ModuleEditorType.DELIVERY_ARCADE: (ModuleSaveDeliveryArcade,),
-	ModuleEditorType.DESTRUCTOID_ARCADE: (ModuleSaveDestructoidArcade,),
-	ModuleEditorType.DR_INFERNO_ROBOT_SIM: (ModuleSaveDestructoidArcade,),
-	ModuleEditorType.FACTORY_GENERIC: (ModuleSaveGeneric, ModuleSaveUGC),
-	ModuleEditorType.FACTORY_NON_GENERIC: (ModuleSaveUGC,),
-	ModuleEditorType.FRIEND_SHARE: (ModuleSaveGeneric, ModuleSetupFriendShare),
-	ModuleEditorType.FRIENDLY_FELIX_CONCERT: (ModuleSaveConcertArcade,),
-	ModuleEditorType.GALLERY_GENERIC: (ModuleSaveGeneric, ModuleSaveUGC),
-	ModuleEditorType.GALLERY_NON_GENERIC: (ModuleSaveUGC,),
-	ModuleEditorType.GENERIC: (ModuleSaveGeneric,),
-	ModuleEditorType.GROUP_PERFORMANCE: (ModuleSaveGeneric, ModuleSetupGroupPerformance),
-	ModuleEditorType.HOP_ARCADE: (ModuleSaveHopArcade,),
-	ModuleEditorType.LOOP_SHOPPE: (ModuleSaveGeneric, ModuleSetupTrade),
-	ModuleEditorType.NETWORKER_PIC: (ModuleSaveNetworkerPic,),
-	ModuleEditorType.NETWORKER_TEXT: (ModuleSaveGeneric, ModuleSaveNetworkerText),
-	ModuleEditorType.NETWORKER_TRADE: (ModuleSaveGeneric, ModuleSetupTrade),
-	ModuleEditorType.PLASTIC_PELLET_INDUCTOR: (ModuleSaveUGC,),
-	ModuleEditorType.ROCKET_GAME: (ModuleSaveSticker, ModuleSaveRocketGame),
-	ModuleEditorType.SOUNDTRACK: (ModuleSaveGeneric, ModuleSaveSoundtrack),
-	ModuleEditorType.STICKER: (ModuleSaveSticker,),
-	ModuleEditorType.STICKER_SHOPPE: (ModuleSaveGeneric, ModuleSetupTrade),
-	ModuleEditorType.TRADE: (ModuleSaveGeneric, ModuleSetupTrade),
-	ModuleEditorType.TRIO_PERFORMANCE: (ModuleSaveGeneric, ModuleSetupTrioPerformance),
-	None: (),
-}
+# MUST be at the bottom
+from .settings_registry import *

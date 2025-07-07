@@ -8,11 +8,8 @@ from django.contrib import admin
 from django.contrib.admin.helpers import ActionForm
 from django.db.models import Q
 
-from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
-from ..models.dynamic.module import Module, module_settings_classes, ModuleSaveConcertArcade, ModuleSaveSoundtrack
-from ..models.dynamic.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageBodyType, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleSetupCost, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReply, StartingStack, Question
-from ..models.static.module_handlers import ModuleExecutionCost, ModuleGuestYield, ModuleMessage, ModuleOwnerYield
+from mln.models import *
+
 from .make_inline import custom, inlines, make_inline
 
 # Normal but customized admin interfaces
@@ -135,10 +132,10 @@ message_admin.list_display_links = "body",
 message_admin.list_filter = "is_read",
 message_admin.search_fields = "sender__username", "recipient__username", "body__subject", "body__text"
 
-friend_cond_admin = make_inline(NetworkerFriendshipCondition, NetworkerFriendshipConditionSource)
-friend_cond_admin.list_display = "networker", "condition", "success_body", "failure_body", "source"
-friend_cond_admin.list_display_links = "networker",
-friend_cond_admin.search_fields = "networker__username", "condition__name", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source__source"
+# friend_cond_admin = make_inline(NetworkerFriendshipCondition, NetworkerFriendshipConditionSource)
+# friend_cond_admin.list_display = "networker", "condition", "success_body", "failure_body", "source"
+# friend_cond_admin.list_display_links = "networker",
+# friend_cond_admin.search_fields = "networker__username", "condition__name", "success_body__subject", "success_body__text", "failure_body__subject", "failure_body__text", "source__source"
 
 trigger_admin_legacy = make_inline(NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy)
 trigger_admin_legacy.list_display = "networker", "body", "trigger", "source", "notes"

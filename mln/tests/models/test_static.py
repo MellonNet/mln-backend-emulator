@@ -1,4 +1,4 @@
-from mln.models.static import BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, MessageTemplate, MessageTemplateAttachment, NetworkerReply, StartingStack
+from mln.models import *
 from mln.tests.setup_testcase import cls_setup, requires
 from mln.tests.models.dupe_testcase import DupeTest
 

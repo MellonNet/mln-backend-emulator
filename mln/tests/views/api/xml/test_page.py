@@ -1,5 +1,4 @@
-from mln.models.static import ItemInfo, ItemType
-from mln.models.dynamic import AboutMe
+from mln.models import *
 from mln.services.inventory import add_inv_item
 from mln.tests.models.test_dynamic import statements
 from mln.tests.models.test_profile import has_skin, one_user, networker

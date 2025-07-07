@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from mln.models.dynamic import AboutMe
-from mln.models.static import Answer, Question
+from mln.models import *
 from mln.tests.setup_testcase import cls_setup, requires, setup, TestCase
 from mln.tests.models.dupe_testcase import DupeTest
 from mln.tests.models.test_profile import one_user, two_users, user_has_item
