@@ -60,4 +60,8 @@ def assert_has_item(user, item_id, qty=1, field_name=None):
 		raise ValidationError(message)
 
 def has_item(user, item_id):
-	return user.inventory.filter(item_id=item_id)
+	try:
+		user.inventory.filter(item_id=item_id).get()
+		return True
+	except ObjectDoesNotExist:
+		return False
