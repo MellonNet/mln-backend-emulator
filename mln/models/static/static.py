@@ -355,11 +355,6 @@ class NetworkerReply(models.Model):
 			(self.trigger_body is not None and message.body == self.trigger_body) or
 			(self.trigger_attachment is not None and attachment is not None and attachment.item == self.trigger_attachment)
 		)
-	
-	# Used when there is no direct interaction with a networker
-	def should_send(self, item_obtained_id):
-		"""Check if this reply should be sent when an item is obtained."""
-		return self.trigger_item_obtained is not None and item_obtained_id == self.trigger_item_obtained.id
 
 class NetworkerMessageTriggerLegacy(models.Model):
 	"""Currently meant for devs to collect data on triggers, later to be properly integrated into the system."""

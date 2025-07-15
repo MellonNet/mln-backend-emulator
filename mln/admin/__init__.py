@@ -36,9 +36,9 @@ custom[Friendship] = FriendshipAdmin
 
 MBT = MessageBodyType
 has_handler = lambda msg: (
-	msg.type in {MBT.MODULE, MBT.ITEM, MBT.USER, MBT.SYSTEM, MBT.BETA, MBT.INTEGRATION, MBT.UNPUBLISHED, MBT.OTHER} or  # unsupported
+	msg.type in {MBT.MODULE, MBT.USER, MBT.SYSTEM, MBT.BETA, MBT.INTEGRATION, MBT.UNPUBLISHED, MBT.OTHER} or  # unsupported
 	(msg.type == MBT.FRIEND and NetworkerFriendshipCondition.objects.filter(Q(success_body=msg) | Q(failure_body=msg)).exists()) or
-	(msg.type == MBT.REPLY and NetworkerReply.objects.filter(template__body=msg).exists())
+	(msg.type in [MBT.REPLY, MBT.ITEM] and NetworkerReply.objects.filter(template__body=msg).exists())
 )
 
 has_handler.short_description = "has handler"
@@ -159,9 +159,9 @@ networker_reply_admin.response = lambda _, reply: reply.template.body.subject
 networker_reply_admin.response.short_description = "Response"
 networker_reply_admin.attachment = lambda _, reply: next(iter(reply.template.attachments.all()), None)
 networker_reply_admin.attachment.short_description = "Attachment"
-networker_reply_admin.list_display = "networker", "trigger", "response", "attachment"
+networker_reply_admin.list_display = "networker", "trigger", "response", "attachment", "trigger_item_obtained"
 networker_reply_admin.list_display_links = "response",
-networker_reply_admin.search_fields = "networker__username", "template__attachments__item__name",  "template__body__subject", "template__body__text", "trigger_attachment__name", "trigger_body__subject", "trigger_body__text"
+networker_reply_admin.search_fields = "networker__username", "template__attachments__item__name",  "template__body__subject", "template__body__text", "trigger_attachment__name", "trigger_body__subject", "trigger_body__text", "trigger_item_obtained__name"
 
 # Item infos
 
