@@ -13,6 +13,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.edit import CreateView
 
+from mln.services import coast_guard
+
 from .oauth import OAuthLoginView, get_token
 
 def flashvars_handler(request):
@@ -37,6 +39,7 @@ urlpatterns = [
 	), name="sign_up"),
 	path("accounts/password_change", PasswordChangeView.as_view()),
 	path("admin/", admin.site.urls),
+	path("api/coast-guard/rank", coast_guard.submit_rank),
 ]
 
 if settings.DEBUG:

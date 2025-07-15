@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 
-class MLNMessage: 
+class MLNMessage:
 	"""
 	These are messages that can be sent to the user on certain conditions.
 	They don't necessarily indicate an error within MLN, rather inform the user they need to do something different.
@@ -146,7 +146,7 @@ class MessageBodyCategory(models.Model):
 	def __str__(self):
 		return self.name
 
-class MessageBodyType(Enum): 
+class MessageBodyType(Enum):
 	MODULE = auto()
 	ITEM = auto()
 	FRIEND = auto()
@@ -194,25 +194,25 @@ class MessageReplyType(Enum):
 	EASY_REPLY_ONLY = 2
 	NO_REPLY = 3
 
-class MessageTemplate(models.Model): 
+class MessageTemplate(models.Model):
 	"""
-	Defines a template for a message that will be sent by MLN. 
+	Defines a template for a message that will be sent by MLN.
 	These templates can have attachments, but not a recipient.
-	These are different from [Message], in that the latter have already been sent. 
-	""" 
+	These are different from [Message], in that the latter have already been sent.
+	"""
 	body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE)
 
-	def __str__(self): 
+	def __str__(self):
 		result = self.body.subject
 		for attachment in self.attachments.all():
 			result += " + %s" % str(attachment)
 		return result
 
-class MessageTemplateAttachment(Stack): 
+class MessageTemplateAttachment(Stack):
 	"""An attachment for a [MessageTemplate]."""
 	template = models.ForeignKey(MessageTemplate, related_name="attachments", on_delete=models.CASCADE)
 
-	class Meta: 
+	class Meta:
 		constraints = (models.UniqueConstraint(fields=("template", "item"), name="messsage_template_attachment_unique_template_item"),)
 
 class ModuleEditorType(Enum):
@@ -242,7 +242,7 @@ class ModuleEditorType(Enum):
 	TRIO_PERFORMANCE = auto()
 	NETWORKER_PIC = auto()
 
-class ModuleOutcome(Enum): 
+class ModuleOutcome(Enum):
 	"""When to distribute items. Used in module click handlers, like ModuleOwnerYield."""
 	ARCADE = auto()  # after winning the game [eg, delivery]
 	BATTLE = auto()  # after winning a battle  [eg, bee battle]
@@ -335,7 +335,7 @@ class StartingStack(Stack):
 	"""A stack that users start off with in their inventory when they create an account."""
 	item = models.OneToOneField(ItemInfo, related_name="+", on_delete=models.CASCADE)
 
-class NetworkerReply(models.Model): 
+class NetworkerReply(models.Model):
 	template = models.ForeignKey(MessageTemplate, related_name="+", on_delete=models.CASCADE)
 	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, blank=True, null=True, limit_choices_to={"profile__is_networker": True})
 	trigger_body = models.ForeignKey(MessageBody, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
@@ -344,10 +344,10 @@ class NetworkerReply(models.Model):
 	class Meta:
 		verbose_name_plural = "Networker replies"
 
-	def __str__(self): 
+	def __str__(self):
 		return "Reply when sending %s to %s: %s" % (self.trigger_attachment or self.trigger_body, self.networker, self.template.body.subject)
 
-	def should_reply(self, message, attachment): 
+	def should_reply(self, message, attachment):
 		return (
 			(self.trigger_body is not None and message.body == self.trigger_body) or
 			(self.trigger_attachment is not None and attachment is not None and attachment.item == self.trigger_attachment)
@@ -372,3 +372,11 @@ class NetworkerMessageAttachmentLegacy(Stack):
 
 	class Meta:
 		constraints = (models.UniqueConstraint(fields=("trigger", "item"), name="networker_message_attachment_unique_trigger_item"),)
+
+class CoastGuardMessage(models.Model):
+	template = models.ForeignKey(MessageTemplate, related_name="+", on_delete=models.CASCADE)
+	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
+	rank = models.IntegerField()
+
+	def __str__(self):
+		return f"Rank {self.rank} message"
