@@ -56,6 +56,7 @@ class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	is_networker = models.BooleanField(default=False)
 	is_secret = models.BooleanField(default=False, help_text="If true, this user is a secret networker and should not be displayed in public friend lists.")
+	is_pseudo = models.BooleanField(default=False)
 	avatar = models.CharField(max_length=64, default="0#1,6,1,16,5,1,6,13,2,9,2,2,1,1")
 	rank = models.PositiveSmallIntegerField(default=0)
 	available_votes = models.PositiveSmallIntegerField(default=20)

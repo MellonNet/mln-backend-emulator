@@ -97,11 +97,12 @@ class Module(models.Model):
 
 	def _update_clicks(self, clicker):
 		"""Updates clicks for both the clicker and the module."""
-		clicker.profile.available_votes -= 1
-		clicker.profile.save()
 		self.clicks_since_last_harvest += 1
 		self.total_clicks += 1
 		self.save()
+		if clicker.profile.is_networker: return
+		clicker.profile.available_votes -= 1
+		clicker.profile.save()
 
 	def get_settings_classes(self):
 		"""Get the save data classes for this module."""
@@ -115,9 +116,26 @@ class Module(models.Model):
 		"""Calculate the yield of this module."""
 		return self._calc_yield_info()[0]
 
+	def handle_trade(self, clicker):
+		trade = self.setup_trade
+		assert_has_item(clicker, trade.request_item.id, trade.request_qty)
+		remove_inv_item(clicker, trade.request_item.id, trade.request_qty)
+		add_inv_item(self.owner, trade.request_item.id, trade.request_qty)
+		add_inv_item(clicker, trade.give_item.id, trade.give_qty)
+		self.is_setup = False
+		self.save()
+
+	def handle_guest_yield(self, clicker):
+		guest_yield = self._get_yield(self.item.moduleguestyields.all())
+		if guest_yield is not None:
+			guest_yield.on_click(self, clicker)
+			if guest_yield.should_yield(self):
+				return guest_yield
+
 	def click(self, clicker):
 		"""Updates clicks and distributes relevant rewards."""
 		self._validate_click(clicker)
+
 		# Handle most click handlers
 		self.did_guest_win = random.choice([True, False])
 		for model in CLICK_HANDLERS:
@@ -126,23 +144,13 @@ class Module(models.Model):
 
 		# Handle trades separately
 		if ModuleSetupTrade in self.get_settings_classes():  # handle trades
-			trade = self.setup_trade
-			assert_has_item(clicker, trade.request_item.id, trade.request_qty)
-			remove_inv_item(clicker, trade.request_item.id, trade.request_qty)
-			add_inv_item(self.owner, trade.request_item.id, trade.request_qty)
-			add_inv_item(clicker, trade.give_item.id, trade.give_qty)
-			self.is_setup = False
-			self.save()
+			self.handle_trade()
 
 		# Handle guest yields separately
 		outcome = self.item.module_info.click_outcome
 		result = None  # we return the guest yield to the UI
 		if (outcome != ModuleOutcome.ARCADE):
-			guest_yield = self._get_yield(self.item.moduleguestyields.all())
-			if guest_yield is not None:
-				guest_yield.on_click(self, clicker)
-				if guest_yield.should_yield(self):
-					result = guest_yield
+			result = self.handle_guest_yield(clicker)
 
 		# Update information about the module
 		self._update_clicks(clicker)
@@ -150,7 +158,24 @@ class Module(models.Model):
 			# Tear down the module if the guest won
 			self.is_setup = False
 			self.save()
+
+		# For pseudo-networkers, have them click the user back
+		if self.owner.profile.is_networker and self.owner.profile.is_pseudo:
+			self.click_back(clicker)
+
 		return result
+
+	def click_back(self, clicker):
+		# A pseudo-networker is a special networker added to re-balance the game
+		# If you click a pseudo-networker's module, they will click yours back.
+		# If you have several, they will keep clicking until one succeeds.
+		if clicker.profile.is_networker: return  # only click back humans
+		for human_module in clicker.modules.filter(item=self.item):
+			try:
+				human_module.click(self.owner)
+				break
+			except:
+				continue
 
 	def add_to_harvest(self, qty):
 		self.yield_since_last_harvest += qty

@@ -49,7 +49,7 @@ def send_friend_invite(user, recipient_name):
 
 def add_networker_friend(user, networker):
 	condition = get_or_none(NetworkerFriendshipCondition, networker=networker)
-	assert condition is not None  # all networkers have a condition object, even if empty
+	if not condition: return  # all networkers must have a condition, no way to recover
 	success = condition.condition_id is None or has_item(user, condition.condition_id)
 	if success:
 		user.outgoing_friendships.create(to_user=networker, status=FriendshipStatus.FRIEND)
