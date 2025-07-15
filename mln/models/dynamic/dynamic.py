@@ -158,6 +158,41 @@ class Friendship(models.Model):
 	def __str__(self):
 		return "%s -> %s: %s" % (self.from_user, self.to_user, self.get_status_display())
 
+class OAuthClient(models.Model):
+	client_id = models.CharField(max_length=64)
+	client_name = models.CharField(max_length=64)
+	client_secret = models.CharField(max_length=64)
+	image_url = models.URLField()
+
+	def __str__(self):
+		return self.client_name
+
+	class Meta:
+		verbose_name_plural = "OAuth Clients"
+
+class OAuthCode(models.Model):
+	user = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
+	auth_code = models.CharField(max_length=64)
+	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
+	generated_at = models.DateTimeField()
+
+	def __str__(self):
+		return f"Auth code for {self.user}"
+
+	class Meta:
+		verbose_name_plural = "OAuth Authorization Codes"
+
+class OAuthToken(models.Model):
+	access_token = models.CharField(max_length=64)
+	user = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
+	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
+
+	def __str__(self):
+		return f"OAuth access token for {self.user}"
+
+	class Meta:
+		verbose_name_plural = "OAuth Tokens"
+
 def get_or_none(cls, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""
 	try:

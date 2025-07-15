@@ -13,6 +13,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.edit import CreateView
 
+from .oauth import OAuthLoginView, get_token
+
 def flashvars_handler(request):
 	raise Http404("""
 	Page is not intended to be viewed, only serves as root for flashvars.
@@ -25,6 +27,8 @@ urlpatterns = [
 	path("ugc", flashvars_handler, name="ugc"),
 	path("creation_lab/", include("creation_lab.urls")),
 	path("creation_lab", flashvars_handler, name="creation_lab"),
+	path("oauth", OAuthLoginView.as_view()),
+	path("oauth/token", get_token),
 	path("accounts/", include("django.contrib.auth.urls")),
 	path("accounts/sign_up", CreateView.as_view(
 		template_name="registration/sign_up.html",
