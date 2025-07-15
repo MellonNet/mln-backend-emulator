@@ -1,0 +1,27 @@
+title Sign in with My Lego Network
+
+materialdesignicons F0004 "User" as user
+materialdesignicons F02AF "Resource Client" as client
+materialdesignicons F048D "Resource Server" as server
+materialdesignicons F1288 "MLN server" as mln
+
+user->client: Opens page
+client->server: Get initial data
+server->client: Session ID
+
+====
+
+user->client: Sign in
+client->mln: OAuth page w/ session ID
+mln->server: Redirect with session ID\nand auth code
+server->mln: POST /oauth/token\nwith auth code
+mln->server: Access token
+
+server->client: Redirect to home
+
+====
+
+user->client: Earns reward
+client->server: Get reward\nwith session ID
+server->mln: Get reward with API\ntoken + access token
+mln->user: Send rewards within MLN

@@ -40,9 +40,11 @@ INSTALLED_APPS = [
 	"django.contrib.sessions",
 	"django.contrib.messages",
 	"django.contrib.staticfiles",
+	"corsheaders",
 ]
 
 MIDDLEWARE = [
+	"corsheaders.middleware.CorsMiddleware",
 	"django.middleware.security.SecurityMiddleware",
 	"django.contrib.sessions.middleware.SessionMiddleware",
 	"django.middleware.common.CommonMiddleware",
@@ -50,6 +52,11 @@ MIDDLEWARE = [
 	"django.contrib.auth.middleware.AuthenticationMiddleware",
 	"django.contrib.messages.middleware.MessageMiddleware",
 	"django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+CORS_ALLOWED_ORIGINS = [
+	# If you get CORS errors while testing, insert your localhost:XXXX here
+  # When hosting a mini-game integration, put that here too
 ]
 
 ROOT_URLCONF = "mlnserver.urls"

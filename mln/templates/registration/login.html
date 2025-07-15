@@ -12,11 +12,28 @@
 	<p>Please login to see this page.</p>
 	{% endif %}
 {% endif %}
-<form method="post">
-	{% csrf_token %}
-	{{ form.as_p }}
-	<input type="submit" value="Login" />
-</form>
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
-<p><a href="{% url 'sign_up' %}">Sign up</a></p>
+
+{% if oauth %}
+	{% if client_name %}
+		<p>This account will be used to sign into: {{ client_name }}</p>
+		<img src="{{image_url}}" height="300px"/>
+	{% endif %}
+{% endif %}
+
+{% if oauth and invalid %}
+	<h2>NOTE: This request was missing some information</h2>
+	<p>The URL is supposed to contain a session_id, redirect_url, and a valid client_id</p>
+	<p>The error message was: {{invalid}}</p>
+	<p>Please contact the developer of the site that took you here</p>
+	<button type="button" onclick="window.history.back()">Go back</button>
+{% else %}
+	<form method="post">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<input type="submit" value="Login" />
+	</form>
+	<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+	<p><a href="{% url 'sign_up' %}">Sign up</a></p>
+{% endif %}
+
 {% endblock %}
