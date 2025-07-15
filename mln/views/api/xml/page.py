@@ -65,7 +65,7 @@ def handle_page_get_new(viewing_user, request):
 		friends = [
 			(friendship, friend, status)
 			for (friendship, friend, status) in friends
-			if not (getattr(friend.profile, "is_networker", False) and getattr(friend.profile, "is_secret", False))
+			if not (friend.profile.is_networker and friend.profile.is_secret)
 		]
 
 	context = {
