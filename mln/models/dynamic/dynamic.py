@@ -194,9 +194,9 @@ class OAuthToken(models.Model):
 	class Meta:
 		verbose_name_plural = "OAuth Tokens"
 
-def get_or_none(cls, *args, **kwargs):
+def get_or_none(cls, is_relation=False, *args, **kwargs):
 	"""Get a model instance according to the filters, or return None if no matching model instance was found."""
 	try:
-		return cls.objects.get(*args, **kwargs)
+		return cls.objects.get(*args, **kwargs) if not is_relation else cls.get(*args, **kwargs)
 	except ObjectDoesNotExist:
 		return None
