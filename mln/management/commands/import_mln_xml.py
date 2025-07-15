@@ -2,8 +2,7 @@ import xml.etree.ElementTree as et
 
 from django.core.management.base import BaseCommand
 
-from mln.models.static import Answer, BlueprintInfo, BlueprintRequirement, Color, ItemInfo, ItemType, MessageBody, MessageBodyCategory, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleOutcome, ModuleSetupCost, ModuleSkin, StartingStack, Question
-from mln.models.static.module_handlers import ModuleExecutionCost, ModuleGuestYield, ModuleMessage, ModuleOwnerYield
+from mln.models import *
 
 href_types = {
 	"Concert I Arcade Game": ModuleEditorType.CONCERT_I_ARCADE,

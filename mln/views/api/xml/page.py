@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 
-from ....models.dynamic import get_or_none, Friendship, FriendshipStatus
-from ....models.static import ItemType
+from mln.models import *
 from ....services.page import page_save_layout
 
 def handle_page_get_new(viewing_user, request):

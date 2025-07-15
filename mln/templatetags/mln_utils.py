@@ -1,12 +1,10 @@
 """Various utility functions for accessing or formatting data for templates that would be too complex to do in the templates themselves."""
 import re
-from django import template
+import django
 from django.template import loader
 from django.template.base import DebugLexer, Lexer, tag_re, TextNode
 
-from mln.models.dynamic.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerPic, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
-from mln.models.dynamic.module_settings_arcade import HopArcadeElement, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
-from mln.models.static import ItemType, MessageReplyType
+from mln.models import *
 
 SAVE_TEMPLATES = {
 	ModuleSaveConcertArcade: "concert_arcade",
@@ -27,7 +25,7 @@ SETUP_TEMPLATES = {
 	ModuleSetupTrioPerformance: "trio_performance",
 }
 
-register = template.Library()
+register = django.template.Library()
 
 @register.filter
 def get_avatar(profile):
@@ -157,7 +155,7 @@ def replyable(message):
 		return MessageReplyType.NORMAL_REPLY_ONLY.value
 
 @register.filter
-def get_valid_modules(owner): 
+def get_valid_modules(owner):
 	return owner.modules.filter(pos_x__isnull=False, pos_y__isnull=False)
 
 # Fix for Django template compilation, to remove whitespace from templates.

@@ -3,8 +3,7 @@
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-import mln.models.static
-
+import mln.models
 
 class Migration(migrations.Migration):
 
@@ -36,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='moduleexecutioncost',
             name='item',
-            field=models.ForeignKey(limit_choices_to={'type': mln.models.static.ItemType(4)}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.ItemInfo'),
+            field=models.ForeignKey(limit_choices_to={'type': mln.models.ItemType(4)}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.ItemInfo'),
         ),
         migrations.AlterField(
             model_name='moduleinfo',
@@ -176,12 +175,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='modulesetupcost',
             name='item',
-            field=models.ForeignKey(limit_choices_to={'type': mln.models.static.ItemType(4)}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.ItemInfo'),
+            field=models.ForeignKey(limit_choices_to={'type': mln.models.ItemType(4)}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.ItemInfo'),
         ),
         migrations.AlterField(
             model_name='moduleyieldinfo',
             name='yield_item',
-            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType(3)), ('type', mln.models.static.ItemType(4)), _connector='OR'), on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.ItemInfo'),
+            field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType(3)), ('type', mln.models.ItemType(4)), _connector='OR'), on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.ItemInfo'),
         ),
         migrations.AlterField(
             model_name='profile',

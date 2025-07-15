@@ -1,4 +1,4 @@
-from mln.models.static import ItemInfo, ItemType, MessageBody, MessageTemplate, MLNMessage, NetworkerReply
+from mln.models import *
 from mln.services.inventory import add_inv_item
 from mln.services.message import create_attachment, create_message, delete_message, detach_attachments, easy_reply, open_message, send_message
 from mln.tests.models.test_dynamic import attachment, body, message
@@ -19,7 +19,7 @@ def easy_reply_body(cls):
 
 @setup
 @requires(body_category)
-def networker_message(self): 
+def networker_message(self):
 	"""Sets up tests for NetworkerReply."""
 	self.wrong_message_body_id = MessageBody.objects.create(category_id=self.BODY_CAT_ID, subject="Wrong Message", text="Wrong body").id
 	self.correct_message_body_id = MessageBody.objects.create(category_id=self.BODY_CAT_ID, subject="Correct Message", text="Correct body").id
@@ -73,12 +73,12 @@ class Message(TestCase):
 		open_message(self.user, self.message.id)
 		self.assertTrue(self.user.messages.get(id=self.message.id).is_read)
 
-	def test_send_message_wrong_body(self): 
+	def test_send_message_wrong_body(self):
 		message = create_message(self.other_user, self.user.id, self.wrong_message_body_id)
 		send_message(message, None)
 		self.assertTrue(self.other_user.messages.filter(sender=self.user, body_id=MLNMessage.I_DONT_GET_IT).exists())
 
-	def test_send_message_wrong_attachment(self): 
+	def test_send_message_wrong_attachment(self):
 		# 1. Verify the networker replies with "I don't get it".
 		message = create_message(self.other_user, self.user.id, self.wrong_message_body_id)
 		attachment = create_attachment(message, self.wrong_attachment_id, 1)
@@ -88,13 +88,13 @@ class Message(TestCase):
 		reply = self.other_user.messages.get(sender=self.user, body_id=MLNMessage.I_DONT_GET_IT)
 		self.assertTrue(reply.attachments.filter(item=attachment.item, qty=attachment.qty))
 
-	def test_send_message_correct_body(self): 
+	def test_send_message_correct_body(self):
 		# Verify the networker replies with the correct response
 		message = create_message(self.other_user, self.user.id, self.correct_message_body_id)
 		send_message(message, None)
 		self.assertTrue(self.other_user.messages.filter(sender_id=self.user.id, body_id=self.reply_id).exists())
 
-	def test_send_message_correct_attachment(self): 
+	def test_send_message_correct_attachment(self):
 		# Verify the networker replies with the correct response
 		message = create_message(self.other_user, self.user.id, self.wrong_message_body_id)
 		attachment = create_attachment(message, self.correct_attachment_id, 1)

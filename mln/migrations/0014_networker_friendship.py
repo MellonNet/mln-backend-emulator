@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import mln.models.static
+import mln.models
 
 def migrate_conditions(apps, schema_editor):
 	User = apps.get_model("auth", "User")
@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
 		migrations.AlterField(
 			model_name='networkerfriendshipcondition',
 			name='condition',
-			field=models.ForeignKey(blank=True, limit_choices_to=models.Q(('type', mln.models.static.ItemType(2)), ('type', mln.models.static.ItemType(3)), ('type', mln.models.static.ItemType(4)), ('type', mln.models.static.ItemType(6)), _connector='OR'), null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='mln.ItemInfo'),
+			field=models.ForeignKey(blank=True, limit_choices_to=models.Q(('type', mln.models.ItemType(2)), ('type', mln.models.ItemType(3)), ('type', mln.models.ItemType(4)), ('type', mln.models.ItemType(6)), _connector='OR'), null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='mln.ItemInfo'),
 		),
 		migrations.AlterField(
 			model_name='networkerfriendshipcondition',

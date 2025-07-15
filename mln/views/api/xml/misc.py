@@ -1,4 +1,4 @@
-from ....models.dynamic import AboutMe
+from mln.models import *
 from ....services.misc import inventory_module_get, use_blueprint
 
 def handle_blueprint_use(user, request):

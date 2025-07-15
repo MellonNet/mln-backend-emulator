@@ -1,6 +1,6 @@
 from django.db.transaction import atomic
 
-from ..models.static import ItemInfo, ItemType
+from mln.models import *
 from .inventory import add_inv_item, remove_inv_item
 
 @atomic

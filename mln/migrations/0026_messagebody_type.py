@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 from django.db.models import Q
-import mln.models.static
+import mln.models
 
 def wrap(query): return query.exists(), query.first()
 def by_category(categories): return lambda msg: (msg.category.name in categories, msg)
@@ -12,7 +12,7 @@ USER_CATEGORIES = {"General", "Trading", "Bragging", "Praise", "Building", "Than
 def add_message_body_type(apps, schema_editor):
 	# Adds MessageBodyTypes to MessageBodies, if it can
 	MessageBody = apps.get_model("mln", 'MessageBody')
-	MessageBodyType = mln.models.static.MessageBodyType
+	MessageBodyType = mln.models.MessageBodyType
 	NetworkerFriendshipCondition = apps.get_model("mln", "NetworkerFriendshipCondition")
 	NetworkerReply = apps.get_model("mln", "NetworkerReply")
 
@@ -30,15 +30,15 @@ def add_message_body_type(apps, schema_editor):
 		# Determine which types this object can be
 		types = []
 		objects = []
-		for type_, test in POSSIBLE_TYPES.items(): 
+		for type_, test in POSSIBLE_TYPES.items():
 			result, object_ = test(message_body)
-			if result: 
+			if result:
 				types.append(type_)
 				objects.append(object_)
 
 		# Save the message type or note
 		if len(types) == 0: continue  # couldn't determine
-		elif len(types) == 1: 
+		elif len(types) == 1:
 			message_body.type = types [0]
 		else:
 			message_body.notes = "Has corresponding entries in categories: %s.\n\nHandler objects:\n%s" % (", ".join(map(str, types)), "\n".join(map(str, objects)))
@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
 		migrations.AddField(
 			model_name='messagebody',
 			name='type',
-			field=mln.models.static.EnumField(mln.models.static.MessageBodyType, null=True, blank=True),
+			field=mln.models.EnumField(mln.models.MessageBodyType, null=True, blank=True),
 		),
 		migrations.AddField(
 			model_name='messagebody',

@@ -2,7 +2,7 @@
 
 from django.db import migrations
 from django.db import models
-import mln.models.static
+import mln.models
 
 class Migration(migrations.Migration):
 	dependencies = [
@@ -20,17 +20,17 @@ class Migration(migrations.Migration):
 		migrations.AlterField(
 			model_name='moduleharvestyield',
 			name='item',
-			field=models.OneToOneField(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='+', to='mln.iteminfo'),
+			field=models.OneToOneField(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='+', to='mln.iteminfo'),
 		),
 		migrations.AlterField(
 			model_name='moduleexecutioncost',
 			name='module_item',
-			field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='execution_costs', to='mln.iteminfo'),
+			field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='execution_costs', to='mln.iteminfo'),
 		),
 		migrations.AlterField(
 			model_name='modulesetupcost',
 			name='module_item',
-			field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='setup_costs', to='mln.iteminfo'),
+			field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='setup_costs', to='mln.iteminfo'),
 		),
 
 		# Create ModuleOwnerYield
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
 				('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
 				('qty', models.PositiveSmallIntegerField()),
 				('item', models.ForeignKey(on_delete=models.deletion.CASCADE, related_name='+', to='mln.iteminfo')),
-				('module_item', models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='owner_yields', to='mln.iteminfo')),
+				('module_item', models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='owner_yields', to='mln.iteminfo')),
 				('probability', models.PositiveSmallIntegerField()),
 			],
 		),
@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
 		migrations.AlterField(
 			model_name='moduleguestyield',
 			name='module_item',
-			field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='guest_yields', to='mln.iteminfo'),
+			field=models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='guest_yields', to='mln.iteminfo'),
 		),
 		migrations.RenameField(
 			model_name='moduleguestyield',
@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
 				('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
 				('probability', models.PositiveSmallIntegerField()),
 				('message', models.OneToOneField(on_delete=models.deletion.CASCADE, related_name='+', to='mln.messagetemplate')),
-				('module_item', models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.static.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='friend_messages', to='mln.iteminfo')),
+				('module_item', models.ForeignKey(limit_choices_to=models.Q(('type', mln.models.ItemType['MODULE'])), on_delete=models.deletion.CASCADE, related_name='friend_messages', to='mln.iteminfo')),
 			],
 		),
 
