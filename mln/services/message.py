@@ -49,7 +49,7 @@ def open_message(user, message_id):
 	message.save()
 	return message
 
-def create_message(user, recipient_id, body_id): 
+def create_message(user, recipient_id, body_id):
 	"""Creates a message in-memory. To actually send, use send_message."""
 	_check_recipient(user, recipient_id)
 	return Message(sender=user, recipient_id=recipient_id, body_id=body_id)
@@ -72,8 +72,13 @@ def send_message(message, attachment=None):
 			attachment.message = reply
 			attachment.save()
 
-def send_template(template, sender, recipient): 
+def send_template(template, sender, recipient):
 	"""Sends a MessageTemplate along with any MessageTemplateAttachments."""
 	message = Message.objects.create(sender=sender, recipient=recipient, body=template.body)
 	for attachment in template.attachments.all():
 		message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
+
+def first_obtained_item(user, item_id):
+	"""Send the first_obtained_item message to the user if applicable."""
+	for reply in NetworkerReply.objects.filter(trigger_item_obtained_id=item_id):
+		send_template(reply.template, reply.networker, user)
