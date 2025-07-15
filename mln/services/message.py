@@ -76,9 +76,9 @@ def send_message(message, attachment=None):
 def attach(message: Message, attachment: Attachment):
 	message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
 
-def consolidate(message, template):
+def consolidate(message, other):
 	"""Consolidates all the attachments in [template] with those in [message]"""
-	for attachment in template.attachments.all():
+	for attachment in other.attachments.all():
 		already_attached = get_or_none(message.attachments, is_relation=True, item_id=attachment.item_id)
 		if already_attached:
 			# This attachment already exists, just increment
