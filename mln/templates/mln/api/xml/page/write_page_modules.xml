@@ -9,6 +9,11 @@
 			isSetup="True"
 		{% endif %}
 	>
+	<trophyItems>
+		{% for trophyItem in page_owner|get_trophies %}
+			<item itemID="{{ trophyItem.id }}"></item>
+		{% endfor %}
+	</trophyItems>
 		<details posx="{{ module.pos_x }}" posy="{{ module.pos_y }}" />
 		{% if calc_yield %}
 			{% with yield_item_qty=module.calc_yield_qty %}
