@@ -36,9 +36,10 @@ custom[Friendship] = FriendshipAdmin
 
 MBT = MessageBodyType
 has_handler = lambda msg: (
-	msg.type in {MBT.MODULE, MBT.USER, MBT.SYSTEM, MBT.BETA, MBT.INTEGRATION, MBT.UNPUBLISHED, MBT.OTHER} or  # unsupported
+	msg.type in {MBT.USER, MBT.SYSTEM, MBT.BETA, MBT.INTEGRATION, MBT.UNPUBLISHED, MBT.OTHER} or  # unsupported
 	(msg.type == MBT.FRIEND and NetworkerFriendshipCondition.objects.filter(Q(success_body=msg) | Q(failure_body=msg)).exists()) or
-	(msg.type in [MBT.REPLY, MBT.ITEM] and NetworkerReply.objects.filter(template__body=msg).exists())
+	(msg.type in [MBT.REPLY, MBT.ITEM] and NetworkerReply.objects.filter(template__body=msg).exists()) or
+	(msg.type == MBT.MODULE and ModuleMessage.objects.filter(message__body=msg).exists())
 )
 
 has_handler.short_description = "has handler"
