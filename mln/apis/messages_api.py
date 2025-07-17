@@ -48,8 +48,8 @@ def reply_to_message(data, access_token, id):
 
 @csrf_exempt
 @oauth
+@only_allow("POST")
 def mark_read(request, access_token, id):
-  if (request.method != "POST"): return HttpResponse(status=405)
   message = get_message(message_id=id, user=access_token.user)
   if type(message) is HttpResponse: return message
   message.is_read = True

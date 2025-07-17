@@ -6,6 +6,7 @@ from mln.apis.json import *
 
 @csrf_exempt
 @oauth
+@only_allow("GET")
 def get_user(request, access_token, username):
   otherUser = get_or_none(User, username=username)
   if not otherUser:
