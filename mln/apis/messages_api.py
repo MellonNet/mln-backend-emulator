@@ -45,3 +45,13 @@ def reply_to_message(data, access_token, id):
   message_services.send_message(reply, attachment)
   result = message_response(reply)
   return JsonResponse(result, safe=False, status=201)
+
+@csrf_exempt
+@oauth
+def mark_read(request, access_token, id):
+  if (request.method != "POST"): return HttpResponse(status=405)
+  message = get_message(message_id=id, user=access_token.user)
+  if type(message) is HttpResponse: return message
+  message.is_read = True
+  message.save()
+  return HttpResponse(status=204)
