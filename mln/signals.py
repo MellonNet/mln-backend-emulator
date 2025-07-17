@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models.dynamic import Profile, Friendship, FriendshipStatus, get_or_none
+from .models.dynamic import Profile, get_or_none
 from .models.static import StartingStack
 from .services.friend import add_networker_friend
 from .services.inventory import add_inv_item

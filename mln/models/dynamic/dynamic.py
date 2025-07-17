@@ -218,6 +218,8 @@ class WebhookType(Enum):
 
 class Webhook(models.Model):
 	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
+	access_token = models.ForeignKey(OAuthToken, related_name="+", on_delete=models.CASCADE)
+	user = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
 	secret = models.CharField(max_length=64)
 	url = models.URLField()
 	type = EnumField(WebhookType)
