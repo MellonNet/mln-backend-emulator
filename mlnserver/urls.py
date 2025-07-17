@@ -13,7 +13,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.edit import CreateView
 
-from mln.apis import inbox_api, messages_api, integrations
+from mln.apis import inbox_api, messages_api, integrations, users_api
 from mlnserver.oauth import OAuthLoginView, get_token
 
 def flashvars_handler(request):
@@ -44,6 +44,7 @@ urlpatterns = [
 	path("api/messages/<int:id>", messages_api.MessagesApi.as_view()),
 	path("api/messages/<int:id>/reply", messages_api.reply_to_message),
 	path("api/messages/<int:id>/mark-read", messages_api.mark_read),
+	path("api/users/<str:username>", users_api.get_user)
 ]
 
 if settings.DEBUG:
