@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from mln.models.dynamic import Message, Attachment, get_or_none
 from mln.models.static import MessageBody, ItemInfo
 
+from json_checker import Checker, CheckerError
+
 def attachment_response(attachment: Attachment): return {
   "id": attachment.item.id,
   "name": attachment.item.name,
@@ -30,18 +32,22 @@ def message_response(message: Message): return {
   ],
 }
 
-def attachment_request(json) -> tuple[ItemInfo, int]:
-  item_id = json.get("item_id")
-  print(f"Item: {item_id}")
-  if not item_id or type(item_id) is not int:
-    return HttpResponse("Invalid or missing attachment.item_id", status=400)
+ATTACHMENT_SCHEMA = {
+  "item_id": int,
+  "qty": int,
+}
+
+def attachment_request(json) -> tuple[int, int]:
+  try:
+    result = Checker(ATTACHMENT_SCHEMA, soft=True).validate(json)
+  except CheckerError as error:
+    return HttpResponse(error, status=400)
+
+  item_id = result["item_id"]
+  qty = result["qty"]
 
   item = get_or_none(ItemInfo, id=item_id)
   if not item:
     return HttpResponse("Attachment item not found", status=404)
-
-  qty = json.get("qty")
-  if not qty or type(qty) is not int:
-    return HttpResponse("Invalid or missing attachment.qty", status=400)
 
   return (item, qty)
