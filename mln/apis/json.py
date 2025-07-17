@@ -1,4 +1,6 @@
 from django.http import HttpResponse
+from functools import wraps
+from json_checker import Checker, CheckerError, OptionalKey, And
 
 from mln.models.dynamic import Message, Attachment, get_or_none
 from mln.models.static import MessageBody, ItemInfo
@@ -30,18 +32,41 @@ def message_response(message: Message): return {
   ],
 }
 
-def attachment_request(json) -> tuple[ItemInfo, int]:
-  item_id = json.get("item_id")
-  print(f"Item: {item_id}")
-  if not item_id or type(item_id) is not int:
-    return HttpResponse("Invalid or missing attachment.item_id", status=400)
+ATTACHMENT_SCHEMA = {
+  "item_id": int,
+  "qty": int,
+}
 
+MESSAGE_REQUEST_SCHEMA = {
+  "body_id": int,
+  OptionalKey("attachment"): ATTACHMENT_SCHEMA,
+}
+
+SEND_MESSAGE_SCHEMA = {
+  "recipient": str,
+  **MESSAGE_REQUEST_SCHEMA,
+}
+
+def attachment_request(json) -> tuple[int, int]:
+  item_id = json["item_id"]
   item = get_or_none(ItemInfo, id=item_id)
   if not item:
     return HttpResponse("Attachment item not found", status=404)
 
-  qty = json.get("qty")
-  if not qty or type(qty) is not int:
-    return HttpResponse("Invalid or missing attachment.qty", status=400)
-
+  qty = json["qty"]
+  if qty <= 0:
+    return HttpResponse("Cannot attach 0 or less of something", status=400)
   return (item, qty)
+
+def check_json(schema):
+  def decorator(func):
+    @wraps(func)
+    def wrapper(data, *args, **kwargs):
+      try:
+        checker = Checker(schema, soft=True, ignore_extra_keys=True)
+        checker.validate(data)
+        return func(data, *args, **kwargs)
+      except CheckerError as error:
+        return HttpResponse(error, status=400)
+    return wrapper
+  return decorator
