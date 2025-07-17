@@ -2,6 +2,7 @@ from django.views import View  # re-exported
 from django.views.decorators.csrf import csrf_exempt  # re-exported
 from django.utils.decorators import method_decorator  # re-exported
 
+from functools import wraps
 from typing import Any
 import json
 
@@ -13,6 +14,7 @@ from mln.models.dynamic import get_or_none, OAuthToken
 type Json = dict[str, Any]
 
 def post_json(func):
+  @wraps(func)
   def wrapper(request, access_token):
     data = _parse_json_request(request)
     if type(data) is HttpResponse: return data
@@ -39,6 +41,7 @@ def _parse_json_request(request) -> HttpResponse | Json:
     return HttpResponse("Invalid JSON", status=400)
 
 def oauth(func):
+  @wraps(func)
   def wrapper(request, *args, **kwargs):
     access_token = _authenticate_request(request)
     if type(access_token) is HttpResponse: return access_token
