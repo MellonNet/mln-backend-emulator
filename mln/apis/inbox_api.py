@@ -4,7 +4,31 @@ from mln.services import message as message_services
 from mln.apis.utils import *
 from mln.apis.json import *
 
-from json_checker import Checker, CheckerError, OptionalKey
+def create_message(data, sender: User, recipient: User):
+  body_id = data.get("body_id")
+  body = get_or_none(MessageBody, id=body_id)
+  if not body:
+    return HttpResponse("Message not found", status=404)
+
+  try:
+    return message_services.create_message(
+      user=sender,
+      recipient_id=recipient.id,
+      body_id=body.id,
+    )
+  except RuntimeError:
+    return HttpResponse("You cannot send messages to this user", status=403)
+
+def create_attachment(data, message):
+  attachment_raw = data.get("attachment")
+  if not attachment_raw: return None
+  attachment = attachment_request(attachment_raw)
+  if type(attachment) is HttpResponse: return attachment
+  try:
+    (item, qty) = attachment
+    return message_services.create_attachment(message, item.id, qty)
+  except RuntimeError:
+    return HttpResponse(f"You do not have {qty} {item.name}(s)", status=402)
 
 class InboxApi(View):
   @method_decorator(csrf_exempt)
@@ -29,32 +53,12 @@ class InboxApi(View):
     if not recipient:
       return HttpResponse("Recipient not found", status=404)
 
-    body_id = data.get("body_id")
-    body = get_or_none(MessageBody, id=body_id)
-    if not body:
-      return HttpResponse("Message not found", status=404)
+    message = create_message(data, sender=access_token.user, recipient=recipient)
+    if type(message) is HttpResponse: return message
 
-    try:
-      message = message_services.create_message(
-        user=access_token.user,
-        recipient_id=recipient.id,
-        body_id=body.id,
-      )
-    except RuntimeError:
-      return HttpResponse("You cannot send messages to this user", status=403)
+    attachment = create_attachment(data, message)
+    if type(attachment) is HttpResponse: return attachment
 
-    attachment = None
-    attachment_raw = data.get("attachment")
-    if attachment_raw:
-      attachment = attachment_request(attachment_raw)
-      if type(attachment) is HttpResponse: return attachment
-      try:
-        (item, qty) = attachment
-        attachment = message_services.create_attachment(message, item.id, qty)
-      except RuntimeError:
-        return HttpResponse(f"You do not have {qty} {item.name}(s)", status=402)
-
-    # TODO: Check if items are actually mailable
     message_services.send_message(message, attachment)
 
     result = message_response(message)
