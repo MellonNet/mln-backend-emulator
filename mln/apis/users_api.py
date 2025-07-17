@@ -6,6 +6,7 @@ from mln.apis.json import *
 
 @csrf_exempt
 @oauth
+@only_allow("GET")
 def get_user(request, access_token, username):
   otherUser = get_or_none(User, username=username)
   if not otherUser:
@@ -40,7 +41,12 @@ class FriendshipsApi(View):
         friendship.save()
       return JsonResponse(friendship_response(friendship), safe=False)
     elif friendship.status == FriendshipStatus.BLOCKED:
-      return HttpResponse("That user has blocked you", status=403)
+      if friendship.to_user == user:
+        return HttpResponse("That user has blocked you", status=403)
+      else:
+        friendship.status = FriendshipStatus.FRIEND
+        friendship.save()
+        return JsonResponse(friendship_response(friendship), safe=False)
     elif friendship.status == FriendshipStatus.FRIEND:
       return JsonResponse(friendship_response(friendship), safe=False)
 
@@ -57,3 +63,39 @@ class FriendshipsApi(View):
     else:
       friendship.delete()
       return HttpResponse(status=204)
+
+@csrf_exempt
+@oauth
+@only_allow("POST")
+def block_user(request, access_token, username):
+  user = access_token.user
+  other_user = get_or_none(User, username=username)
+  if not other_user:
+    return HttpResponse("User not found", status=404)
+
+  friendship = get_friendship(user, other_user)
+  if not friendship:
+    return HttpResponse("Friendship not found", status=404)
+  elif friendship.status == FriendshipStatus.BLOCKED:
+    if friendship.to_user == user:
+      return HttpResponse("That user has blocked you", status=500)
+    else:
+      return HttpResponse(status=204)
+  elif friendship.status == FriendshipStatus.PENDING:
+    if friendship.to_user == user:
+      # User was sent a request -- accept, then block
+      friendship.status = FriendshipStatus.BLOCKED
+      friendship.save()
+    else:
+      # The other user never accepted the request -- rescind
+      friendship.delete()
+    return HttpResponse(status=204)
+  elif friendship.status == FriendshipStatus.FRIEND:
+    if friendship.to_user == user:
+      # Flip the direction of the relationship
+      friendship.to_user = other_user
+      friendship.from_user = user
+    friendship.status = FriendshipStatus.BLOCKED
+    friendship.save()
+    return HttpResponse(status=204)
+
