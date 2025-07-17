@@ -2,7 +2,7 @@
 
 MLN supports a number of APIs, which are intended for Discord bots but can theoretically be used by any integration.
 
-## Authentication
+### Authentication
 
 All requests must contain the following headers:
 
@@ -11,13 +11,32 @@ Authorization: Bearer access_token
 Api-Token: api_token
 ```
 
-Where `api_token` is your bot's secret API token, and `access_token` is the token granted by the OAuth sign-in flow. For more details on that, see [Sign in with MLN](./oauth.md).
+Where `api_token` is your bot's secret API token, and `access_token` is the token granted by the OAuth sign-in flow. For more details on that, see [Sign in with MLN](./oauth.md). If either of these headers are missing, the server will respond with `401 Unauthorized`. If either of these headers are invalid, the request will be rejected with `403 Forbidden`.
+
+### Webhooks
+
+Some events originate from MLN and need to be sent to your client. To receive these events, use the Webhooks API as described below. Each request takes the following: 
+
+```js
+{
+  "webhook_url": string
+}
+```
+
+The server will respond with `201 Created`:
+
+```js
+{
+  "webhook_id": string,
+  "mln_secret": string,
+}
+```
+
+When the specified trigger event happens, that endpoint will receive a `POST` request with the specified payload. The `Authorization` header will have the user's access token, and the `Api-Token` will have `mln_secret`, which is guaranteed to be the same across all webhooks registered by the same client. You can use this secret to verify that the webhook is really being triggered by MLN
 
 ## Inbox
 
-### Data types
-
-#### `MessageAttachmentRequest`
+### `MessageAttachmentRequest`
 
 ```js
 {
@@ -26,7 +45,7 @@ Where `api_token` is your bot's secret API token, and `access_token` is the toke
 },
 ```
 
-#### `MessageAttachmentResponse`
+### `MessageAttachmentResponse`
 
 ```js
 {
@@ -36,7 +55,7 @@ Where `api_token` is your bot's secret API token, and `access_token` is the toke
 }
 ```
 
-#### `MessageRequest`
+### `MessageRequest`
 
 ```js
 {
@@ -45,7 +64,7 @@ Where `api_token` is your bot's secret API token, and `access_token` is the toke
 }
 ```
 
-#### `MessageResponse`
+### `MessageResponse`
 
 ```js
 {
@@ -63,16 +82,6 @@ Where `api_token` is your bot's secret API token, and `access_token` is the toke
   ],
 }
 ```
-
-### POST `/api/messages/webhook` -- Webhooks for new messages
-
-```js
-{
-  "webhook_url": string,
-}
-```
-
-Response: `204 No content`. When the user receives a message, your webhook will get a `POST` request with the new message, in the `Message` format specified above
 
 ### GET `/api/messages` -- Get messages
 
@@ -116,9 +125,7 @@ Errors: `404 Message not found`
 
 ## Users and Friendships
 
-### Data Types
-
-#### `User`
+### `User`
 
 ```js
 {
@@ -135,7 +142,7 @@ Errors: `404 Message not found`
 }
 ```
 
-#### `Friendship`
+### `Friendship`
 
 ```js
 {
@@ -146,16 +153,6 @@ Errors: `404 Message not found`
   "status": string,  // [friend, pending, blocked]
 }
 ```
-
-### POST `/api/friendships/webhook` -- Webhooks for friend requests
-
-```js
-{
-  "webhook_url": string
-}
-```
-
-Response: `204 No Content`. When the user receives a new friend request, or their outgoing request was accepted/rejected/blocked, or if their current friend blocks them, MLN will send a `POST` request to the webhook with the corresponding `Friendship` object.  
 
 ### GET `/api/users/{username}` -- Get a user's profile
 
@@ -184,9 +181,7 @@ Errors: `404 User not found`
 
 ## Inventory and Modules
 
-### Data types
-
-#### `ItemStack`
+### `ItemStack`
 
 ```js
 {
@@ -196,7 +191,7 @@ Errors: `404 User not found`
 }
 ```
 
-#### `ModuleHarvest`
+### `ModuleHarvest`
 
 ```js
 {
@@ -238,3 +233,19 @@ Errors:
 - `405 Method not allowed` if the module cannot be set up
 - `402 Payment Required` if you lack the items needed. An array of `ItemStack`s will be returned
 
+## Webhooks
+
+### POST `/api/webhooks/messages` -- Webhooks for new messages
+
+Trigger: When the user receives a new message
+Payload: A `Message` object 
+
+### POST `/api/webhooks/friendships` -- Webhooks for friendships
+
+Trigger: Another user sends a friend request, accepts or denies a request, or blocks you
+Payload: A `Friendship` object
+
+### DELETE `/api/webhooks/{id}` -- Delete a webhook
+
+Response: `200 Ok`
+Errors: `404 Webhook not found`, `403 Forbidden` if the webhook was not created by your client
