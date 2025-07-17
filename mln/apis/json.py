@@ -43,14 +43,16 @@ def badge_response(badge: InventoryStack): return {
 def friendship_response(friendship: Friendship):
   if friendship is None:
     return "none"
-  elif friendship.status == FriendshipStatus.FRIEND:
-    return "friend"
-  elif friendship.status == FriendshipStatus.PENDING:
-    return "pending"
-  elif friendship.status == FriendshipStatus.BLOCKED:
-    return "blocked"
   else:
-    print(friendship)
+    return friendship.status.name.title()
+
+def full_friendship_response(friendship: Friendship): return {
+  "from_user_id": friendship.from_user.id,
+  "from_username": friendship.from_user.username,
+  "to_user_id": friendship.to_user.id,
+  "to_username": friendship.to_user.username,
+  "status": friendship_response(friendship)
+}
 
 def user_response(user: User, friendship: Friendship): return {
   "username": user.username,

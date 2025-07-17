@@ -147,6 +147,7 @@ class FriendshipStatus(Enum):
 	FRIEND = auto()
 	PENDING = auto()
 	BLOCKED = auto()
+	REMOVED = auto()  # not a real status, do not save with this. For runtime only
 
 class Friendship(models.Model):
 	"""

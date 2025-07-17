@@ -42,7 +42,9 @@ def easy_reply(user, recipient_id, org_body_id, body_id):
 	body = MessageBody.objects.get(id=org_body_id)
 	if not body.easy_replies.filter(id=body_id).exists():
 		raise RuntimeError("Message body with ID %i is not an easy reply of %s" % (body_id, body))
-	return Message.objects.create(sender=user, recipient_id=recipient_id, body_id=body_id, reply_body_id=org_body_id)
+	message = Message.objects.create(sender=user, recipient_id=recipient_id, body_id=body_id, reply_body_id=org_body_id)
+	run_message_webhooks(message)
+	return message
 
 def open_message(user, message_id):
 	"""Get a message and mark it as read."""
@@ -83,6 +85,7 @@ def send_template(template, sender, recipient) -> Message:
 	message = Message.objects.create(sender=sender, recipient=recipient, body=template.body)
 	for attachment in template.attachments.all():
 		message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
+	run_message_webhooks(message)
 	return message
 
 def first_obtained_item(user, item_id):
