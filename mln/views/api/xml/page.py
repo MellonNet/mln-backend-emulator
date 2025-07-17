@@ -72,6 +72,9 @@ def handle_page_get_new(viewing_user, request):
 		"page_owner": page_owner,
 		"viewing_user": viewing_user,
 		"is_private_view": is_private_view,
+		# Code cannot safely check "not is_private_view" because it may be None elsewhere
+		# Code can safely check "is_public_view" anywhere because it'll only exist here
+		"is_public_view": not is_private_view,
 		"calc_yield": viewing_own,
 		"friends": friends,
 		"friendship_status": friendship_status

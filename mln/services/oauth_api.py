@@ -21,18 +21,18 @@ def parse_json_request(request: HttpRequest) -> HttpResponse | Json:
   except:
     return HttpResponse("Invalid JSON", status=400)
 
-def authenticate_request(data: Json) -> HttpResponse | User:
+def authenticate_request(data: Json) -> HttpResponse | OAuthToken:
   access_token_raw: Optional[Any] = data.get("access_token")
   if not access_token_raw or type(access_token_raw) is not str:
     return HttpResponse("Invalid or missing access token", status=400)
 
   access_token = get_or_none(OAuthToken, access_token=access_token_raw)
   if not access_token:
-    return HttpResponse("Invalid access token", status=403)
+    return HttpResponse("Invalid access token", status=401)
 
   client = access_token.client
   api_token = data.get("api_token")
   if not api_token or api_token != client.client_secret:
     return HttpResponse("Invalid or missing API token", status=401)
 
-  return access_token.user
+  return access_token

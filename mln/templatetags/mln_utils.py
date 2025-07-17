@@ -1,12 +1,14 @@
 """Various utility functions for accessing or formatting data for templates that would be too complex to do in the templates themselves."""
 import re
 from django import template
+from django.core.exceptions import ObjectDoesNotExist
 from django.template import loader
 from django.template.base import DebugLexer, Lexer, tag_re, TextNode
 
 from mln.models.dynamic.module_settings import ModuleSaveGeneric, ModuleSaveNetworkerPic, ModuleSaveNetworkerText, ModuleSaveRocketGame, ModuleSaveSoundtrack, ModuleSaveSticker, ModuleSaveUGC, ModuleSetupFriendShare, ModuleSetupGroupPerformance, ModuleSetupTrade, ModuleSetupTrioPerformance
 from mln.models.dynamic.module_settings_arcade import HopArcadeElement, ModuleSaveConcertArcade, ModuleSaveDeliveryArcade, ModuleSaveDestructoidArcade, ModuleSaveHopArcade
-from mln.models.static import ItemType, MessageReplyType
+from mln.models.dynamic import get_or_none as get_model
+from mln.models.static import ItemType, MessageReplyType, ItemInfo
 
 SAVE_TEMPLATES = {
 	ModuleSaveConcertArcade: "concert_arcade",
@@ -157,8 +159,19 @@ def replyable(message):
 		return MessageReplyType.NORMAL_REPLY_ONLY.value
 
 @register.filter
-def get_valid_modules(owner): 
+def get_valid_modules(owner):
 	return owner.modules.filter(pos_x__isnull=False, pos_y__isnull=False)
+
+@register.filter
+def get_trophies(owner):
+	result = []
+	for trophyID in ["103022", "103030", "103026", "103024", "103021", "103032", "103031"]:
+		try:
+			trophy = owner.inventory.get(item__id=trophyID)
+			result.append(trophy.item)
+		except ObjectDoesNotExist:
+			continue
+	return result
 
 # Fix for Django template compilation, to remove whitespace from templates.
 # The two tokenize functions are changed to avoid generating a TextNode when the text content is only whitespace.
