@@ -13,8 +13,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.edit import CreateView
 
-from mln.apis import integrations
-from mln.apis import inbox_api
+from mln.apis import inbox_api, messages_api, integrations
 from mlnserver.oauth import OAuthLoginView, get_token
 
 def flashvars_handler(request):
@@ -42,6 +41,7 @@ urlpatterns = [
 
 	path("api/award", integrations.grant_award),
 	path("api/messages", inbox_api.InboxApi.as_view()),
+	path("api/messages/<int:id>", messages_api.MessagesApi.as_view()),
 ]
 
 if settings.DEBUG:

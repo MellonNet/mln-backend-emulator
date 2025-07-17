@@ -39,10 +39,10 @@ def _parse_json_request(request) -> HttpResponse | Json:
     return HttpResponse("Invalid JSON", status=400)
 
 def oauth(func):
-  def wrapper(request):
+  def wrapper(request, *args, **kwargs):
     access_token = _authenticate_request(request)
     if type(access_token) is HttpResponse: return access_token
-    return func(request, access_token)
+    return func(request, access_token, *args, **kwargs)
   return wrapper
 
 def _authenticate_request(request: HttpRequest) -> HttpResponse | OAuthToken:
