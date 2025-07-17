@@ -210,3 +210,16 @@ class IntegrationMessage(models.Model):
 
 	def __str__(self):
 		return f"{self.client.client_name}: Message #{self.award}"
+
+class WebhookType(Enum):
+	MESSAGES = auto()
+	FRIENDSHIPS = auto()
+
+class Webhook(models.Model):
+	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
+	secret = models.CharField(max_length=64)
+	url = models.URLField()
+	type = EnumField(WebhookType)
+
+	def __str__(self):
+		return f"{self.type.name.title()} webhook for {self.client.client_name}"
