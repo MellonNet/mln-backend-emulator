@@ -28,7 +28,7 @@ def authenticate_request(data: Json) -> HttpResponse | OAuthToken:
 
   access_token = get_or_none(OAuthToken, access_token=access_token_raw)
   if not access_token:
-    return HttpResponse("Invalid access token", status=403)
+    return HttpResponse("Invalid access token", status=401)
 
   client = access_token.client
   api_token = data.get("api_token")
