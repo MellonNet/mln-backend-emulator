@@ -57,6 +57,7 @@ def create_message(user, recipient_id, body_id):
 
 def send_message(message, attachment=None):
 	"""Send a message to someone. If the recipient is a networker, sends a reply too"""
+	# TODO: Check if items are actually mailable
 	if not message.recipient.profile.is_networker:  # send the message directly
 		message.save()
 		if attachment is not None:

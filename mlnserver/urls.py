@@ -42,6 +42,7 @@ urlpatterns = [
 	path("api/award", integrations.grant_award),
 	path("api/messages", inbox_api.InboxApi.as_view()),
 	path("api/messages/<int:id>", messages_api.MessagesApi.as_view()),
+	path("api/messages/<int:id>/reply", messages_api.reply_to_message),
 ]
 
 if settings.DEBUG:

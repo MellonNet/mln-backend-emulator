@@ -15,10 +15,10 @@ type Json = dict[str, Any]
 
 def post_json(func):
   @wraps(func)
-  def wrapper(request, access_token):
+  def wrapper(request, *args, **kwargs):
     data = _parse_json_request(request)
     if type(data) is HttpResponse: return data
-    return func(data, access_token)
+    return func(data, *args, **kwargs)
   return wrapper
 
 def _parse_json_request(request) -> HttpResponse | Json:
