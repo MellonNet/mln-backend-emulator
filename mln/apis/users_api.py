@@ -40,6 +40,20 @@ class FriendshipsApi(View):
         friendship.save()
       return JsonResponse(friendship_response(friendship), safe=False)
     elif friendship.status == FriendshipStatus.BLOCKED:
-      return HttpResponse(status=403)
+      return HttpResponse("That user has blocked you", status=403)
     elif friendship.status == FriendshipStatus.FRIEND:
       return JsonResponse(friendship_response(friendship), safe=False)
+
+  def delete(self, request, access_token, username):
+    user = access_token.user
+    other_user = get_or_none(User, username=username)
+    if not other_user:
+      return HttpResponse("User not found", status=404)
+    friendship = get_friendship(user, other_user)
+    if not friendship:
+      return HttpResponse(status=204)
+    elif friendship.to_user == user and friendship.status == FriendshipStatus.BLOCKED:
+      return HttpResponse("That user has blocked you", status=403)
+    else:
+      friendship.delete()
+      return HttpResponse(status=204)
