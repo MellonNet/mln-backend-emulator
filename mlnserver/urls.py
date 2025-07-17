@@ -41,7 +41,7 @@ urlpatterns = [
 	path("admin/", admin.site.urls),
 
 	path("api/award", integrations.grant_award),
-	path("api/messages", inbox_api.get_messages),
+	path("api/messages", inbox_api.InboxApi.as_view()),
 ]
 
 if settings.DEBUG:

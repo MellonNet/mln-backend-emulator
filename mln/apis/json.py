@@ -1,5 +1,7 @@
-from mln.models.dynamic import Message, Attachment
-from mln.models.static import MessageBody
+from django.http import HttpResponse
+
+from mln.models.dynamic import Message, Attachment, get_or_none
+from mln.models.static import MessageBody, ItemInfo
 
 def attachment_response(attachment: Attachment): return {
   "id": attachment.item.id,
@@ -27,3 +29,19 @@ def message_response(message: Message): return {
     for reply in message.body.easy_replies.all()
   ],
 }
+
+def attachment_request(json) -> tuple[ItemInfo, int]:
+  item_id = json.get("item_id")
+  print(f"Item: {item_id}")
+  if not item_id or type(item_id) is not int:
+    return HttpResponse("Invalid or missing attachment.item_id", status=400)
+
+  item = get_or_none(ItemInfo, id=item_id)
+  if not item:
+    return HttpResponse("Attachment item not found", status=404)
+
+  qty = json.get("qty")
+  if not qty or type(qty) is not int:
+    return HttpResponse("Invalid or missing attachment.qty", status=400)
+
+  return (item, qty)

@@ -1,4 +1,6 @@
+from django.views import View  # re-exported
 from django.views.decorators.csrf import csrf_exempt  # re-exported
+from django.utils.decorators import method_decorator  # re-exported
 
 from typing import Any
 import json
