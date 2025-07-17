@@ -1,18 +1,11 @@
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-
 from mln.models.dynamic import IntegrationMessage, get_or_none
 from mln.services import message as message_service
-from mln.apis import oauth_utils
+from mln.apis.utils import *
 
 @csrf_exempt
-def grant_award(request):
-  access_token = oauth_utils.authenticate_request(request)
-  if type(access_token) is HttpResponse: return access_token
-
-  data = oauth_utils.parse_json_request(request)
-  if type(data) is HttpResponse: return data
-
+@oauth
+@post_json
+def grant_award(data, access_token):
   award = data.get("award", None)
   if not award or type(award) != int:
     return HttpResponse("Invalid or missing award", status=400)
