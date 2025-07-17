@@ -23,6 +23,15 @@ def get_friend_request(from_user, to_user) -> Friendship | None:
 	except ObjectDoesNotExist:
 		return None
 
+def get_friendship(user1, user2) -> Friendship | None:
+	try:
+		return user1.outgoing_friendships.get(to_user=user2)
+	except ObjectDoesNotExist:
+		try:
+			return user2.outgoing_friendships.get(to_user=user1)
+		except ObjectDoesNotExist:
+			return None
+
 def send_friend_invite(user, recipient_name):
 	"""
 	Send a friend request to someone.

@@ -1,8 +1,9 @@
 from django.http import HttpResponse
 from functools import wraps
-from json_checker import Checker, CheckerError, OptionalKey, And
+from json_checker import Checker, CheckerError, OptionalKey
 
-from mln.models.dynamic import Message, Attachment, get_or_none
+from mln.models.dynamic import Message, Attachment, get_or_none, Friendship, FriendshipStatus, User, InventoryStack
+from mln.services.inventory import get_badges
 from mln.models.static import MessageBody, ItemInfo
 
 def attachment_response(attachment: Attachment): return {
@@ -31,6 +32,35 @@ def message_response(message: Message): return {
     message_body_response(reply)
     for reply in message.body.easy_replies.all()
   ],
+}
+
+def badge_response(badge: InventoryStack): return {
+  "id": badge.item.id,
+  "name": badge.item.name,
+  # TODO: description and thumbnail
+}
+
+def friendship_response(friendship: Friendship):
+  if friendship is None:
+    return "none"
+  elif friendship.status == FriendshipStatus.FRIEND:
+    return "friend"
+  elif friendship.status == FriendshipStatus.PENDING:
+    return "pending"
+  elif friendship.status == FriendshipStatus.BLOCKED:
+    return "blocked"
+  else:
+    print(friendship)
+
+def user_response(user: User, friendship: Friendship): return {
+  "username": user.username,
+  "page_url": f"/mln/public_view/{user.username}",
+  "is_networker": user.profile.is_networker,
+  "friendship_status": friendship_response(friendship),
+  "badges": [
+    badge_response(badge)
+    for badge in get_badges(user)
+  ]
 }
 
 ATTACHMENT_SCHEMA = {
