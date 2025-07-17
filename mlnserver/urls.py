@@ -13,7 +13,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.edit import CreateView
 
-from mln.apis import inbox_api, messages_api, integrations, users_api
+from mln.apis import inbox_api, messages_api, integrations, users_api, webhooks
 from mlnserver.oauth import OAuthLoginView, get_token
 
 def flashvars_handler(request):
@@ -47,6 +47,8 @@ urlpatterns = [
 	path("api/users/<str:username>", users_api.get_user),
 	path("api/users/<str:username>/friendship", users_api.FriendshipsApi.as_view()),
 	path("api/users/<str:username>/block", users_api.block_user),
+	path("api/webhooks", webhooks.register_webhook),
+	path("api/webhooks/<int:id>", webhooks.delete_webhook),
 ]
 
 if settings.DEBUG:
