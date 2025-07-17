@@ -22,6 +22,7 @@ def message_response(message: Message): return {
   "sender_id": message.sender.id,
   "sender_username": message.sender.username,
   **message_body_response(message.body),
+  "is_read": message.is_read,
   "attachments": [
     attachment_response(attachment)
     for attachment in message.attachments.all()
