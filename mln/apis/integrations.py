@@ -3,14 +3,14 @@ from django.http import HttpResponse
 
 from mln.models.dynamic import IntegrationMessage, get_or_none
 from mln.services import message as message_service
-from mln.services import oauth_api
+from mln.apis import oauth_utils
 
 @csrf_exempt
 def grant_award(request):
-  data = oauth_api.parse_json_request(request)
+  data = oauth_utils.parse_json_request(request)
   if type(data) is HttpResponse: return data
 
-  access_token = oauth_api.authenticate_request(data)
+  access_token = oauth_utils.authenticate_request(data)
   if type(access_token) is HttpResponse: return access_token
 
   award = data.get("award", None)
