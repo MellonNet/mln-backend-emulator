@@ -44,7 +44,8 @@ urlpatterns = [
 	path("api/messages/<int:id>", messages_api.MessagesApi.as_view()),
 	path("api/messages/<int:id>/reply", messages_api.reply_to_message),
 	path("api/messages/<int:id>/mark-read", messages_api.mark_read),
-	path("api/users/<str:username>", users_api.get_user)
+	path("api/users/<str:username>", users_api.get_user),
+	path("api/users/<str:username>/friendship", users_api.FriendshipsApi.as_view()),
 ]
 
 if settings.DEBUG:

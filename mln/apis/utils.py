@@ -13,6 +13,16 @@ from mln.models.dynamic import get_or_none, OAuthToken
 
 type Json = dict[str, Any]
 
+def only_allow(method):
+  def decorator(func):
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+      if request.method != method:
+        return HttpResponse(status=405)
+      return func(request, *args, **kwargs)
+    return wrapper
+  return decorator
+
 def post_json(func):
   @wraps(func)
   def wrapper(request, *args, **kwargs):
