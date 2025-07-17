@@ -1,6 +1,7 @@
 from mln.models.dynamic import User, Profile
 
 from mln.services.friend import get_friendship, send_friend_invite
+from mln.services.webhooks import run_friendship_webhooks
 from mln.apis.utils import *
 from mln.apis.json import *
 
@@ -39,6 +40,7 @@ class FriendshipsApi(View):
         # Accept the pending request
         friendship.status = FriendshipStatus.FRIEND
         friendship.save()
+        run_friendship_webhooks(friendship, user)
       return JsonResponse(friendship_response(friendship), safe=False)
     elif friendship.status == FriendshipStatus.BLOCKED:
       if friendship.to_user == user:
@@ -46,6 +48,7 @@ class FriendshipsApi(View):
       else:
         friendship.status = FriendshipStatus.FRIEND
         friendship.save()
+        run_friendship_webhooks(friendship, user)
         return JsonResponse(friendship_response(friendship), safe=False)
     elif friendship.status == FriendshipStatus.FRIEND:
       return JsonResponse(friendship_response(friendship), safe=False)
@@ -61,6 +64,8 @@ class FriendshipsApi(View):
     elif friendship.to_user == user and friendship.status == FriendshipStatus.BLOCKED:
       return HttpResponse("That user has blocked you", status=403)
     else:
+      friendship.status = FriendshipStatus.REMOVED
+      run_friendship_webhooks(friendship, user)
       friendship.delete()
       return HttpResponse(status=204)
 
@@ -86,6 +91,7 @@ def block_user(request, access_token, username):
       # User was sent a request -- accept, then block
       friendship.status = FriendshipStatus.BLOCKED
       friendship.save()
+      run_friendship_webhooks(friendship, user)
     else:
       # The other user never accepted the request -- rescind
       friendship.delete()
@@ -97,5 +103,5 @@ def block_user(request, access_token, username):
       friendship.from_user = user
     friendship.status = FriendshipStatus.BLOCKED
     friendship.save()
+    run_friendship_webhooks(friendship, user)
     return HttpResponse(status=204)
-

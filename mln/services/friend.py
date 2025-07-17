@@ -7,6 +7,7 @@ from ..models.dynamic import Friendship, FriendshipStatus, Profile, get_or_none
 from ..models.static import MLNError, NetworkerFriendshipCondition
 
 from .inventory import has_item
+from .webhooks import run_friendship_webhooks
 
 def _get_friendship(user, relation_id):
 	try:
@@ -54,7 +55,9 @@ def send_friend_invite(user, recipient_name) -> Friendship:
 	if recipient_profile.is_networker:
 		return add_networker_friend(user, recipient)
 	else:
-		return user.outgoing_friendships.create(to_user=recipient, status=FriendshipStatus.PENDING)
+		friendship = user.outgoing_friendships.create(to_user=recipient, status=FriendshipStatus.PENDING)
+		run_friendship_webhooks(friendship=friendship, actor=user)
+		return friendship
 
 def add_networker_friend(user, networker) -> Friendship:
 	condition = get_or_none(NetworkerFriendshipCondition, networker=networker)
@@ -82,6 +85,7 @@ def handle_friend_invite_response(user, relation_id, accept):
 		raise RuntimeError("%s is not a pending relation" % relation)
 	if accept:
 		relation.status = FriendshipStatus.FRIEND
+		run_friendship_webhooks(relation, user)
 		relation.save()
 	else:
 		relation.delete()
@@ -97,6 +101,8 @@ def remove_friend(user, relation_id):
 	relation = _get_friendship(user, relation_id)
 	if relation.status == FriendshipStatus.BLOCKED and relation.from_user != user:
 		raise MLNError(MLNError.YOU_ARE_BLOCKED)
+	relation.status = FriendshipStatus.REMOVED
+	run_friendship_webhooks(relation, user)
 	relation.delete()
 
 def block_friend(user, relation_id):
@@ -116,6 +122,7 @@ def block_friend(user, relation_id):
 		relation.from_user = user
 		relation.to_user = friend
 	relation.status = FriendshipStatus.BLOCKED
+	run_friendship_webhooks(relation, user)
 	relation.save()
 
 def unblock_friend(user, relation_id):
@@ -133,6 +140,7 @@ def unblock_friend(user, relation_id):
 	if relation.from_user != user:
 		raise MLNError(MLNError.YOU_ARE_BLOCKED)
 	relation.status = FriendshipStatus.FRIEND
+	run_friendship_webhooks(relation, user)
 	relation.save()
 
 def are_friends(user, other_user_id):
