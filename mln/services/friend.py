@@ -32,7 +32,7 @@ def get_friendship(user1, user2) -> Friendship | None:
 		except ObjectDoesNotExist:
 			return None
 
-def send_friend_invite(user, recipient_name):
+def send_friend_invite(user, recipient_name) -> Friendship:
 	"""
 	Send a friend request to someone.
 	Raise RuntimeError if no user with the specified username exists.
@@ -52,19 +52,20 @@ def send_friend_invite(user, recipient_name):
 	recipient_profile = get_or_none(Profile, user=recipient)
 	assert recipient_profile is not None  # all users have profiles
 	if recipient_profile.is_networker:
-		add_networker_friend(user, recipient)
+		return add_networker_friend(user, recipient)
 	else:
-		user.outgoing_friendships.create(to_user=recipient, status=FriendshipStatus.PENDING)
+		return user.outgoing_friendships.create(to_user=recipient, status=FriendshipStatus.PENDING)
 
-def add_networker_friend(user, networker):
+def add_networker_friend(user, networker) -> Friendship:
 	condition = get_or_none(NetworkerFriendshipCondition, networker=networker)
 	if not condition: return  # all networkers must have a condition, no way to recover
 	success = condition.condition_id is None or has_item(user, condition.condition_id)
 	if success:
-		user.outgoing_friendships.create(to_user=networker, status=FriendshipStatus.FRIEND)
 		user.messages.create(sender=networker, body_id=condition.success_body_id)
+		return user.outgoing_friendships.create(to_user=networker, status=FriendshipStatus.FRIEND)
 	else:
 		user.messages.create(sender=networker, body_id=condition.failure_body_id)
+		return None
 
 def handle_friend_invite_response(user, relation_id, accept):
 	"""
