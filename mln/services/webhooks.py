@@ -7,7 +7,7 @@ def run_message_webhooks(message):
   recipient = message.recipient
   webhooks = Webhook.objects.filter(user=recipient, type=WebhookType.MESSAGES)
   for webhook in webhooks.all():
-    body = message_response(message),
+    body = message_response(message)
     run_webhook(webhook, body)
 
 def run_friendship_webhooks(friendship, actor):
@@ -25,8 +25,7 @@ def run_webhook(webhook, body):
     "Authorization": f"Bearer {webhook.access_token.access_token}",
     "Api-Token": webhook.secret,
   }
-  try:
-    requests.post(webhook.url, json=body, headers=headers, timeout=0.1)
-  except requests.ConnectionError:
-    # We don't care if these requests go through
-    pass
+  # We don't care if these requests go through
+  try: requests.post(webhook.url, json=body, headers=headers, timeout=1)
+  except requests.ConnectionError: pass
+  except requests.exceptions.Timeout: pass
