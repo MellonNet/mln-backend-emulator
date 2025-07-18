@@ -7,22 +7,22 @@ from mln.services.inventory import get_badges
 from mln.models.static import MessageBody, ItemInfo
 
 def attachment_response(attachment: Attachment): return {
-  "id": attachment.item.id,
+  "item_id": attachment.item.id,
   "name": attachment.item.name,
   "qty": attachment.qty,
 }
 
 def message_body_response(body: MessageBody): return {
-  "body_id": body.id,
+  "id": body.id,
   "subject": body.subject,
-  "body": body.text,
+  "text": body.text,
 }
 
 def message_response(message: Message): return {
   "id": message.id,
   "sender_id": message.sender.id,
   "sender_username": message.sender.username,
-  **message_body_response(message.body),
+  "body": message_body_response(message.body),
   "is_read": message.is_read,
   "attachments": [
     attachment_response(attachment)
@@ -44,7 +44,7 @@ def friendship_response(friendship: Friendship):
   if friendship is None:
     return "none"
   else:
-    return friendship.status.name.title()
+    return friendship.status.name.lower()
 
 def full_friendship_response(friendship: Friendship): return {
   "from_user_id": friendship.from_user.id,
@@ -57,6 +57,7 @@ def full_friendship_response(friendship: Friendship): return {
 def user_response(user: User, friendship: Friendship): return {
   "username": user.username,
   "page_url": f"/mln/public_view/{user.username}",
+  "rank": user.profile.rank,
   "is_networker": user.profile.is_networker,
   "friendship_status": friendship_response(friendship),
   "badges": [

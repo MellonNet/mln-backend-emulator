@@ -38,7 +38,7 @@ def get_message(message_id: int, user: User):
 def reply_to_message(data, access_token, id):
   message = get_message(message_id=id, user=access_token.user)
   if type(message) is HttpResponse: return message
-  reply = create_message(data, sender=access_token.user, recipient=message.sender)
+  reply = create_message(data, sender=access_token.user, recipient=message.sender, reply_to=message)
   if type(reply) is HttpResponse: return reply
   attachment = create_attachment(data, reply)
   if type(attachment) is HttpResponse: return attachment

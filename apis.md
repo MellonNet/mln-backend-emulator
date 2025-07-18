@@ -47,6 +47,16 @@ Some events originate from MLN and need to be sent to your client. To receive th
 }
 ```
 
+### `MessageBody`
+
+```js
+{
+  "id": int,
+  "subject": string,
+  "text": string,
+}
+```
+
 ### `MessageResponse`
 
 ```js
@@ -54,18 +64,10 @@ Some events originate from MLN and need to be sent to your client. To receive th
   "id": int,
   "sender_id": int,
   "sender_username": string,
-  "body_id": int,
-  "subject": string
-  "body": string,
+  "body": MessageBody,
   "is_read": bool,
   "attachments": [ AttachmentResponse ],
-  "replies": [
-  	{
-      "body_id": int,
-      "subject": string,
-      "body": string,
-    }
-  ],
+  "replies": [ MessageBody ]
 }
 ```
 

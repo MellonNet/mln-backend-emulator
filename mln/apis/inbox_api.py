@@ -4,7 +4,7 @@ from mln.services import message as message_services
 from mln.apis.utils import *
 from mln.apis.json import *
 
-def create_message(data, sender: User, recipient: User):
+def create_message(data, sender: User, recipient: User, reply_to=None):
   body_id = data.get("body_id")
   body = get_or_none(MessageBody, id=body_id)
   if not body:
@@ -15,6 +15,7 @@ def create_message(data, sender: User, recipient: User):
       user=sender,
       recipient_id=recipient.id,
       body_id=body.id,
+      reply_to=reply_to
     )
   except RuntimeError:
     return HttpResponse("You cannot send messages to this user", status=403)
