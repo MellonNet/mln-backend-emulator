@@ -55,7 +55,7 @@ def open_message(user, message_id):
 
 def create_message(user, recipient_id, body_id, reply_to=None):
 	"""Creates a message in-memory. To actually send, use send_message."""
-	# _check_recipient(user, recipient_id)
+	_check_recipient(user, recipient_id)
 	reply_body_id = None if reply_to is None else reply_to.body.id
 	return Message(sender=user, recipient_id=recipient_id, body_id=body_id, reply_body_id=reply_body_id)
 
