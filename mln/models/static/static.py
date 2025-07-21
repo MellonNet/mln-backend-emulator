@@ -390,4 +390,4 @@ class RobotChroniclesMessage(models.Model):
 	award = models.IntegerField()
 
 	def __str__(self):
-		return f"Award {self.rank} message"
+		return f"Award {self.award} message"
