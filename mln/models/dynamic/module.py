@@ -144,7 +144,7 @@ class Module(models.Model):
 
 		# Handle trades separately
 		if ModuleSetupTrade in self.get_settings_classes():  # handle trades
-			self.handle_trade()
+			self.handle_trade(clicker)
 
 		# Handle guest yields separately
 		outcome = self.item.module_info.click_outcome
