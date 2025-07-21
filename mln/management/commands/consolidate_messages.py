@@ -3,9 +3,6 @@ from django.core.management.base import BaseCommand
 from mln.models.dynamic import Message, Profile
 from mln.services.message import consolidate
 
-username = "dudeface3175"
-
-
 class Command(BaseCommand):
   """
   Consolidates all messages for all users
