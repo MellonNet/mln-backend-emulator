@@ -1,17 +1,17 @@
 # My Lego Network APIs
 
-MLN supports a number of APIs, which are intended for Discord bots but can theoretically be used by any integration.
+MLN supports a thorough REST API that is intended for modern clients. The Flash frontend is limited to using an older, XML-based API.
 
 ### Authentication
 
 All requests must contain the following headers:
 
 ```text
-Authorization: access_token
+Authorization: Bearer access_token
 Api-Token: api_token
 ```
 
-Where `api_token` is your bot's secret API token, and `access_token` is the token granted by the OAuth sign-in flow. For more details on that, see [Sign in with MLN](./oauth.md). If either of these headers are missing, the server will respond with `401 Unauthorized`. If either of these headers are invalid, the request will be rejected with `403 Forbidden`.
+Where `api_token` is your bot's secret API token, and `access_token` is the token granted by the OAuth sign-in flow. For more details on that, see [Sign in with MLN](./oauth.md).
 
 ### Webhooks
 
@@ -23,7 +23,7 @@ Some events originate from MLN and need to be sent to your client. To receive th
 
 ```js
 {
-	"item_id": int,
+  "item_id": int,
   "qty": int,
 },
 ```
@@ -86,7 +86,7 @@ Response: `200 Ok` with an array of the user's most `n` recent `MessageResponse`
 ```
 
 Response: `201 Created` with the new message as a `MessageResponse`
-Errors: 
+Errors:
 
 - `404 Not found` if the recipient, message body, or any attachment cannot be found
 - `402 Payment Required` if you lack the items in the attachments
@@ -250,7 +250,7 @@ Response: `201 Created`:
 }
 ```
 
-The `type` determines when the webhook will be called: 
+The `type` determines when the webhook will be called:
 
 - `messages`: When the user receives a new message. Payload: A `Message` object
 - `friendships`: When another user sends a friend request, accepts or denies a request, or blocks you
