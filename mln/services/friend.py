@@ -1,7 +1,6 @@
 import random
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
 
 from ..models.dynamic import Friendship, FriendshipStatus, Profile, get_or_none
 from ..models.static import MLNError, NetworkerFriendshipCondition
@@ -10,28 +9,20 @@ from .inventory import has_item
 from .webhooks import run_friendship_webhooks
 
 def _get_friendship(user, relation_id):
-	try:
-		friendship = Friendship.objects.get(id=relation_id)
-	except ObjectDoesNotExist:
+	friendship = get_or_none(Friendship, id=relation_id)
+	if not friendship:
 		raise RuntimeError("No friendship relation with ID %i exists" % relation_id)
 	if friendship.from_user != user and friendship.to_user != user:
 		raise RuntimeError("%s is not related to user %s" % (friendship, user))
 	return friendship
 
 def get_friend_request(from_user, to_user) -> Friendship | None:
-	try:
-		return from_user.outgoing_friendships.get(to_user=to_user)
-	except ObjectDoesNotExist:
-		return None
+	return get_or_none(from_user.outgoing_friendships, to_user=to_user)
 
-def get_friendship(user1, user2) -> Friendship | None:
-	try:
-		return user1.outgoing_friendships.get(to_user=user2)
-	except ObjectDoesNotExist:
-		try:
-			return user2.outgoing_friendships.get(to_user=user1)
-		except ObjectDoesNotExist:
-			return None
+def get_friendship(user1, user2) -> Friendship | None: return (
+	get_or_none(user1.outgoing_friendships(to_user=user2)) or
+	get_or_none(user2.outgoing_friendships(to_user=user1))
+)
 
 def send_friend_invite(user, recipient_name) -> Friendship:
 	"""
