@@ -13,7 +13,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.edit import CreateView
 
-from mln.services import integrations
+from mln.apis import integrations
 from .oauth import OAuthLoginView, get_token
 
 def flashvars_handler(request):

@@ -1,6 +1,6 @@
 # Mini-game integrations
 
-MLN can integrate with other mini-games to grant rewards in MLN based on mini-game progress and vice-versa. The general pattern is:
+MLN can integrate with other mini-games to grant awards in MLN based on mini-game progress and vice-versa. The general pattern is:
 
 1. Create a mini-game server to host Flash files and handle requests
 1. Serve the flash files with a session ID cookie
@@ -9,11 +9,44 @@ MLN can integrate with other mini-games to grant rewards in MLN based on mini-ga
 1. Make an API request to MLN to send the user a message with items
 1. Optionally, respond to the mini-game client with rewards from MLN
 
-Each game implements these details separately, but generally, mini-game progress is tracked with a "rank" or "award" ID, which is sent to MLN to determine what message and items should be sent.
+Each game implements these details separately, but generally, mini-game progress is tracked with an "award" ID, which is sent to MLN to determine what message and items should be sent.
 
-For simplicity, each mini-game is run on its own server, hosted separately. This lets us keep things simple as most mini-game servers are very basic and can use any server stack, as opposed to being forced to integrate with MLN. This also prevents issues with MLN from affecting the mini-games and vice-versa.
+For simplicity, each mini-game is run on its own server, hosted separately. This lets us keep things simple as most mini-game servers are very basic and can use any server stack, as opposed to being forced to integrate with MLN's Django stack. This also prevents issues with MLN from affecting the mini-games and vice-versa.
 
-In MLN's database, we keep track of which rank IDs are associated with which messages in a table per minigame. This could be simplified in the future into one table for all mini-games, but since they were developed independently, it was simpler to keep them separate.
+## The `IntegrationMessage` model
+
+Each mini-game message needs the same few fields:
+
+- a `MessageTemplate` to send, along with any `MessageTemplateAttachment`s
+- a `networker` to send the template
+- an `award` ID that is associated with in-game progress
+
+There are two tables and two API endpoints with basically the same fields. If more mini-games that follow this pattern are added in the future, it may be beneficial to consolidate them:
+
+```python
+class IntegrationMessage(models.Model):
+	template = models.ForeignKey(MessageTemplate, related_name="+",n_delete=models.CASCADE)
+	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
+	progress = models.IntegerField()
+	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
+
+	def __str__(self):
+		return f"{self.client.client_name}: Message #{self.progress}"
+```
+
+When the user completes an achievement in the mini-game, its server should make the following request:
+
+```http
+POST /api/integration-message HTTP/1.1
+Authorization: Bearer ACCESS_TOKEN
+Api-Token: API_TOKEN
+
+{
+  "progress": int,
+}
+```
+
+Since every access token has an associated client, the handler will be able to look up the correct `IntegrationMessage` using the provided client and progress.
 
 ## The Robot Chronicles
 
@@ -60,35 +93,3 @@ To let MLN know a new rank has been earned, send the following request:
 ```
 
 The `api_token` and `access_token` are the values you get from setting up OAuth (see link above), and the `rank` corresponds to the user's in-game rank. This request will call `submit_rank()` which will look up the correct `CoastGuardMessage` and send that to the user.
-
-## Potential API refactor
-
-Currently, each mini-game message needs the same few fields:
-
-- a `MessageTemplate` to send, along with any `MessageTemplateAttachment`s
-- a `networker` to send the template
-- a `rank`/`award` to know which message to send when
-
-There are two tables and two API endpoints with basically the same fields. If more mini-games that follow this pattern are added in the future, it may be beneficial to consolidate them:
-
-```python
-class IntegrationMessage(models.Model):
-	template = models.ForeignKey(MessageTemplate, related_name="+",n_delete=models.CASCADE)
-	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
-	progress = models.IntegerField()
-	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
-
-	def __str__(self):
-		return f"{self.client.client_name}: Message #{self.progress}"
-```
-
-```js
-// POST /api/integration-message
-{
-  "api_token": string,
-  "access_token": string,
-  "progress": int,
-}
-```
-
-Since every access token has an associated client, the handler will be able to look up the correct `IntegrationMessage` using the provided client and progress.

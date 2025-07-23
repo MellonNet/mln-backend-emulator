@@ -7,11 +7,11 @@ from mln.apis import oauth_utils
 
 @csrf_exempt
 def grant_award(request):
+  access_token = oauth_utils.authenticate_request(request)
+  if type(access_token) is HttpResponse: return access_token
+
   data = oauth_utils.parse_json_request(request)
   if type(data) is HttpResponse: return data
-
-  access_token = oauth_utils.authenticate_request(data)
-  if type(access_token) is HttpResponse: return access_token
 
   award = data.get("award", None)
   if not award or type(award) != int:

@@ -165,6 +165,7 @@ class OAuthClient(models.Model):
 	client_name = models.CharField(max_length=64)
 	client_secret = models.CharField(max_length=64)
 	image_url = models.URLField()
+	redirect_url = models.URLField()
 
 	def __str__(self):
 		return self.client_name
