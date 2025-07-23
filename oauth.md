@@ -66,7 +66,7 @@ https://coast-guard.lcdruniverse.org/api/login?session_id=session123&auth_code=a
 
 To get the access token, send a `POST` request to `/oauth/token` with the following:
 
-```json
+```js
 {
     "api_token": string,
     "auth_code": string,
@@ -75,7 +75,7 @@ To get the access token, send a `POST` request to `/oauth/token` with the follow
 
  MLN will respond with the following:
 
-```json
+```js
 {
     "access_token": string,
     "username": string,
