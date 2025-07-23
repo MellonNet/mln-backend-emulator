@@ -21,17 +21,17 @@ Each mini-game message needs the same few fields:
 - a `networker` to send the template
 - an `award` ID that is associated with in-game progress
 
-There are two tables and two API endpoints with basically the same fields. If more mini-games that follow this pattern are added in the future, it may be beneficial to consolidate them:
+That makes 
 
 ```python
 class IntegrationMessage(models.Model):
 	template = models.ForeignKey(MessageTemplate, related_name="+",n_delete=models.CASCADE)
 	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
-	progress = models.IntegerField()
+	award = models.IntegerField()
 	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
 
 	def __str__(self):
-		return f"{self.client.client_name}: Message #{self.progress}"
+		return f"{self.client.client_name}: Message #{self.award}"
 ```
 
 When the user completes an achievement in the mini-game, its server should make the following request:
@@ -42,11 +42,11 @@ Authorization: Bearer ACCESS_TOKEN
 Api-Token: API_TOKEN
 
 {
-  "progress": int,
+  "award": int,
 }
 ```
 
-Since every access token has an associated client, the handler will be able to look up the correct `IntegrationMessage` using the provided client and progress.
+Since every access token has an associated client, the handler will be able to look up the correct `IntegrationMessage` using the provided access token and progress.
 
 ## The Robot Chronicles
 
@@ -58,38 +58,12 @@ Since every access token has an associated client, the handler will be able to l
 
 You can befriend each of these users without any requirements. Although the mini-game has 7 "levels", there are actually only 5 "awards" that it will send to MLN:
 
-1. Crane Quest (City): No reward or message. Maybe we should make one up because the button appears in-game...
+1. Crane Quest (City): No reward or message, but the button appears in-game
 2. Speed Inferno Challenge (Racers): If you win, Peelie Wheelie will send you some Racing Trophies
 3. Infestation (Agents): Completing this mission will have Agent Chase send you some Agent's Dossiers
 4. Towing the line (City): Completing this mission will have Foreman Frank send you some Hard Hats
 5. The Fall of the Robot Defeating this level will have Mayor Frictionfit send you the Keys to the City
 
-The other two missions, Battle for the Skies and Outriders challenge, don't trigger any events in MLN. To request items, send the following request:
-
-```js
-// POST /api/robot-chronicles/award
-{
-  "api_token": string,
-  "access_token": string,
-  "award": int,  // 1, 2, 3, 4, or 5
-}
-```
-
-The `api_token` and `access_token` are the values you get from setting up OAuth (see link above), and the `award` corresponds to the list above. This request will call `get_award()` which will look up the correct `RobotChroniclesMessage` and send that to the user.
-
 ## Lego City Coast Guards
 
-This mini-game has just one associated networker: [Old Capt Joe](https://mylegonetwork.fandom.com/wiki/Old_Capt_Joe). When you beat the first level of the mini-game and he will send you the `Coast Guard Badge, Rank 1 Blueprint`. Once you have built the badge, you can befriend him. Playing through the rest of the game will grant the other badges.
-
-To let MLN know a new rank has been earned, send the following request:
-
-```js
-// POST /api/coast-guard/rank
-{
-  "api_token": string,
-  "access_token": string,
-  "rank": int,  // 1, 2, 3, 4, or 5
-}
-```
-
-The `api_token` and `access_token` are the values you get from setting up OAuth (see link above), and the `rank` corresponds to the user's in-game rank. This request will call `submit_rank()` which will look up the correct `CoastGuardMessage` and send that to the user.
+This mini-game has just one associated networker: [Old Capt Joe](https://mylegonetwork.fandom.com/wiki/Old_Capt_Joe). When you beat the first level of the mini-game and he will send you the `Coast Guard Badge, Rank 1 Blueprint`. Once you have built the badge, you can befriend him. Playing through the rest of the game will grant the 4 other badges
