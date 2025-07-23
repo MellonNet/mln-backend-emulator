@@ -12,7 +12,7 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils.timezone import now
 
-from ..static import Answer, Color, EnumField, ItemInfo, ItemType, MessageBody, Stack, Question
+from ..static import Answer, Color, EnumField, ItemInfo, ItemType, MessageBody, Stack, Question, MessageTemplate
 from ...services.inventory import assert_has_item
 
 DAY = datetime.timedelta(days=1)
@@ -165,6 +165,7 @@ class OAuthClient(models.Model):
 	client_name = models.CharField(max_length=64)
 	client_secret = models.CharField(max_length=64)
 	image_url = models.URLField()
+	redirect_url = models.URLField()
 
 	def __str__(self):
 		return self.client_name
@@ -201,3 +202,12 @@ def get_or_none(cls, is_relation=False, *args, **kwargs):
 		return cls.objects.get(*args, **kwargs) if not is_relation else cls.get(*args, **kwargs)
 	except ObjectDoesNotExist:
 		return None
+
+class IntegrationMessage(models.Model):
+	template = models.ForeignKey(MessageTemplate, related_name="+", on_delete=models.CASCADE)
+	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
+	award = models.IntegerField()
+	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
+
+	def __str__(self):
+		return f"{self.client.client_name}: Message #{self.award}"

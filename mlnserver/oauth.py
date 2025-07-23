@@ -65,7 +65,7 @@ class OAuthLoginView(LoginView):
       return HttpResponse(f"Client not found: {client_id}", status=404)
     OAuthCode.objects.create(user=user, auth_code=auth_code, client=client, generated_at=generated_at)
     session_id = self.request.GET.get("session_id")
-    redirect_url = self.request.GET.get("redirect_url")
+    redirect_url = client.redirect_url
     url = f"{redirect_url}?session_id={session_id}&auth_code={auth_code}"
     return HttpResponseRedirect(url)
 
@@ -86,11 +86,6 @@ class OAuthLoginView(LoginView):
     session_id = self.request.GET.get("session_id")
     if not session_id:
       context["invalid"] = "Missing session_id"
-      return context
-
-    redirect_url = self.request.GET.get("redirect_url")
-    if not redirect_url:
-      context["invalid"] = "Missing redirect_url"
       return context
 
     context["client_name"] = client.client_name

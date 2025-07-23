@@ -22,7 +22,7 @@
 
 {% if oauth and invalid %}
 	<h2>NOTE: This request was missing some information</h2>
-	<p>The URL is supposed to contain a session_id, redirect_url, and a valid client_id</p>
+	<p>The URL is supposed to contain a session_id and a valid client_id</p>
 	<p>The error message was: {{invalid}}</p>
 	<p>Please contact the developer of the site that took you here</p>
 	<button type="button" onclick="window.history.back()">Go back</button>
