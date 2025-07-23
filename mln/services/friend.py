@@ -7,6 +7,7 @@ from ..models.dynamic import Friendship, FriendshipStatus, Profile, get_or_none
 from ..models.static import MLNError, NetworkerFriendshipCondition
 
 from .inventory import has_item
+from .webhooks import run_friendship_webhooks
 
 def _get_friendship(user, relation_id):
 	try:
@@ -23,7 +24,16 @@ def get_friend_request(from_user, to_user) -> Friendship | None:
 	except ObjectDoesNotExist:
 		return None
 
-def send_friend_invite(user, recipient_name):
+def get_friendship(user1, user2) -> Friendship | None:
+	try:
+		return user1.outgoing_friendships.get(to_user=user2)
+	except ObjectDoesNotExist:
+		try:
+			return user2.outgoing_friendships.get(to_user=user1)
+		except ObjectDoesNotExist:
+			return None
+
+def send_friend_invite(user, recipient_name) -> Friendship:
 	"""
 	Send a friend request to someone.
 	Raise RuntimeError if no user with the specified username exists.
@@ -43,19 +53,22 @@ def send_friend_invite(user, recipient_name):
 	recipient_profile = get_or_none(Profile, user=recipient)
 	assert recipient_profile is not None  # all users have profiles
 	if recipient_profile.is_networker:
-		add_networker_friend(user, recipient)
+		return add_networker_friend(user, recipient)
 	else:
-		user.outgoing_friendships.create(to_user=recipient, status=FriendshipStatus.PENDING)
+		friendship = user.outgoing_friendships.create(to_user=recipient, status=FriendshipStatus.PENDING)
+		run_friendship_webhooks(friendship=friendship, actor=user)
+		return friendship
 
-def add_networker_friend(user, networker):
+def add_networker_friend(user, networker) -> Friendship:
 	condition = get_or_none(NetworkerFriendshipCondition, networker=networker)
 	if not condition: return  # all networkers must have a condition, no way to recover
 	success = condition.condition_id is None or has_item(user, condition.condition_id)
 	if success:
-		user.outgoing_friendships.create(to_user=networker, status=FriendshipStatus.FRIEND)
 		user.messages.create(sender=networker, body_id=condition.success_body_id)
+		return user.outgoing_friendships.create(to_user=networker, status=FriendshipStatus.FRIEND)
 	else:
 		user.messages.create(sender=networker, body_id=condition.failure_body_id)
+		return None
 
 def handle_friend_invite_response(user, relation_id, accept):
 	"""
@@ -72,6 +85,7 @@ def handle_friend_invite_response(user, relation_id, accept):
 		raise RuntimeError("%s is not a pending relation" % relation)
 	if accept:
 		relation.status = FriendshipStatus.FRIEND
+		run_friendship_webhooks(relation, user)
 		relation.save()
 	else:
 		relation.delete()
@@ -87,6 +101,8 @@ def remove_friend(user, relation_id):
 	relation = _get_friendship(user, relation_id)
 	if relation.status == FriendshipStatus.BLOCKED and relation.from_user != user:
 		raise MLNError(MLNError.YOU_ARE_BLOCKED)
+	relation.status = FriendshipStatus.REMOVED
+	run_friendship_webhooks(relation, user)
 	relation.delete()
 
 def block_friend(user, relation_id):
@@ -106,6 +122,7 @@ def block_friend(user, relation_id):
 		relation.from_user = user
 		relation.to_user = friend
 	relation.status = FriendshipStatus.BLOCKED
+	run_friendship_webhooks(relation, user)
 	relation.save()
 
 def unblock_friend(user, relation_id):
@@ -123,6 +140,7 @@ def unblock_friend(user, relation_id):
 	if relation.from_user != user:
 		raise MLNError(MLNError.YOU_ARE_BLOCKED)
 	relation.status = FriendshipStatus.FRIEND
+	run_friendship_webhooks(relation, user)
 	relation.save()
 
 def are_friends(user, other_user_id):

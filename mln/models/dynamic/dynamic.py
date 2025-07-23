@@ -147,6 +147,7 @@ class FriendshipStatus(Enum):
 	FRIEND = auto()
 	PENDING = auto()
 	BLOCKED = auto()
+	REMOVED = auto()  # not a real status, do not save with this. For runtime only
 
 class Friendship(models.Model):
 	"""
@@ -211,3 +212,18 @@ class IntegrationMessage(models.Model):
 
 	def __str__(self):
 		return f"{self.client.client_name}: Message #{self.award}"
+
+class WebhookType(Enum):
+	MESSAGES = auto()
+	FRIENDSHIPS = auto()
+
+class Webhook(models.Model):
+	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
+	access_token = models.ForeignKey(OAuthToken, related_name="+", on_delete=models.CASCADE)
+	user = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
+	secret = models.CharField(max_length=64)
+	url = models.URLField()
+	type = EnumField(WebhookType)
+
+	def __str__(self):
+		return f"{self.type.name.title()} webhook for {self.client.client_name}"

@@ -1,7 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Q
 
-from ..models.static import ItemInfo
+from ..models.static import ItemInfo, ItemType
 
 def add_inv_item(user, item_id, qty=1):
 	"""
@@ -69,3 +69,6 @@ def has_item(user, item_id):
 		return True
 	except ObjectDoesNotExist:
 		return False
+
+def get_badges(user):
+	return user.inventory.filter(item__type=ItemType.BADGE)

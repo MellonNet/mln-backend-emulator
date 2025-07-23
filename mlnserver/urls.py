@@ -13,8 +13,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.edit import CreateView
 
-from mln.apis import integrations
-from .oauth import OAuthLoginView, get_token
+from mln.apis import inbox_api, messages_api, integrations, users_api, webhooks
+from mlnserver.oauth import OAuthLoginView, get_token
 
 def flashvars_handler(request):
 	raise Http404("""
@@ -38,7 +38,17 @@ urlpatterns = [
 	), name="sign_up"),
 	path("accounts/password_change", PasswordChangeView.as_view()),
 	path("admin/", admin.site.urls),
-	path("api/award", integrations.grant_award)
+
+	path("api/award", integrations.grant_award),
+	path("api/messages", inbox_api.InboxApi.as_view()),
+	path("api/messages/<int:id>", messages_api.MessagesApi.as_view()),
+	path("api/messages/<int:id>/reply", messages_api.reply_to_message),
+	path("api/messages/<int:id>/mark-read", messages_api.mark_read),
+	path("api/users/<str:username>", users_api.get_user),
+	path("api/users/<str:username>/friendship", users_api.FriendshipsApi.as_view()),
+	path("api/users/<str:username>/block", users_api.block_user),
+	path("api/webhooks", webhooks.register_webhook),
+	path("api/webhooks/<int:id>", webhooks.delete_webhook),
 ]
 
 if settings.DEBUG:
