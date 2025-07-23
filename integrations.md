@@ -21,7 +21,7 @@ Each mini-game message needs the same few fields:
 - a `networker` to send the template
 - an `award` ID that is associated with in-game progress
 
-That makes 
+That makes
 
 ```python
 class IntegrationMessage(models.Model):
@@ -67,3 +67,17 @@ You can befriend each of these users without any requirements. Although the mini
 ## Lego City Coast Guards
 
 This mini-game has just one associated networker: [Old Capt Joe](https://mylegonetwork.fandom.com/wiki/Old_Capt_Joe). When you beat the first level of the mini-game and he will send you the `Coast Guard Badge, Rank 1 Blueprint`. Once you have built the badge, you can befriend him. Playing through the rest of the game will grant the 4 other badges
+
+## Lego City Construction
+
+This mini-game has several levels that unlock vehicles and buildings of different categories. instead of getting awards per level, you get awards for finishing each category, called a "garage". The garages are as follows:
+
+1. Construction
+2. Fire
+3. Police
+4. Transit
+5. Farm
+6. Cargo
+7. City
+
+These garages correspond to in-game items that can be shown on the [Lego City Trophy Module](https://mylegonetwork.fandom.com/wiki/LEGO_CITY_Trophy_Module). When the user completes a garage, [Jack Drill](https://mylegonetwork.fandom.com/wiki/Jack_Drill) will send them the correct item.
