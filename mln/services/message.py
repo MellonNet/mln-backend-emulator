@@ -1,6 +1,7 @@
 
-from ..models.dynamic import Attachment, Message
-from ..models.static import MessageBody, MLNMessage, NetworkerReply
+from django.contrib.auth.models import User
+from ..models.dynamic import Attachment, Message, get_or_none
+from ..models.static import MessageBody, MLNMessage, NetworkerReply, MessageTemplate
 from .friend import are_friends
 from .inventory import add_inv_item, remove_inv_item
 from .webhooks import run_message_webhooks
@@ -81,11 +82,33 @@ def send_message(message, attachment=None):
 			attachment.save()
 		run_message_webhooks(reply)
 
-def send_template(template, sender, recipient) -> Message:
+def attach(message: Message, attachment: Attachment):
+	message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
+
+def consolidate(message, other):
+	"""Consolidates all the attachments in [template] with those in [message]"""
+	for attachment in other.attachments.all():
+		already_attached = get_or_none(message.attachments, is_relation=True, item_id=attachment.item_id)
+		if already_attached:
+			# This attachment already exists, just increment
+			already_attached.qty += attachment.qty
+			already_attached.save()
+		else:
+			# This attachment does not exist, make a new one
+			attach(message, attachment)
+
+def send_template(template: MessageTemplate, sender: User, recipient: User) -> Message:
 	"""Sends a MessageTemplate along with any MessageTemplateAttachments."""
+	# First, check if the user has already received this message from the sender
+	already_sent = get_or_none(Message, sender=sender, recipient=recipient, body=template.body)
+	if already_sent:
+		consolidate(already_sent, template)
+		return
+
+	# Otherwise, send the template to the user as normal
 	message = Message.objects.create(sender=sender, recipient=recipient, body=template.body)
 	for attachment in template.attachments.all():
-		message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
+		attach(message, attachment)
 	run_message_webhooks(message)
 	return message
 
