@@ -72,6 +72,22 @@ def webservice(request):
 	out = _encrypt(out)
 	return HttpResponse(out)
 
+@csrf_exempt
+def award_giver(request):
+	raw = request.POST["id"]
+	data = _decrypt(raw, key=ROCKET_MODULE_ENCRYPTION_KEY)
+	decoded = data.decode("utf-8")
+	match decoded:
+		case "000119c6-0000-0000-0000-000000000000":
+			template = "mln/api/xml/module/rocket_game.xml"
+			context = {}
+			out = render_to_string_stripped(template, context)
+			out = out.encode()
+			out = _encrypt(out, key=ROCKET_MODULE_ENCRYPTION_KEY)
+			return HttpResponse(out, status=200)
+		case _:
+			return HttpResponse(status=400)
+
 def _webservice_unencrypted(user, data):
 	log.debug(data)
 	xml_request = et.fromstring(data)
@@ -109,6 +125,7 @@ def _webservice_unencrypted(user, data):
 	return out
 
 ENCRYPTION_KEY = b"0e0 t00e0-0 i etiaonmld"
+ROCKET_MODULE_ENCRYPTION_KEY = b"13bv9cyruhnflksjhtf+p1q"
 
 def _xor(data, key=ENCRYPTION_KEY):
 	res = bytearray(len(data))
@@ -116,8 +133,8 @@ def _xor(data, key=ENCRYPTION_KEY):
 		res[i] = data[i] ^ key[i % len(key)]
 	return res
 
-def _decrypt(data):
-	return _xor(base64.b64decode(data))
+def _decrypt(data, key=ENCRYPTION_KEY):
+	return _xor(base64.b64decode(data), key=key)
 
-def _encrypt(data):
-	return base64.b64encode(_xor(data))
+def _encrypt(data, key=ENCRYPTION_KEY):
+	return base64.b64encode(_xor(data, key=key))

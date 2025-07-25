@@ -20,4 +20,5 @@ urlpatterns = [
 	path("Publicview/<str:page_owner_name>.aspx", lambda x, page_owner_name: redirect("public_view", page_owner_name)),
 	path("Publicview/<str:page_owner_name>.html", lambda x, page_owner_name: redirect("public_view", page_owner_name)), # click on friend in friend list
 	path("webservice", webservice.webservice, name="webservice"),
+	path("AwardGiverExecute", webservice.award_giver),
 ]

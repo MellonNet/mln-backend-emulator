@@ -1,0 +1,4 @@
+{% load mln_utils %}<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<awardResponse>
+  <result state="1" text="You won! Your reward is in your inbox"/>
+</awardResponse>
