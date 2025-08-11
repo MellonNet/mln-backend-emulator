@@ -33,13 +33,13 @@ def create_attachment(data, message):
 
 class InboxApi(View):
   @method_decorator(csrf_exempt)
-  @method_decorator(oauth)
+  @method_decorator(auth)
   def dispatch(self, request, *args, **kwargs):
     return super().dispatch(request, *args, **kwargs)
 
-  def get(self, request, access_token):
+  def get(self, request, user):
     # TODO: Support ?count=n
-    query = Message.objects.filter(recipient=access_token.user).all()
+    query = Message.objects.filter(recipient=user).all()
     result = [
       message_response(message)
       for message in query
@@ -48,13 +48,13 @@ class InboxApi(View):
 
   @method_decorator(post_json)
   @method_decorator(check_json(SEND_MESSAGE_SCHEMA))
-  def post(self, data, access_token):
+  def post(self, data, user):
     recipient_username = data.get("recipient")
     recipient = get_or_none(User, username=recipient_username)
     if not recipient:
       return HttpResponse("Recipient not found", status=404)
 
-    message = create_message(data, sender=access_token.user, recipient=recipient)
+    message = create_message(data, sender=user, recipient=recipient)
     if type(message) is HttpResponse: return message
 
     attachment = create_attachment(data, message)

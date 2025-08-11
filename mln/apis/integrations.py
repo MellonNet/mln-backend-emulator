@@ -8,7 +8,7 @@ INTEGRATION_SCHEMA = {
 }
 
 @csrf_exempt
-@oauth
+@oauth_only
 @post_json
 @check_json(INTEGRATION_SCHEMA)
 def grant_award(data, access_token):

@@ -7,17 +7,17 @@ from mln.apis.inbox_api import create_message, create_attachment
 
 class MessagesApi(View):
   @method_decorator(csrf_exempt)
-  @method_decorator(oauth)
+  @method_decorator(auth)
   def dispatch(self, request, *args, **kwargs):
     return super().dispatch(request, *args, **kwargs)
 
-  def get(self, request, access_token, id):
-    message = get_message(message_id=id, user=access_token.user)
+  def get(self, request, user, id):
+    message = get_message(message_id=id, user=user)
     if type(message) is HttpResponse: return message
     return JsonResponse(message_response(message))
 
-  def delete(self, request, access_token, id):
-    message = get_message(message_id=id, user=access_token.user)
+  def delete(self, request, user, id):
+    message = get_message(message_id=id, user=user)
     if type(message) is HttpResponse: return message
     message.delete()
     return HttpResponse(status=204)
@@ -32,13 +32,13 @@ def get_message(message_id: int, user: User):
     return result
 
 @csrf_exempt
-@oauth
+@auth
 @post_json
 @check_json(MESSAGE_REQUEST_SCHEMA)
-def reply_to_message(data, access_token, id):
-  message = get_message(message_id=id, user=access_token.user)
+def reply_to_message(data, user, id):
+  message = get_message(message_id=id, user=user)
   if type(message) is HttpResponse: return message
-  reply = create_message(data, sender=access_token.user, recipient=message.sender, reply_to=message)
+  reply = create_message(data, sender=user, recipient=message.sender, reply_to=message)
   if type(reply) is HttpResponse: return reply
   attachment = create_attachment(data, reply)
   if type(attachment) is HttpResponse: return attachment
@@ -47,10 +47,10 @@ def reply_to_message(data, access_token, id):
   return JsonResponse(result, safe=False, status=201)
 
 @csrf_exempt
-@oauth
+@auth
 @only_allow("POST")
-def mark_read(request, access_token, id):
-  message = get_message(message_id=id, user=access_token.user)
+def mark_read(request, user, id):
+  message = get_message(message_id=id, user=user)
   if type(message) is HttpResponse: return message
   message.is_read = True
   message.save()

@@ -6,23 +6,28 @@ from mln.apis.utils import *
 from mln.apis.json import *
 
 @csrf_exempt
-@oauth
+@auth
 @only_allow("GET")
-def get_user(request, access_token, username):
+def get_self(request, user):
+  return JsonResponse(user_response(user, None))
+
+@csrf_exempt
+@auth
+@only_allow("GET")
+def get_user(request, user, username):
   otherUser = get_or_none(User, username=username)
   if not otherUser:
     return HttpResponse("User not found", status=404)
-  friendship = get_friendship(access_token.user, otherUser)
+  friendship = get_friendship(user, otherUser)
   return JsonResponse(user_response(otherUser, friendship))
 
 class FriendshipsApi(View):
   @method_decorator(csrf_exempt)
-  @method_decorator(oauth)
+  @method_decorator(auth)
   def dispatch(self, request, *args, **kwargs):
     return super().dispatch(request, *args, **kwargs)
 
-  def post(self, data, access_token, username):
-    user = access_token.user
+  def post(self, data, user, username):
     otherUser = get_or_none(User, username=username)
     if not otherUser:
       return HttpResponse("User not found", status=404)
@@ -53,8 +58,7 @@ class FriendshipsApi(View):
     elif friendship.status == FriendshipStatus.FRIEND:
       return JsonResponse(friendship_response(friendship), safe=False)
 
-  def delete(self, request, access_token, username):
-    user = access_token.user
+  def delete(self, request, user, username):
     other_user = get_or_none(User, username=username)
     if not other_user:
       return HttpResponse("User not found", status=404)
@@ -70,10 +74,9 @@ class FriendshipsApi(View):
       return HttpResponse(status=204)
 
 @csrf_exempt
-@oauth
+@auth
 @only_allow("POST")
-def block_user(request, access_token, username):
-  user = access_token.user
+def block_user(request, user, username):
   other_user = get_or_none(User, username=username)
   if not other_user:
     return HttpResponse("User not found", status=404)

@@ -50,12 +50,22 @@ def _parse_json_request(request) -> HttpResponse | Json:
   except:
     return HttpResponse("Invalid JSON", status=400)
 
-def oauth(func):
+def auth(func):
   @wraps(func)
   def wrapper(request, *args, **kwargs):
-    access_token = _authenticate_request(request)
-    if type(access_token) is HttpResponse: return access_token
-    return func(request, access_token, *args, **kwargs)
+    user = request.user
+    if not user.is_authenticated:
+      user = _authenticate_request(request)
+      if type(user) is HttpResponse: return user
+    return func(request, user, *args, **kwargs)
+  return wrapper
+
+def oauth_only(func):
+  @wraps(func)
+  def wrapper(request, *args, **kwargs):
+    user = _authenticate_request(request)
+    if type(user) is HttpResponse: return user
+    return func(request, user, *args, **kwargs)
   return wrapper
 
 def _authenticate_request(request: HttpRequest) -> HttpResponse | OAuthToken:
@@ -97,4 +107,4 @@ def _authenticate_request(request: HttpRequest) -> HttpResponse | OAuthToken:
   elif api_token != client.client_secret:
     return HttpResponse("Invalid API token", status=401)
 
-  return access_token
+  return access_token.user

@@ -30,7 +30,11 @@ ALLOWED_HOSTS = [
   "localhost",
   "mln.lcdruniverse.org",
 ]
-CSRF_TRUSTED_ORIGINS = ["https://mln.lcdruniverse.org"]
+
+CSRF_TRUSTED_ORIGINS = [
+  "https://mln.lcdruniverse.org",
+	"http://localhost:5000",
+]
 
 # Application definition
 
@@ -61,7 +65,10 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
 	# If you get CORS errors while testing, insert your localhost:XXXX here
   # When hosting a mini-game integration, put that here too
+	"http://localhost:5000",
 ]
+
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = "mlnserver.urls"
 

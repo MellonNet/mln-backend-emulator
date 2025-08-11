@@ -11,7 +11,7 @@ WEBHOOK_SCHEMA = {
 }
 
 @csrf_exempt
-@oauth
+@oauth_only
 @post_json
 @check_json(WEBHOOK_SCHEMA)
 def register_webhook(data, access_token):
@@ -36,7 +36,7 @@ def register_webhook(data, access_token):
     return HttpResponse(error, status=400)
 
 @csrf_exempt
-@oauth
+@oauth_only
 @only_allow("DELETE")
 def delete_webhook(request, access_token, id):
   webhook = get_or_none(Webhook, id=id)
