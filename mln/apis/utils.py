@@ -55,17 +55,17 @@ def auth(func):
   def wrapper(request, *args, **kwargs):
     user = request.user
     if not user.is_authenticated:
-      user = _authenticate_request(request)
-      if type(user) is HttpResponse: return user
-    return func(request, user, *args, **kwargs)
+      access_token = _authenticate_request(request)
+      if type(access_token) is HttpResponse: return access_token
+    return func(request, access_token.user, *args, **kwargs)
   return wrapper
 
 def oauth_only(func):
   @wraps(func)
   def wrapper(request, *args, **kwargs):
-    user = _authenticate_request(request)
-    if type(user) is HttpResponse: return user
-    return func(request, user, *args, **kwargs)
+    access_token = _authenticate_request(request)
+    if type(access_token) is HttpResponse: return access_token
+    return func(request, access_token, *args, **kwargs)
   return wrapper
 
 def _authenticate_request(request: HttpRequest) -> HttpResponse | OAuthToken:
@@ -107,4 +107,4 @@ def _authenticate_request(request: HttpRequest) -> HttpResponse | OAuthToken:
   elif api_token != client.client_secret:
     return HttpResponse("Invalid API token", status=401)
 
-  return access_token.user
+  return access_token

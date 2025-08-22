@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
   "https://mln.lcdruniverse.org",
-	"http://localhost:5000",
+  "https://mln.mellonnet.com",
 ]
 
 # Application definition
