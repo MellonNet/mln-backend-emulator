@@ -4,7 +4,6 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -20,26 +19,6 @@ class Migration(migrations.Migration):
                 ('award', models.IntegerField()),
             ],
         ),
-        migrations.RemoveField(
-            model_name='robotchroniclesmessage',
-            name='networker',
-        ),
-        migrations.RemoveField(
-            model_name='robotchroniclesmessage',
-            name='template',
-        ),
-        migrations.AddField(
-            model_name='oauthclient',
-            name='redirect_url',
-            field=models.URLField(default='localhost:7000/api/login'),
-            preserve_default=False,
-        ),
-        migrations.DeleteModel(
-            name='CoastGuardMessage',
-        ),
-        migrations.DeleteModel(
-            name='RobotChroniclesMessage',
-        ),
         migrations.AddField(
             model_name='integrationmessage',
             name='client',
@@ -54,5 +33,17 @@ class Migration(migrations.Migration):
             model_name='integrationmessage',
             name='template',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='mln.messagetemplate'),
+        ),
+        migrations.AddField(
+            model_name='oauthclient',
+            name='redirect_url',
+            field=models.URLField(default='localhost:7000/api/login'),
+            preserve_default=False,
+        ),
+        migrations.DeleteModel(
+            name='CoastGuardMessage',
+        ),
+        migrations.DeleteModel(
+            name='RobotChroniclesMessage',
         ),
     ]

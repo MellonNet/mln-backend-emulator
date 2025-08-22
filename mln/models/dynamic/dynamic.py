@@ -76,6 +76,7 @@ class Profile(models.Model):
 			if (self.is_networker and parts[0] not in ("0", "1")) or (not self.is_networker and parts[0] != "0"):
 				raise ValidationError({"avatar": "First part of avatar should not be %s" % parts[0]})
 			avatar_data = parts[1].split(",")
+			# TODO: Reverse engineering the format, seems that a non-networker avatar only needs 12 parts, not 14.
 			if not((parts[0] == "0" and len(avatar_data) == 14) or (parts[0] == "1" and len(avatar_data) == 5)):
 				raise ValidationError({"avatar": "Data part of avatar has %i values but shouldn't %s" % (len(avatar_data), self.avatar)})
 			self.avatar = parts[0]+"#"+parts[1]
