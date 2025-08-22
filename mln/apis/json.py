@@ -60,6 +60,7 @@ def user_response(user: User, friendship: Friendship): return {
   "rank": user.profile.rank,
   "is_networker": user.profile.is_networker,
   "friendship_status": friendship_response(friendship),
+  "avatar": user.profile.avatar,
   "badges": [
     badge_response(badge)
     for badge in get_badges(user)

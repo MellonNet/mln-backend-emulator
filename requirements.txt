@@ -3,3 +3,4 @@ Pillow
 django-cors-headers==4.7.0
 json-checker==2.0.0
 requests==2.32.4
+uv==0.8.0
