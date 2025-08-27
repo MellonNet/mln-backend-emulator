@@ -22,5 +22,5 @@ def public_view(request, page_owner_name):
 		if request.user.is_authenticated:
 			return redirect("public_view", request.user.username)
 		return redirect("%s?next=%s" % (settings.LOGIN_URL, request.path))
-	get_object_or_404(User, username=page_owner_name)
-	return render(request, "mln/ui/public_view.html", {"page_owner_name": page_owner_name})
+	user = get_object_or_404(User, username__iexact=page_owner_name)
+	return render(request, "mln/ui/public_view.html", {"page_owner_name": user.username})
