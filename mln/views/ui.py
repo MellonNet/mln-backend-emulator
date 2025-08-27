@@ -4,7 +4,8 @@ This is only for HTML pages, for webservice XML handling see the webservice modu
 If you're working on views for gallery, factory, creation lab or other related systems, please put them into their own django app. This file is only for the core MLN views.
 """
 from django.conf import settings
-from django.shortcuts import get_object_or_404, redirect, render
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render, Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
@@ -22,5 +23,11 @@ def public_view(request, page_owner_name):
 		if request.user.is_authenticated:
 			return redirect("public_view", request.user.username)
 		return redirect("%s?next=%s" % (settings.LOGIN_URL, request.path))
-	user = get_object_or_404(User, username__iexact=page_owner_name)
+	try:
+		user = get_object_or_404(User, username__iexact=page_owner_name)
+	except Http404:
+		try:
+			user = get_object_or_404(User, username__iexact=page_owner_name.replace(" ", "_"))
+		except Http404:
+			user = get_object_or_404(User, username__iexact=page_owner_name.replace("_", " "))
 	return render(request, "mln/ui/public_view.html", {"page_owner_name": user.username})
