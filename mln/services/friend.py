@@ -53,7 +53,13 @@ def send_friend_invite(user, recipient_name) -> Friendship:
 def add_networker_friend(user, networker) -> Friendship:
 	condition = get_or_none(NetworkerFriendshipCondition, networker=networker)
 	if not condition: return  # all networkers must have a condition, no way to recover
-	success = condition.condition_id is None or has_item(user, condition.condition_id)
+	success = (
+		condition.condition_id is None
+		or has_item(user, condition.condition_id)
+		# Special case: User has spent their Headline Hero badge by making the Keys to the City Badge
+		# 	In this case, we let them pass the requirement anyway.
+		or (condition.condition_id == 129102 and has_item(user, 129103))
+	)
 	if success:
 		user.messages.create(sender=networker, body_id=condition.success_body_id)
 		return user.outgoing_friendships.create(to_user=networker, status=FriendshipStatus.FRIEND)
