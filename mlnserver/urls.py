@@ -50,6 +50,7 @@ urlpatterns = [
 	path("api/users/<str:username>/block", users_api.block_user),
 	path("api/webhooks", webhooks.register_webhook),
 	path("api/webhooks/<int:id>", webhooks.delete_webhook),
+	path("api/test", users_api.test),
 ]
 
 if settings.DEBUG:

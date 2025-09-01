@@ -1,3 +1,8 @@
+from datetime import datetime
+
+from django.db.models import CharField
+from django.db.models.functions import Length
+
 from mln.models.dynamic import User, Profile
 
 from mln.services.friend import get_friendship, send_friend_invite
@@ -10,6 +15,30 @@ from mln.apis.json import *
 @only_allow("GET")
 def get_self(request, user):
   return JsonResponse(user_response(user, None))
+
+@csrf_exempt
+@only_allow("GET")
+def test(request):
+  # CharField.register_lookup(Length, 'length')
+  # query = User.objects.filter(username__length=20)
+  # users = list(query.all())
+  # with open("users.txt", "w") as file:
+  #   for user in users:
+  #     profile = Profile.objects.get(user_id=user.id)
+  #     file.write(f"{user.username} - {user.date_joined} - Rank {profile.rank}\n")
+  # return HttpResponse(f"Wrote {len(users)} to users.txt", status=200)
+
+  num_users = 0
+  with open("users.txt") as file:
+    for line in file.readlines():
+      username = line.strip()
+      user = get_or_none(User, username=username)
+      if user is None:
+        print(f"Could not find {user}")
+        continue
+      user.delete()
+      num_users += 1
+  return HttpResponse("Deleted {num_users} users", status=200)
 
 @csrf_exempt
 @auth
