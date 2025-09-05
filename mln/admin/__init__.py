@@ -100,8 +100,11 @@ class MessageBodyAdmin(admin.ModelAdmin):
 
 	@admin.action(description="Change type + theme")
 	def change_both(self, request, queryset):
-		self.change_type(request, queryset)
-		self.change_theme(request, queryset)
+		type_str = request.POST["type"]
+		type_ = MessageBodyType[type_str]
+		theme_str = request.POST["theme"]
+		theme = MessageBodyTheme[theme_str]
+		queryset.update(theme=theme, type=type_)
 
 custom[MessageBody] = MessageBodyAdmin
 
