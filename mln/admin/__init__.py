@@ -85,7 +85,7 @@ class MessageBodyAdmin(admin.ModelAdmin):
 	filter_vertical = "easy_replies",
 	list_filter = HasHandlerFilter, "type", "theme"
 	action_form = MessageBodyTypeForm
-	actions = ["change_type", "change_theme"]
+	actions = ["change_type", "change_theme", "change_both"]
 
 	@admin.action(description="Change message type")
 	def change_type(self, request, queryset):
@@ -100,7 +100,7 @@ class MessageBodyAdmin(admin.ModelAdmin):
 		queryset.update(theme=theme)
 
 	@admin.action(description="Change type + theme")
-	def change_theme(self, request, queryset):
+	def change_both(self, request, queryset):
 		self.change_type(request, queryset)
 		self.change_theme(request, queryset)
 
