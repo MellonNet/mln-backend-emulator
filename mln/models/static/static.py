@@ -154,11 +154,28 @@ class MessageBodyType(Enum):
 	USER = auto()
 	SYSTEM = auto()
 	BETA = auto()
-	INTEGRATION = auto()
-	UNPUBLISHED = auto()
+	DEPRECATED_TYPE = auto()
+	REWARD_CODE = auto()
 	OTHER = auto()
-	COAST_GUARD = auto()
+	EXTERNAL_AWARD = auto()
+	PROMO = auto()
+
+class MessageBodyTheme(Enum):
+	MLN = auto()
+	MLN_SYSTEM = auto()
+	MLN_BETA = auto()
 	ROBOT_CHRONICLES = auto()
+	COAST_GUARD = auto()
+	CONSTRUCTION = auto()
+	BIONICLE = auto()
+	LEGO_UNIVERSE = auto()
+	DICE_QUEST = auto()
+	SPA = auto()
+	LEGO_CLUB = auto()
+	REAL_LIFE = auto()
+	STAR_JUSTICE = auto()
+	RACERS = auto()
+	OTHER = auto()
 
 class MessageBody(models.Model):
 	"""
@@ -170,6 +187,7 @@ class MessageBody(models.Model):
 	"""
 	category = models.ForeignKey(MessageBodyCategory, related_name="+", on_delete=models.CASCADE)
 	type = EnumField(MessageBodyType, null=True, blank=True)
+	theme = EnumField(MessageBodyTheme, null=True, blank=True)
 	subject = models.CharField(max_length=128)
 	text = models.TextField()
 	notes = models.TextField(default="", blank=True)
