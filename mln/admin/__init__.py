@@ -8,10 +8,10 @@ from django.contrib import admin
 from django.contrib.admin.helpers import ActionForm
 from django.db.models import Q
 
-from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack
+from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack, IntegrationMessage
 from ..models.dynamic.module import Module, module_settings_classes, ModuleSaveConcertArcade, ModuleSaveSoundtrack
 from ..models.dynamic.module_settings_arcade import DeliveryArcadeTile
-from ..models.static import Answer, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageBodyType, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleSetupCost, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReply, StartingStack, Question
+from ..models.static import Answer, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageBodyTheme, MessageBodyType, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleSetupCost, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReply, StartingStack, Question
 from ..models.static.module_handlers import ModuleExecutionCost, ModuleGuestYield, ModuleMessage, ModuleOwnerYield
 from .make_inline import custom, inlines, make_inline
 
@@ -35,11 +35,24 @@ custom[Friendship] = FriendshipAdmin
 # ----- MessageBody -----
 
 MBT = MessageBodyType
+
+# TODO: System, Beta, Reward Code,
+UNSUPPORTED_MESSAGE_TYPES = {  # These are messages that are NOT sent automatically
+	MBT.USER,         # sent by users
+	MBT.SYSTEM,       # sent by the system when certain events occur (TODO)
+	MBT.BETA,         # manually sent by the MLN team to beta testers (TODO)
+	MBT.REWARD_CODE,  # sent in response to a code being entered (TODO)
+	MBT.PROMO,        # manually sent by the MLN team to promote other games (TODO)
+	MBT.OTHER,        # Uncategorized
+}
+
 has_handler = lambda msg: (
-	msg.type in {MBT.USER, MBT.SYSTEM, MBT.BETA, MBT.INTEGRATION, MBT.UNPUBLISHED, MBT.OTHER} or  # unsupported
+	msg.type in UNSUPPORTED_MESSAGE_TYPES or
 	(msg.type == MBT.FRIEND and NetworkerFriendshipCondition.objects.filter(Q(success_body=msg) | Q(failure_body=msg)).exists()) or
-	(msg.type in [MBT.REPLY, MBT.ITEM] and NetworkerReply.objects.filter(template__body=msg).exists()) or
-	(msg.type == MBT.MODULE and ModuleMessage.objects.filter(message__body=msg).exists())
+	# Some external rewards are not implemented and respond to a ;) message instead
+	(msg.type in [MBT.REPLY, MBT.ITEM, MBT.EXTERNAL_AWARD] and NetworkerReply.objects.filter(template__body=msg).exists()) or
+	(msg.type == MBT.MODULE and ModuleMessage.objects.filter(message__body=msg).exists()) or
+	(msg.type == MBT.EXTERNAL_AWARD and IntegrationMessage.objects.filter(template__body=msg).exists())
 )
 
 has_handler.short_description = "has handler"
@@ -62,21 +75,36 @@ class HasHandlerFilter(admin.SimpleListFilter):
 
 class MessageBodyTypeForm(ActionForm):
 	"""Allows the user to pick a MessageBodyType before performing an action."""
-	type = forms.ChoiceField(choices=[(name, name.lower()) for name in MBT.__members__.keys()])
+	type = forms.ChoiceField(choices=[(name, name.lower()) for name in sorted(MBT.__members__.keys())])
+	theme = forms.ChoiceField(choices=[(name, name.lower()) for name in sorted(MessageBodyTheme.__members__.keys())])
 
 class MessageBodyAdmin(admin.ModelAdmin):
-	list_display = "subject", "text", "type", has_handler
+	list_display = "subject", "text", "type", "theme", has_handler
 	search_fields = "subject", "text"
 	filter_vertical = "easy_replies",
-	list_filter = "type", HasHandlerFilter, "category"
+	list_filter = HasHandlerFilter, "type", "theme"
 	action_form = MessageBodyTypeForm
-	actions = ["change_type"]
+	actions = ["change_type", "change_theme", "change_both"]
 
 	@admin.action(description="Change message type")
 	def change_type(self, request, queryset):
 		type_str = request.POST["type"]
 		type_ = MessageBodyType[type_str]
 		queryset.update(type=type_)
+
+	@admin.action(description="Change message theme")
+	def change_theme(self, request, queryset):
+		theme_str = request.POST["theme"]
+		theme = MessageBodyTheme[theme_str]
+		queryset.update(theme=theme)
+
+	@admin.action(description="Change type + theme")
+	def change_both(self, request, queryset):
+		type_str = request.POST["type"]
+		type_ = MessageBodyType[type_str]
+		theme_str = request.POST["theme"]
+		theme = MessageBodyTheme[theme_str]
+		queryset.update(theme=theme, type=type_)
 
 custom[MessageBody] = MessageBodyAdmin
 
@@ -182,6 +210,14 @@ module_admin = make_inline(Module, *settings, get_inlines=get_settings_inlines)
 module_admin.list_display = "owner", "item", "pos_x", "pos_y", "total_clicks"
 module_admin.list_display_links = "item",
 module_admin.search_fields = "owner__username", "item__name"
+
+# Integration messages
+
+integration_message_admin = make_inline(IntegrationMessage)
+integration_message_admin.list_display = "client", "award", "template",
+integration_message_admin.list_display_links = "template",
+integration_message_admin.search_fields = "client__client_name", "template__body__subject", "template__body__text"
+integration_message_admin.ordering = "client", "award"
 
 # Register admin interfaces
 
