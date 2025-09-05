@@ -99,6 +99,11 @@ class MessageBodyAdmin(admin.ModelAdmin):
 		theme = MessageBodyTheme[theme_str]
 		queryset.update(theme=theme)
 
+	@admin.action(description="Change type + theme")
+	def change_theme(self, request, queryset):
+		self.change_type(request, queryset)
+		self.change_theme(request, queryset)
+
 custom[MessageBody] = MessageBodyAdmin
 
 # ----- End of MessageBody -----
