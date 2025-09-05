@@ -112,13 +112,16 @@ def block_user(request, user, username):
 
 @csrf_exempt
 def test(request):
-  template = get_or_none(MessageTemplate, id=402)
-  return HttpResponse(f"Going to send {template}")
-  echo = get_or_none(User, username="Echo")
-  if template is None or echo is None:
-    return HttpResponse(f"Could not find template or Echo\n- tempplate={template}\n- Echo={echo}", status=500)
+  badge_id = 91352
   count = 0
+  template_id = 203
+  raanu = get_or_none(User, username="Raanu")
+  template = get_or_none(MessageTemplate, id=template_id)
+  if not template or not raanu:
+    return HttpResponse("Could not find Watchful Eye template or Raanu", status=500)
   for user in User.objects.all():
-    message_services.send_template(template, echo, user)
+    badge = get_or_none(user.inventory, is_relation=True, item_id=badge_id)
+    if not badge: continue
+    # message_services.send_template(template, raanu, user)
     count += 1
-  return HttpResponse(f"Sent Desctructoid to {count} users")
+  return HttpResponse(f"Will send {template} from {raanu} to {count} users")
