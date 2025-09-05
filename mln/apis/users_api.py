@@ -1,5 +1,6 @@
-from mln.models.dynamic import User, Profile
+from mln.models.dynamic import User, Profile, MessageTemplate
 
+from mln.services import message as message_services
 from mln.services.friend import get_friendship, send_friend_invite
 from mln.services.webhooks import run_friendship_webhooks
 from mln.apis.utils import *
@@ -108,3 +109,16 @@ def block_user(request, user, username):
     friendship.save()
     run_friendship_webhooks(friendship, user)
     return HttpResponse(status=204)
+
+@csrf_exempt
+def test(request):
+  template = get_or_none(MessageTemplate, id=402)
+  return HttpResponse(f"Going to send {template}")
+  echo = get_or_none(User, username="Echo")
+  if template is None or echo is None:
+    return HttpResponse(f"Could not find template or Echo\n- tempplate={template}\n- Echo={echo}", status=500)
+  count = 0
+  for user in User.objects.all():
+    message_services.send_template(template, echo, user)
+    count += 1
+  return HttpResponse(f"Sent Desctructoid to {count} users")
