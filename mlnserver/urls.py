@@ -44,7 +44,9 @@ urlpatterns = [
 	path("api/messages/<int:id>", messages_api.MessagesApi.as_view()),
 	path("api/messages/<int:id>/reply", messages_api.reply_to_message),
 	path("api/messages/<int:id>/mark-read", messages_api.mark_read),
+	# TOOD: Figure this out in case a user names themselves whoami or random
 	path("api/users/whoami", users_api.get_self),
+	path("api/users/random", users_api.get_random_user),
 	path("api/users/<str:username>", users_api.get_user),
 	path("api/users/<str:username>/friendship", users_api.FriendshipsApi.as_view()),
 	path("api/users/<str:username>/block", users_api.block_user),

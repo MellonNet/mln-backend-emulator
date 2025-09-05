@@ -20,8 +20,8 @@ def get_friend_request(from_user, to_user) -> Friendship | None:
 	return get_or_none(from_user.outgoing_friendships, to_user=to_user, is_relation=True)
 
 def get_friendship(user1, user2) -> Friendship | None: return (
-	get_or_none(user1.outgoing_friendships(to_user=user2), is_relation=True) or
-	get_or_none(user2.outgoing_friendships(to_user=user1), is_relation=True)
+	get_or_none(user1.outgoing_friendships, to_user=user2, is_relation=True) or
+	get_or_none(user2.outgoing_friendships, to_user=user1, is_relation=True)
 )
 
 def send_friend_invite(user, recipient_name) -> Friendship:

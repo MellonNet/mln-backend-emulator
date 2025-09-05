@@ -1,5 +1,7 @@
-from mln.models.dynamic import User, Profile
+import random
+from django.db.models import Q
 
+from mln.models.dynamic import User, Profile
 from mln.services.friend import get_friendship, send_friend_invite
 from mln.services.webhooks import run_friendship_webhooks
 from mln.apis.utils import *
@@ -20,6 +22,22 @@ def get_user(request, user, username):
     return HttpResponse("User not found", status=404)
   friendship = get_friendship(user, otherUser)
   return JsonResponse(user_response(otherUser, friendship))
+
+@csrf_exempt
+@auth
+@only_allow("GET")
+def get_random_user(request, user):
+  rank_str: str = request.GET.get("rank")
+  if not rank_str: return HttpResponse("Must specify a rank", status=400)
+  if not rank_str.isnumeric(): return HttpResponse("Rank must be a number", status=400)
+  rank = int(rank_str)
+  if rank < 0 or rank > 10: return HttpResponse("Rank must be between 0 and 10", status=400)
+  profiles = Profile.objects.filter(Q(rank=rank) & Q(is_networker=False))
+  if not profiles: return JsonResponse(None, safe=False)
+  profile = random.choice(profiles)
+  other_user = profile.user
+  friendship = get_friendship(user, other_user)
+  return JsonResponse(user_response(profile.user, friendship))
 
 class FriendshipsApi(View):
   @method_decorator(csrf_exempt)
