@@ -154,11 +154,10 @@ class MessageBodyType(Enum):
 	USER = auto()
 	SYSTEM = auto()
 	BETA = auto()
-	DEPRECATED_TYPE = auto()
+	PROMO = auto()
 	REWARD_CODE = auto()
 	OTHER = auto()
 	EXTERNAL_AWARD = auto()
-	PROMO = auto()
 
 class MessageBodyTheme(Enum):
 	MLN = auto()
