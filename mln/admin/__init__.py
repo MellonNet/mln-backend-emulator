@@ -215,6 +215,7 @@ integration_message_admin = make_inline(IntegrationMessage)
 integration_message_admin.list_display = "client", "award", "template",
 integration_message_admin.list_display_links = "template",
 integration_message_admin.search_fields = "client__client_name", "template__body__subject", "template__body__text"
+integration_message_admin.ordering = "client", "award"
 
 # Register admin interfaces
 
