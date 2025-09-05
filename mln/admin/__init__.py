@@ -41,7 +41,6 @@ UNSUPPORTED_MESSAGE_TYPES = {  # These are messages that are NOT sent automatica
 	MBT.USER,         # sent by users
 	MBT.SYSTEM,       # sent by the system when certain events occur (TODO)
 	MBT.BETA,         # manually sent by the MLN team to beta testers (TODO)
-	MBT.DEPRECATED_TYPE,
 	MBT.REWARD_CODE,  # sent in response to a code being entered (TODO)
 	MBT.PROMO,        # manually sent by the MLN team to promote other games (TODO)
 	MBT.OTHER,        # Uncategorized
