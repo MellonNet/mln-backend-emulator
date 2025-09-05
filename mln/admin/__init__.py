@@ -76,8 +76,8 @@ class HasHandlerFilter(admin.SimpleListFilter):
 
 class MessageBodyTypeForm(ActionForm):
 	"""Allows the user to pick a MessageBodyType before performing an action."""
-	type = forms.ChoiceField(choices=[(name, name.lower()) for name in MBT.__members__.keys()])
-	theme = forms.ChoiceField(choices=[(name, name.lower()) for name in MessageBodyTheme.__members__.keys()])
+	type = forms.ChoiceField(choices=[(name, name.lower()) for name in sorted(MBT.__members__.keys())])
+	theme = forms.ChoiceField(choices=[(name, name.lower()) for name in sorted(MessageBodyTheme.__members__.keys())])
 
 class MessageBodyAdmin(admin.ModelAdmin):
 	list_display = "subject", "text", "type", "theme", has_handler
