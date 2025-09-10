@@ -6,7 +6,7 @@ from ..models.dynamic import Friendship, FriendshipStatus, Profile, get_or_none
 from ..models.static import MLNError, NetworkerFriendshipCondition
 
 from .inventory import has_item
-from .webhooks import run_friendship_webhooks
+from .webhooks import run_friendship_webhooks, run_message_webhooks
 
 def _get_friendship(user, relation_id):
 	friendship = get_or_none(Friendship, id=relation_id)
@@ -30,7 +30,7 @@ def send_friend_invite(user, recipient_name) -> Friendship:
 	Raise RuntimeError if no user with the specified username exists.
 	Raise RuntimeError if the user already is a friend or blocked friend.
 	"""
-	recipient = get_or_none(User, username=recipient_name)
+	recipient = get_or_none(User, username__iexact=recipient_name)
 	if recipient is None:
 		raise RuntimeError("No user with the username %s exists" % recipient_name)
 
@@ -61,10 +61,12 @@ def add_networker_friend(user, networker) -> Friendship:
 		or (condition.condition_id == 129102 and has_item(user, 129103))
 	)
 	if success:
-		user.messages.create(sender=networker, body_id=condition.success_body_id)
+		message = user.messages.create(sender=networker, body_id=condition.success_body_id)
+		run_message_webhooks(message)
 		return user.outgoing_friendships.create(to_user=networker, status=FriendshipStatus.FRIEND)
 	else:
-		user.messages.create(sender=networker, body_id=condition.failure_body_id)
+		message = user.messages.create(sender=networker, body_id=condition.failure_body_id)
+		run_message_webhooks(message)
 		return None
 
 def handle_friend_invite_response(user, relation_id, accept):

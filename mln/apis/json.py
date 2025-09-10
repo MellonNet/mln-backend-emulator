@@ -40,7 +40,7 @@ def badge_response(badge: InventoryStack): return {
   # TODO: description and thumbnail
 }
 
-def friendship_response(friendship: Friendship):
+def friendship_response(friendship: Friendship | None):
   if friendship is None:
     return "none"
   else:
@@ -54,12 +54,12 @@ def full_friendship_response(friendship: Friendship): return {
   "status": friendship_response(friendship)
 }
 
-def user_response(user: User, friendship: Friendship): return {
+def user_response(user: User, friendship: Friendship | None, anonymous=False): return {
   "username": user.username,
   "page_url": f"/mln/public_view/{user.username}",
   "rank": user.profile.rank,
   "is_networker": user.profile.is_networker,
-  "friendship_status": friendship_response(friendship),
+  "friendship_status": friendship_response(friendship) if not anonymous else None,
   "avatar": user.profile.avatar,
   "badges": [
     badge_response(badge)

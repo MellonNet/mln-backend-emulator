@@ -50,7 +50,7 @@ class InboxApi(View):
   @method_decorator(check_json(SEND_MESSAGE_SCHEMA))
   def post(self, data, user):
     recipient_username = data.get("recipient")
-    recipient = get_or_none(User, username=recipient_username)
+    recipient = get_or_none(User, username__iexact=recipient_username)
     if not recipient:
       return HttpResponse("Recipient not found", status=404)
 

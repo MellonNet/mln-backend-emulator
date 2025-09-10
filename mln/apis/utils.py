@@ -53,11 +53,19 @@ def _parse_json_request(request) -> HttpResponse | Json:
 def auth(func):
   @wraps(func)
   def wrapper(request, *args, **kwargs):
-    user = request.user
-    if not user.is_authenticated:
-      access_token = _authenticate_request(request)
-      if type(access_token) is HttpResponse: return access_token
+    access_token = _authenticate_request(request)
+    if type(access_token) is HttpResponse: return access_token
     return func(request, access_token.user, *args, **kwargs)
+  return wrapper
+
+def maybe_auth(func):
+  @wraps(func)
+  def wrapper(request, *args, **kwargs):
+    access_token = _authenticate_request(request)
+    if type(access_token) is HttpResponse:
+      return func(request, None, *args, **kwargs)
+    else:
+      return func(request, access_token.user, *args, **kwargs)
   return wrapper
 
 def oauth_only(func):

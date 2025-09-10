@@ -14,14 +14,18 @@ def get_self(request, user):
   return JsonResponse(user_response(user, None))
 
 @csrf_exempt
-@auth
+@maybe_auth
 @only_allow("GET")
 def get_user(request, user, username):
-  otherUser = get_or_none(User, username=username)
+  otherUser = get_or_none(User, username__iexact=username)
   if not otherUser:
     return HttpResponse("User not found", status=404)
-  friendship = get_friendship(user, otherUser)
-  return JsonResponse(user_response(otherUser, friendship))
+  if user:
+    friendship = get_friendship(user, otherUser)
+    response = user_response(otherUser, friendship)
+  else:
+    response = user_response(otherUser, friendship=None, anonymous=True)
+  return JsonResponse(response)
 
 @csrf_exempt
 @auth
@@ -46,7 +50,7 @@ class FriendshipsApi(View):
     return super().dispatch(request, *args, **kwargs)
 
   def post(self, data, user, username):
-    otherUser = get_or_none(User, username=username)
+    otherUser = get_or_none(User, username__iexact=username)
     if not otherUser:
       return HttpResponse("User not found", status=404)
 
@@ -77,7 +81,7 @@ class FriendshipsApi(View):
       return JsonResponse(friendship_response(friendship), safe=False)
 
   def delete(self, request, user, username):
-    other_user = get_or_none(User, username=username)
+    other_user = get_or_none(User, username__iexact=username)
     if not other_user:
       return HttpResponse("User not found", status=404)
     friendship = get_friendship(user, other_user)
@@ -95,7 +99,7 @@ class FriendshipsApi(View):
 @auth
 @only_allow("POST")
 def block_user(request, user, username):
-  other_user = get_or_none(User, username=username)
+  other_user = get_or_none(User, username__iexact=username)
   if not other_user:
     return HttpResponse("User not found", status=404)
 
