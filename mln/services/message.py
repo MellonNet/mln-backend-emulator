@@ -73,7 +73,6 @@ def send_message(message, attachment=None):
 	for reply in NetworkerReply.objects.filter(networker=message.recipient):
 		if reply.should_reply(message, attachment):
 			actual_reply = send_template(reply.template, message.recipient, message.sender)
-			run_message_webhooks(actual_reply)
 			break
 	else:  # networker doesn't have a reply for this message
 		reply = Message.objects.create(sender=message.recipient, recipient=message.sender, body_id=MLNMessage.I_DONT_GET_IT)
@@ -103,6 +102,7 @@ def send_template(template: MessageTemplate, sender: User, recipient: User) -> M
 	already_sent = get_or_none(Message, sender=sender, recipient=recipient, body=template.body)
 	if already_sent:
 		consolidate(already_sent, template)
+		run_message_webhooks(already_sent)
 		return already_sent
 
 	# Otherwise, send the template to the user as normal
