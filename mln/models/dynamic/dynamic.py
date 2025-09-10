@@ -230,4 +230,4 @@ class Webhook(models.Model):
 	type = EnumField(WebhookType)
 
 	def __str__(self):
-		return f"{self.type.name.title()} webhook for {self.client.client_name}"
+		return f"{self.type.name.title()} webhook for {self.client.client_name} on behalf of {self.user.username}"

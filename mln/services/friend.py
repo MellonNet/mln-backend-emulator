@@ -100,7 +100,7 @@ def remove_friend(user, relation_id):
 	relation = _get_friendship(user, relation_id)
 	if relation.status == FriendshipStatus.BLOCKED and relation.from_user != user:
 		raise MLNError(MLNError.YOU_ARE_BLOCKED)
-	relation.status = FriendshipStatus.REMOVED
+	relation.status = None
 	run_friendship_webhooks(relation, user)
 	relation.delete()
 

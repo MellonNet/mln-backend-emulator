@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from functools import wraps
 from json_checker import Checker, CheckerError, OptionalKey
 
-from mln.models.dynamic import Message, Attachment, get_or_none, Friendship, FriendshipStatus, User, InventoryStack
+from mln.models.dynamic import Message, Attachment, get_or_none, Friendship, User, InventoryStack, Webhook
 from mln.services.inventory import get_badges
 from mln.models.static import MessageBody, ItemInfo
 
@@ -41,17 +41,18 @@ def badge_response(badge: InventoryStack): return {
 }
 
 def friendship_response(friendship: Friendship | None):
-  if friendship is None:
+  if not friendship or not friendship.status:
     return "none"
   else:
     return friendship.status.name.lower()
 
-def full_friendship_response(friendship: Friendship): return {
+def full_friendship_response(friendship: Friendship, action=None): return {
   "from_user_id": friendship.from_user.id,
   "from_username": friendship.from_user.username,
   "to_user_id": friendship.to_user.id,
   "to_username": friendship.to_user.username,
-  "status": friendship_response(friendship)
+  "status": friendship_response(friendship),
+  "action": action
 }
 
 def user_response(user: User, friendship: Friendship | None, anonymous=False): return {
@@ -105,3 +106,10 @@ def check_json(schema):
         return HttpResponse(error, status=400)
     return wrapper
   return decorator
+
+def webhook_response(webhook: Webhook): return {
+  "webhook_id": webhook.id,
+  "type": webhook.type.name.lower(),
+  "access_token": webhook.access_token.access_token,
+}
+

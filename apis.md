@@ -247,6 +247,8 @@ Response: `201 Created`:
 ```js
 {
   "webhook_id": string,
+  "type": string,  // one of "messages", "friendships"
+  "access_token": string,
 }
 ```
 
