@@ -38,12 +38,18 @@ class InboxApi(View):
     return super().dispatch(request, *args, **kwargs)
 
   def get(self, request, user):
-    # TODO: Support ?count=n
+    count_str: str = request.GET.get("count")
+    if not count_str or not count_str.isnumeric():
+      count = 0
+    else:
+      count = int(count_str)
+    if count < 0:
+      return HttpResponse(f"Count must be greater than 0: {count_str}", status=400)
     query = Message.objects.filter(recipient=user).all()
-    result = [
+    result = list(reversed([
       message_response(message)
       for message in query
-    ]
+    ][-count:]))  # returns the last N results
     return JsonResponse(result, safe=False)
 
   @method_decorator(post_json)
