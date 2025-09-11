@@ -1,7 +1,10 @@
 from django.core.exceptions import ValidationError
 
 from ..models.static import BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType
-from .inventory import add_inv_item, assert_has_item, remove_inv_item
+from mln.models.dynamic import assert_has_item
+from .inventory import add_inv_item, remove_inv_item
+
+from .webhooks import run_rank_webhooks
 
 def inventory_module_get(user):
 	"""
@@ -30,11 +33,19 @@ def use_blueprint(user, blueprint_id):
 	# remove required items
 	for requirement in requirements:
 		remove_inv_item(user, requirement.item_id, requirement.qty)
-	if blueprint_info.build.type == ItemType.MASTERPIECE:
-		if user.inventory.filter(item_id=blueprint_info.build_id).exists():
+	result = blueprint_info.build
+	if result.type == ItemType.MASTERPIECE:
+		if user.inventory.filter(item_id=result.id).exists():
 			return
 		else:
 			user.profile.rank += 1
 			user.profile.save()
+			run_rank_webhooks(user)
+	elif result.type == ItemType.BADGE:
+		# Running badge webhooks here means they won't run if a badge is just sent
+		# Instead we run them in add_inv_item
+		if user.inventory.filter(item_id=result.id).exists():
+			return
+
 	# add newly built item
 	add_inv_item(user, blueprint_info.build_id)

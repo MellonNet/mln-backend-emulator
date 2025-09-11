@@ -3,9 +3,9 @@ import random
 from django.contrib.auth.models import User
 
 from ..models.dynamic import Friendship, FriendshipStatus, Profile, get_or_none
+from mln.models.dynamic.utils import has_item
 from ..models.static import MLNError, NetworkerFriendshipCondition
 
-from .inventory import has_item
 from .webhooks import run_friendship_webhooks, run_message_webhooks
 
 def _get_friendship(user, relation_id):

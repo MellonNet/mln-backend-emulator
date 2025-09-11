@@ -10,7 +10,7 @@ from django.db.models import Q
 from .module import Module
 from ..static import Color, EnumField, ItemInfo, ItemType, ModuleSkin
 from ...services.friend import are_friends
-from ...services.inventory import assert_has_item
+from mln.models.dynamic.dynamic import assert_has_item
 
 class ModuleSaveGeneric(models.Model):
 	"""
@@ -125,8 +125,8 @@ class ModuleSetupTrade(models.Model):
 	Saved are the item and quantity the owner offers and the item and quantity the owner seeks.
 
 	This class cannot be broken down into ModuleSetupCost, ModuleExecutionCost, etc. because
-	users can modify the costs/yields per module, whereas those classes work across all 
-	modules sharing the same ModuleInfo. 
+	users can modify the costs/yields per module, whereas those classes work across all
+	modules sharing the same ModuleInfo.
 	"""
 	module = models.OneToOneField(Module, related_name="setup_trade", on_delete=models.CASCADE)
 	give_item = models.ForeignKey(ItemInfo, related_name="+", on_delete=models.CASCADE)

@@ -2,21 +2,17 @@
 import random
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.db import models
-from django.db.models import Q
 from django.utils.timezone import now
 from datetime import timedelta
 
 from .dynamic import DAY, get_or_none
-from .dynamic import FriendshipStatus
-from ..static import ItemInfo, ItemType, MessageTemplate, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleOutcome, ModuleSetupCost, Stack
+from ..static import ItemInfo, ItemType, ModuleEditorType, ModuleHarvestYield, ModuleOutcome, ModuleSetupCost
 from ..static.module_handlers import CLICK_HANDLERS
 
-from ...services.inventory import add_inv_item, assert_has_item, remove_inv_item
-from ...services.friend import choose_friend
-from ...services.message import send_template
+from mln.models.dynamic.dynamic import assert_has_item
+from ...services.inventory import add_inv_item, remove_inv_item
 
 class Module(models.Model):
 	"""

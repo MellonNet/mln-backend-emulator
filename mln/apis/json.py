@@ -2,8 +2,7 @@ from django.http import HttpResponse
 from functools import wraps
 from json_checker import Checker, CheckerError, OptionalKey
 
-from mln.models.dynamic import Message, Attachment, get_or_none, Friendship, User, InventoryStack, Webhook
-from mln.services.inventory import get_badges
+from mln.models.dynamic import Message, Attachment, get_or_none, Friendship, User, InventoryStack, Webhook, get_badges
 from mln.models.static import MessageBody, ItemInfo
 
 def attachment_response(attachment: Attachment): return {

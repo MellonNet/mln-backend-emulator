@@ -7,13 +7,13 @@ import datetime
 from enum import auto, Enum
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils.timezone import now
 
+from .utils import get_or_none  # export
 from ..static import Answer, Color, EnumField, ItemInfo, ItemType, MessageBody, Stack, Question, MessageTemplate
-from ...services.inventory import assert_has_item
 
 DAY = datetime.timedelta(days=1)
 
@@ -198,16 +198,6 @@ class OAuthToken(models.Model):
 	class Meta:
 		verbose_name_plural = "OAuth Tokens"
 
-def get_or_none(cls, is_relation=False, *args, **kwargs):
-	"""Get a model instance according to the filters, or return None if no matching model instance was found."""
-	try:
-		if is_relation:
-			return cls.get(*args, **kwargs)
-		else:
-			return cls.objects.get(*args, **kwargs)
-	except ObjectDoesNotExist:
-		return None
-
 class IntegrationMessage(models.Model):
 	template = models.ForeignKey(MessageTemplate, related_name="+", on_delete=models.CASCADE)
 	networker = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, limit_choices_to={"profile__is_networker": True})
@@ -220,14 +210,41 @@ class IntegrationMessage(models.Model):
 class WebhookType(Enum):
 	MESSAGES = auto()
 	FRIENDSHIPS = auto()
+	BADGE = auto()
+	RANK_UP = auto()
 
 class Webhook(models.Model):
 	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
-	access_token = models.ForeignKey(OAuthToken, related_name="+", on_delete=models.CASCADE)
-	user = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
 	secret = models.CharField(max_length=64)
 	url = models.URLField()
 	type = EnumField(WebhookType)
 
+	# User can be null for top-level webhooks
+	access_token = models.ForeignKey(OAuthToken, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+	user = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE, null=True, blank=True)
+
 	def __str__(self):
-		return f"{self.type.name.title()} webhook for {self.client.client_name} on behalf of {self.user.username}"
+		result = f"{self.type.name.title()} webhook for {self.client.client_name}"
+		if self.user:
+			result += f" on behalf of {self.user.username}"
+		return result
+
+def assert_has_item(user, item_id, qty=1, field_name=None):
+	"""
+	Raise ValidationError if the user has less than qty items in their inventory.
+	- Never raises an error for networkers.
+	"""
+	if user.profile.is_networker:
+		# networkers can do anything without needing items
+		return
+	if not user.inventory.filter(item_id=item_id, qty__gte=qty).exists():
+		if qty == 1:
+			message = "User does not have item %s" % ItemInfo.objects.get(id=item_id)
+		else:
+			message = "User does not have at least %i of item %s" % (qty, ItemInfo.objects.get(id=item_id))
+		if field_name is not None:
+			raise ValidationError({field_name: message})
+		raise ValidationError(message)
+
+def get_badges(user):
+	return user.inventory.filter(item__type=ItemType.BADGE)
