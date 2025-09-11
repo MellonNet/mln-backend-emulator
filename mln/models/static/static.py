@@ -158,6 +158,7 @@ class MessageBodyType(Enum):
 	REWARD_CODE = auto()
 	OTHER = auto()
 	EXTERNAL_AWARD = auto()
+	UNUSED_1 = auto()
 
 class MessageBodyTheme(Enum):
 	MLN = auto()

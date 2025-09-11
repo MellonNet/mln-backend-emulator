@@ -1,7 +1,7 @@
 import random
 from django.db.models import Q
 
-from mln.models.dynamic import User, Profile
+from mln.models.dynamic import User, Profile, FriendshipStatus
 from mln.services.friend import get_friendship, send_friend_invite
 from mln.services.webhooks import run_friendship_webhooks
 from mln.apis.utils import *
@@ -61,14 +61,16 @@ class FriendshipsApi(View):
         # Only networkers can reject friend requests, due to items
         return HttpResponse("This networker doesn't want to be your friend, check your inbox", status=402)
       else:
-        return JsonResponse(friendship_response(friendship), safe=False)
+        response = full_friendship_response(friendship, action=f"Sent {username} a friend request")
+        return JsonResponse(response, safe=False)
     elif friendship.status == FriendshipStatus.PENDING:
       if friendship.to_user == user:
         # Accept the pending request
         friendship.status = FriendshipStatus.FRIEND
         friendship.save()
         run_friendship_webhooks(friendship, user)
-      return JsonResponse(friendship_response(friendship), safe=False)
+      response = full_friendship_response(friendship, action=f"Accepted {username}'s friend request")
+      return JsonResponse(response, safe=False)
     elif friendship.status == FriendshipStatus.BLOCKED:
       if friendship.to_user == user:
         return HttpResponse("That user has blocked you", status=403)
@@ -76,9 +78,11 @@ class FriendshipsApi(View):
         friendship.status = FriendshipStatus.FRIEND
         friendship.save()
         run_friendship_webhooks(friendship, user)
-        return JsonResponse(friendship_response(friendship), safe=False)
+        response = full_friendship_response(friendship, action=f"Unblocked {username}")
+        return JsonResponse(response, safe=False)
     elif friendship.status == FriendshipStatus.FRIEND:
-      return JsonResponse(friendship_response(friendship), safe=False)
+      response = full_friendship_response(friendship, action=f"{username} was already your friend")
+      return JsonResponse(response, safe=False)
 
   def delete(self, request, user, username):
     other_user = get_or_none(User, username__iexact=username)
@@ -90,43 +94,65 @@ class FriendshipsApi(View):
     elif friendship.to_user == user and friendship.status == FriendshipStatus.BLOCKED:
       return HttpResponse("That user has blocked you", status=403)
     else:
-      friendship.status = FriendshipStatus.REMOVED
+      friendship.status = None
       run_friendship_webhooks(friendship, user)
       friendship.delete()
       return HttpResponse(status=204)
 
-@csrf_exempt
-@auth
-@only_allow("POST")
-def block_user(request, user, username):
-  other_user = get_or_none(User, username__iexact=username)
-  if not other_user:
-    return HttpResponse("User not found", status=404)
+class UserBlockApi(View):
+  @method_decorator(csrf_exempt)
+  @method_decorator(auth)
+  def dispatch(self, request, *args, **kwargs):
+    return super().dispatch(request, *args, **kwargs)
 
-  friendship = get_friendship(user, other_user)
-  if not friendship:
-    return HttpResponse("Friendship not found", status=404)
-  elif friendship.status == FriendshipStatus.BLOCKED:
-    if friendship.to_user == user:
-      return HttpResponse("That user has blocked you", status=500)
-    else:
+  def delete(self, request, user, username):
+    # Do not run webhooks here
+    other_user = get_or_none(User, username__iexact=username)
+    if not other_user:
+      return HttpResponse("User not found", status=404)
+
+    friendship = get_friendship(user, other_user)
+    if not friendship:
+      return HttpResponse("You were not friends with that user", status=400)
+
+    if friendship.status != FriendshipStatus.BLOCKED:
       return HttpResponse(status=204)
-  elif friendship.status == FriendshipStatus.PENDING:
+
     if friendship.to_user == user:
-      # User was sent a request -- accept, then block
+      return HttpResponse("That user has blocked you", status=400)
+    else:
+      friendship.status = FriendshipStatus.FRIEND
+      friendship.save()  # aww....
+      return HttpResponse(status=200)
+
+  def post(self, request, user, username):
+    # Do not run webhooks here
+    other_user = get_or_none(User, username__iexact=username)
+    if not other_user:
+      return HttpResponse("User not found", status=404)
+
+    friendship = get_friendship(user, other_user)
+    if not friendship:
+      return HttpResponse("Friendship not found", status=404)
+    elif friendship.status == FriendshipStatus.BLOCKED:
+      if friendship.to_user == user:
+        return HttpResponse("That user has blocked you", status=400)
+      else:
+        return HttpResponse(status=204)
+    elif friendship.status == FriendshipStatus.PENDING:
+      if friendship.to_user == user:
+        # User was sent a request -- accept, then block
+        friendship.status = FriendshipStatus.BLOCKED
+        friendship.save()
+      else:
+        # The other user never accepted the request -- rescind
+        friendship.delete()
+      return HttpResponse(status=200)
+    elif friendship.status == FriendshipStatus.FRIEND:
+      if friendship.to_user == user:
+        # Flip the direction of the relationship
+        friendship.to_user = other_user
+        friendship.from_user = user
       friendship.status = FriendshipStatus.BLOCKED
       friendship.save()
-      run_friendship_webhooks(friendship, user)
-    else:
-      # The other user never accepted the request -- rescind
-      friendship.delete()
-    return HttpResponse(status=204)
-  elif friendship.status == FriendshipStatus.FRIEND:
-    if friendship.to_user == user:
-      # Flip the direction of the relationship
-      friendship.to_user = other_user
-      friendship.from_user = user
-    friendship.status = FriendshipStatus.BLOCKED
-    friendship.save()
-    run_friendship_webhooks(friendship, user)
-    return HttpResponse(status=204)
+      return HttpResponse(status=200)

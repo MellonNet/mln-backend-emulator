@@ -102,7 +102,6 @@ def send_template(template: MessageTemplate, sender: User, recipient: User) -> M
 	already_sent = get_or_none(Message, sender=sender, recipient=recipient, body=template.body)
 	if already_sent:
 		consolidate(already_sent, template)
-		run_message_webhooks(already_sent)
 		return already_sent
 
 	# Otherwise, send the template to the user as normal

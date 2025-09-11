@@ -1,7 +1,9 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from ..models.static import ItemInfo, ItemType
+from ..models.dynamic import get_or_none
+from .webhooks import run_badge_webhooks
 
 def add_inv_item(user, item_id, qty=1):
 	"""
@@ -17,6 +19,9 @@ def add_inv_item(user, item_id, qty=1):
 		return stack
 	except ObjectDoesNotExist:
 		stack = user.inventory.create(item_id=item_id, qty=qty)
+		result = get_or_none(ItemInfo, id=item_id)
+		if result.type == ItemType.BADGE:
+			run_badge_webhooks(user, result.name)
 		from .message import first_obtained_item
 		first_obtained_item(user, item_id)
 		return stack
@@ -45,30 +50,3 @@ def refund_invalid_modules(user):
 	for module in corrupt_modules:
 		add_inv_item(user, module.item_id)
 	corrupt_modules.delete()
-
-def assert_has_item(user, item_id, qty=1, field_name=None):
-	"""
-	Raise ValidationError if the user has less than qty items in their inventory.
-	- Never raises an error for networkers.
-	"""
-	if user.profile.is_networker:
-		# networkers can do anything without needing items
-		return
-	if not user.inventory.filter(item_id=item_id, qty__gte=qty).exists():
-		if qty == 1:
-			message = "User does not have item %s" % ItemInfo.objects.get(id=item_id)
-		else:
-			message = "User does not have at least %i of item %s" % (qty, ItemInfo.objects.get(id=item_id))
-		if field_name is not None:
-			raise ValidationError({field_name: message})
-		raise ValidationError(message)
-
-def has_item(user, item_id):
-	try:
-		user.inventory.filter(item_id=item_id).get()
-		return True
-	except ObjectDoesNotExist:
-		return False
-
-def get_badges(user):
-	return user.inventory.filter(item__type=ItemType.BADGE)

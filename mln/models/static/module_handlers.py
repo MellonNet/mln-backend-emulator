@@ -5,8 +5,9 @@ from django.db.models import Q
 
 from .static import ItemInfo, ItemType, MessageTemplate, ModuleOutcome, Stack
 
+from mln.models.dynamic.dynamic import assert_has_item
 from ...services.friend import choose_friend
-from ...services.inventory import add_inv_item, assert_has_item, remove_inv_item
+from ...services.inventory import add_inv_item, remove_inv_item
 from ...services.message import send_template
 
 class ModuleClickHandler(models.Model):

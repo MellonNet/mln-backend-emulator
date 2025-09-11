@@ -49,7 +49,7 @@ urlpatterns = [
 	path("api/users/random", users_api.get_random_user),
 	path("api/users/<str:username>", users_api.get_user),
 	path("api/users/<str:username>/friendship", users_api.FriendshipsApi.as_view()),
-	path("api/users/<str:username>/block", users_api.block_user),
+	path("api/users/<str:username>/block", users_api.UserBlockApi.as_view()),
 	path("api/webhooks", webhooks.register_webhook),
 	path("api/webhooks/<int:id>", webhooks.delete_webhook),
 ]

@@ -31,7 +31,7 @@ def register_webhook(data, access_token):
       url=url,
       type=type,
     )
-    return JsonResponse({"webhook_id": webhook.id}, status=201)
+    return JsonResponse(webhook_response(webhook), status=201)
   except ValidationError as error:
     return HttpResponse(error, status=400)
 
