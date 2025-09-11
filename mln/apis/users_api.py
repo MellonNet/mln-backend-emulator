@@ -99,37 +99,60 @@ class FriendshipsApi(View):
       friendship.delete()
       return HttpResponse(status=204)
 
-@csrf_exempt
-@auth
-@only_allow("POST")
-def block_user(request, user, username):
-  # Do not run webhooks here
-  other_user = get_or_none(User, username__iexact=username)
-  if not other_user:
-    return HttpResponse("User not found", status=404)
+class UserBlockApi(View):
+  @method_decorator(csrf_exempt)
+  @method_decorator(auth)
+  def dispatch(self, request, *args, **kwargs):
+    return super().dispatch(request, *args, **kwargs)
 
-  friendship = get_friendship(user, other_user)
-  if not friendship:
-    return HttpResponse("Friendship not found", status=404)
-  elif friendship.status == FriendshipStatus.BLOCKED:
-    if friendship.to_user == user:
-      return HttpResponse("That user has blocked you", status=500)
-    else:
+  def delete(self, request, user, username):
+    # Do not run webhooks here
+    other_user = get_or_none(User, username__iexact=username)
+    if not other_user:
+      return HttpResponse("User not found", status=404)
+
+    friendship = get_friendship(user, other_user)
+    if not friendship:
+      return HttpResponse("You were not friends with that user", status=400)
+
+    if friendship.status != FriendshipStatus.BLOCKED:
       return HttpResponse(status=204)
-  elif friendship.status == FriendshipStatus.PENDING:
+
     if friendship.to_user == user:
-      # User was sent a request -- accept, then block
+      return HttpResponse("That user has blocked you", status=400)
+    else:
+      friendship.status = FriendshipStatus.FRIEND
+      friendship.save()  # aww....
+      return HttpResponse(status=200)
+
+  def post(self, request, user, username):
+    # Do not run webhooks here
+    other_user = get_or_none(User, username__iexact=username)
+    if not other_user:
+      return HttpResponse("User not found", status=404)
+
+    friendship = get_friendship(user, other_user)
+    if not friendship:
+      return HttpResponse("Friendship not found", status=404)
+    elif friendship.status == FriendshipStatus.BLOCKED:
+      if friendship.to_user == user:
+        return HttpResponse("That user has blocked you", status=400)
+      else:
+        return HttpResponse(status=204)
+    elif friendship.status == FriendshipStatus.PENDING:
+      if friendship.to_user == user:
+        # User was sent a request -- accept, then block
+        friendship.status = FriendshipStatus.BLOCKED
+        friendship.save()
+      else:
+        # The other user never accepted the request -- rescind
+        friendship.delete()
+      return HttpResponse(status=200)
+    elif friendship.status == FriendshipStatus.FRIEND:
+      if friendship.to_user == user:
+        # Flip the direction of the relationship
+        friendship.to_user = other_user
+        friendship.from_user = user
       friendship.status = FriendshipStatus.BLOCKED
       friendship.save()
-    else:
-      # The other user never accepted the request -- rescind
-      friendship.delete()
-    return HttpResponse(status=204)
-  elif friendship.status == FriendshipStatus.FRIEND:
-    if friendship.to_user == user:
-      # Flip the direction of the relationship
-      friendship.to_user = other_user
-      friendship.from_user = user
-    friendship.status = FriendshipStatus.BLOCKED
-    friendship.save()
-    return HttpResponse(status=204)
+      return HttpResponse(status=200)

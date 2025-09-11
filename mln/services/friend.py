@@ -121,7 +121,6 @@ def block_friend(user, relation_id):
 		relation.from_user = user
 		relation.to_user = friend
 	relation.status = FriendshipStatus.BLOCKED
-	run_friendship_webhooks(relation, user)
 	relation.save()
 
 def unblock_friend(user, relation_id):
@@ -139,7 +138,6 @@ def unblock_friend(user, relation_id):
 	if relation.from_user != user:
 		raise MLNError(MLNError.YOU_ARE_BLOCKED)
 	relation.status = FriendshipStatus.FRIEND
-	run_friendship_webhooks(relation, user)
 	relation.save()
 
 def are_friends(user, other_user_id):
