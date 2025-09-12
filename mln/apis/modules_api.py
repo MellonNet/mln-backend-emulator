@@ -15,8 +15,22 @@ def who_has(request, user, id):
     return HttpResponse(f"Could not find module with id={id}", status=404)
 
   modules = Module.objects.filter(item_id=id)
-  response = [
+  ready = []
+  needs_setup = []
+  for module in modules:
+    if module.is_clickable():
+      ready.append(module)
+    else:
+      needs_setup.append(module)
+
+  def respond_users(modules): return [
     get_user_response(user, module.owner)
     for module in modules
   ]
+
+  response = {
+    "ready": respond_users(ready),
+    "needs_setup": respond_users(needs_setup)
+  }
+
   return JsonResponse(response, safe=False)
