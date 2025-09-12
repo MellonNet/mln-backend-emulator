@@ -30,7 +30,6 @@ urlpatterns = [
 	path("creation_lab", flashvars_handler, name="creation_lab"),
 	path("oauth", OAuthLoginView.as_view()),
 	path("oauth/token", get_token),
-	path("oauth/logout", oauth_logout),
 	path("accounts/", include("django.contrib.auth.urls")),
 	path("accounts/sign_up", CreateView.as_view(
 		template_name="registration/sign_up.html",
@@ -40,6 +39,7 @@ urlpatterns = [
 	path("accounts/password_change", PasswordChangeView.as_view()),
 	path("admin/", admin.site.urls),
 
+	path("api/logout", oauth_logout),
 	path("api/award", integrations.grant_award),
 	path("api/messages", inbox_api.InboxApi.as_view()),
 	path("api/messages/<int:id>", messages_api.MessagesApi.as_view()),
