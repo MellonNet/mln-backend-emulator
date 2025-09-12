@@ -182,18 +182,19 @@ class OAuthCode(models.Model):
 	generated_at = models.DateTimeField()
 
 	def __str__(self):
-		return f"Auth code for {self.user}"
+		return f"Auth code for {self.client.client_name} on behalf of {self.user}"
 
 	class Meta:
 		verbose_name_plural = "OAuth Authorization Codes"
 
 class OAuthToken(models.Model):
+	auth_code = models.ForeignKey(OAuthCode, related_name="+", on_delete=models.CASCADE, null=True)
 	access_token = models.CharField(max_length=64)
 	user = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
 	client = models.ForeignKey(OAuthClient, related_name="+", on_delete=models.CASCADE)
 
 	def __str__(self):
-		return f"OAuth access token for {self.user}"
+		return f"OAuth Access Token for {self.client.client_name} on behalf of {self.user}"
 
 	class Meta:
 		verbose_name_plural = "OAuth Tokens"

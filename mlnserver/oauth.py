@@ -1,35 +1,33 @@
+import json
+import secrets
+
+from datetime import timedelta
+
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-
 from django.utils import timezone
-
 from django.views.decorators.csrf import csrf_exempt
 
 from mln.models.dynamic import OAuthClient, OAuthCode, OAuthToken, get_or_none
-from datetime import timedelta
-
-import json
-import secrets
+from mln.apis.utils import oauth_only, post_json, check_json
 
 AUTH_CODE_EXPIRY = timedelta(minutes=10)
 
 def generate_secure_token():
   return secrets.token_urlsafe(32)
 
+
+OAUTH_TOKEN_SCHEMA = {
+  "api_token": str,
+  "auth_code": str,
+}
+
 @csrf_exempt
-def get_token(request):
-  if request.method != "POST":
-    return HttpResponse(status=404)
-
-  body = request.body
-  if not body:
-    return HttpResponse("Missing body", status=400)
-
-  data = json.loads(body)
-  api_token = data.get("api_token", None)
-  auth_code_raw = data.get("auth_code", None)
-  if not api_token or not auth_code_raw:
-    return HttpResponse("Missing API token or auth code", status=400)
+@post_json
+@check_json(OAUTH_TOKEN_SCHEMA)
+def get_token(data):
+  api_token = data["api_token"]
+  auth_code_raw = data["auth_code"]
 
   auth_code = get_or_none(OAuthCode, auth_code=auth_code_raw)
   if not auth_code:
@@ -43,9 +41,13 @@ def get_token(request):
   if elapsed_time > AUTH_CODE_EXPIRY:
     return HttpResponse("That auth code has already expired", status=403)
 
+  access_token_other = get_or_none(OAuthToken, auth_code=auth_code)
+  if access_token_other:
+    return HttpResponse("This auth code has already been redeemed", status=401)
+
   access_token_raw = generate_secure_token()
   user = auth_code.user
-  OAuthToken.objects.create(access_token=access_token_raw, user=user, client=client)
+  OAuthToken.objects.create(access_token=access_token_raw, user=user, client=client, auth_code=auth_code)
   body = {
     "access_token": access_token_raw,
     "username": user.username,
@@ -91,3 +93,12 @@ class OAuthLoginView(LoginView):
     context["client_name"] = client.client_name
     context["image_url"] = client.image_url
     return context
+
+@csrf_exempt
+@oauth_only
+def oauth_logout(data, access_token):
+  all_tokens = list(OAuthToken.objects.filter(user=access_token.user, client=access_token.client))
+  for token in all_tokens:
+    token.delete()
+
+  return HttpResponse(status=200)

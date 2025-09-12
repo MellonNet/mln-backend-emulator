@@ -1,9 +1,10 @@
 from django.http import HttpResponse
-from functools import wraps
-from json_checker import Checker, CheckerError, OptionalKey
+from json_checker import OptionalKey
 
 from mln.models.dynamic import Message, Attachment, get_or_none, Friendship, User, InventoryStack, Webhook, get_badges
 from mln.models.static import MessageBody, ItemInfo
+
+from .utils import check_json  # re-exported
 
 def attachment_response(attachment: Attachment): return {
   "item_id": attachment.item.id,
@@ -93,22 +94,8 @@ def attachment_request(json) -> tuple[int, int]:
     return HttpResponse("Cannot attach 0 or less of something", status=400)
   return (item, qty)
 
-def check_json(schema):
-  def decorator(func):
-    @wraps(func)
-    def wrapper(data, *args, **kwargs):
-      try:
-        checker = Checker(schema, soft=True, ignore_extra_keys=True)
-        checker.validate(data)
-        return func(data, *args, **kwargs)
-      except CheckerError as error:
-        return HttpResponse(error, status=400)
-    return wrapper
-  return decorator
-
 def webhook_response(webhook: Webhook): return {
   "webhook_id": webhook.id,
   "type": webhook.type.name.lower(),
   "access_token": webhook.access_token.access_token,
 }
-

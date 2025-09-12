@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.contrib.admin.helpers import ActionForm
 from django.db.models import Q
 
-from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack, IntegrationMessage, Webhook
+from ..models.dynamic import Attachment, Friendship, Message, Profile, InventoryStack, IntegrationMessage, OAuthToken, Webhook
 from ..models.dynamic.module import Module, module_settings_classes, ModuleSaveConcertArcade, ModuleSaveSoundtrack
 from ..models.dynamic.module_settings_arcade import DeliveryArcadeTile
 from ..models.static import Answer, BlueprintInfo, BlueprintRequirement, ItemInfo, ItemType, MessageBody, MessageBodyTheme, MessageBodyType, MessageTemplate, MessageTemplateAttachment, ModuleEditorType, ModuleHarvestYield, ModuleInfo, ModuleSetupCost, NetworkerFriendshipCondition, NetworkerFriendshipConditionSource, NetworkerMessageTriggerLegacy, NetworkerMessageAttachmentLegacy, NetworkerReply, StartingStack, Question
@@ -222,6 +222,12 @@ integration_message_admin.ordering = "client", "award"
 webhooks_admin = make_inline(Webhook)
 webhooks_admin.search_fields = "client__client_name", "user__username"
 webhooks_admin.list_filter = "type",
+
+oauth_tokens = make_inline(OAuthToken)
+oauth_tokens.list_display = "client", "user"
+oauth_tokens.list_display_links = "user",
+oauth_tokens.list_filter = "client",
+oauth_tokens.search_fields = "client__client_name", "user__username", "access_token"
 
 # Register admin interfaces
 

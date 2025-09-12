@@ -14,7 +14,7 @@ from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.edit import CreateView
 
 from mln.apis import inbox_api, messages_api, integrations, users_api, webhooks
-from mlnserver.oauth import OAuthLoginView, get_token
+from mlnserver.oauth import OAuthLoginView, get_token, oauth_logout
 
 def flashvars_handler(request):
 	raise Http404("""
@@ -30,6 +30,7 @@ urlpatterns = [
 	path("creation_lab", flashvars_handler, name="creation_lab"),
 	path("oauth", OAuthLoginView.as_view()),
 	path("oauth/token", get_token),
+	path("oauth/logout", oauth_logout),
 	path("accounts/", include("django.contrib.auth.urls")),
 	path("accounts/sign_up", CreateView.as_view(
 		template_name="registration/sign_up.html",

@@ -2,6 +2,8 @@ from django.views import View  # re-exported
 from django.views.decorators.csrf import csrf_exempt  # re-exported
 from django.utils.decorators import method_decorator  # re-exported
 
+from json_checker import Checker, CheckerError, OptionalKey
+
 from functools import wraps
 from typing import Any
 import json
@@ -30,6 +32,19 @@ def post_json(func):
     if type(data) is HttpResponse: return data
     return func(data, *args, **kwargs)
   return wrapper
+
+def check_json(schema):
+  def decorator(func):
+    @wraps(func)
+    def wrapper(data, *args, **kwargs):
+      try:
+        checker = Checker(schema, soft=True, ignore_extra_keys=True)
+        checker.validate(data)
+        return func(data, *args, **kwargs)
+      except CheckerError as error:
+        return HttpResponse(error, status=400)
+    return wrapper
+  return decorator
 
 def _parse_json_request(request) -> HttpResponse | Json:
   """
