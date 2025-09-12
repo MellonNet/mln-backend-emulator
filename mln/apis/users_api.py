@@ -72,8 +72,12 @@ class FriendshipsApi(View):
         friendship.status = FriendshipStatus.FRIEND
         friendship.save()
         run_friendship_webhooks(friendship, user)
-      response = full_friendship_response(friendship, action=f"Accepted {username}'s friend request")
-      return JsonResponse(response, safe=False)
+        response = full_friendship_response(friendship, action=f"Accepted {username}'s friend request")
+        return JsonResponse(response, safe=False)
+      else:
+        # The request is still pending
+        response = full_friendship_response(friendship, action=f"You already sent that user a request -- wait for them to respond")
+        return JsonResponse(response, safe=False)
     elif friendship.status == FriendshipStatus.BLOCKED:
       if friendship.to_user == user:
         return HttpResponse("That user has blocked you", status=403)
