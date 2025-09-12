@@ -95,6 +95,10 @@ Api-Token: api_token
 
 Replacing `access_token` and `api_token` as appropriate. These headers will authenticate your client and its association to a user in any request. If these headers are missing or invalid, the server will respond with `401 Unauthorized`. If the access token or API token don't allow your client to perform the requested action, the server will respond with `403 Forbidden`.
 
+### Logout
+
+To sign out, make a request to `POST /api/logout`. **This will permanently delete your access token, and any other access tokens for that user on that client**. That also means that any resources associated with the access token will be deleted, like webhooks. Since all tokens for the user are deleted, if the same MLN user creates two accounts on your server, they will be signed out  of both.
+
 ## Summary
 
 Now, when the client wants to perform some action in MLN, it sends a request to its resource server with its session ID, as usual. The resource server can check its database to find the associated access token, and send that (along with the API token) to MLN. Once the API token is validated, MLN will lookup the account associated with the access token and perform the requested action. [^1]

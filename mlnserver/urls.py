@@ -13,7 +13,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.edit import CreateView
 
-from mln.apis import inbox_api, messages_api, integrations, users_api, webhooks
+from mln.apis import inbox_api, messages_api, modules_api, integrations, users_api, webhooks
 from mlnserver.oauth import OAuthLoginView, get_token, oauth_logout
 
 def flashvars_handler(request):
@@ -45,6 +45,7 @@ urlpatterns = [
 	path("api/messages/<int:id>", messages_api.MessagesApi.as_view()),
 	path("api/messages/<int:id>/reply", messages_api.reply_to_message),
 	path("api/messages/<int:id>/mark-read", messages_api.mark_read),
+	path("api/modules/<int:id>/who-has", modules_api.who_has),
 	# TOOD: Figure this out in case a user names themselves whoami or random
 	path("api/users/whoami", users_api.get_self),
 	path("api/users/random", users_api.get_random_user),

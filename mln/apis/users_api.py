@@ -13,6 +13,13 @@ from mln.apis.json import *
 def get_self(request, user):
   return JsonResponse(user_response(user, None))
 
+def get_user_response(self, other):
+  if self:
+    friendship = get_friendship(self, other)
+    return user_response(other, friendship)
+  else:
+    return user_response(other, friendship=None, anonymous=True)
+
 @csrf_exempt
 @maybe_auth
 @only_allow("GET")
@@ -20,15 +27,11 @@ def get_user(request, user, username):
   otherUser = get_or_none(User, username__iexact=username)
   if not otherUser:
     return HttpResponse("User not found", status=404)
-  if user:
-    friendship = get_friendship(user, otherUser)
-    response = user_response(otherUser, friendship)
-  else:
-    response = user_response(otherUser, friendship=None, anonymous=True)
+  response = get_user_response(user, otherUser)
   return JsonResponse(response)
 
 @csrf_exempt
-@auth
+@maybe_auth
 @only_allow("GET")
 def get_random_user(request, user):
   rank_str: str = request.GET.get("rank")
@@ -40,8 +43,8 @@ def get_random_user(request, user):
   if not profiles: return JsonResponse(None, safe=False)
   profile = random.choice(profiles)
   other_user = profile.user
-  friendship = get_friendship(user, other_user)
-  return JsonResponse(user_response(profile.user, friendship))
+  response = get_user_response(user, other_user)
+  return JsonResponse(response)
 
 class FriendshipsApi(View):
   @method_decorator(csrf_exempt)

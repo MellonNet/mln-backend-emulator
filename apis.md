@@ -176,6 +176,16 @@ Errors: `404 User not found`, `403 Forbidden` if the user blocked you
 Response: `204 No Content`
 Errors: `404 User/Friendship not found`,
 
+### GET `/api/users/whoami` -- Gets the current user
+
+Response: A `User` object
+
+### GET `/api/users/random` -- Gets a random user
+
+Query Parameters: `rank` -- A rank, 0 - 10, to find a user in
+Response: A non-networker `User` object
+Errors: `400 Bad Request` for an invalid or missing `rank` parameter
+
 ## Inventory and Modules
 
 ### `ItemStack`
@@ -229,6 +239,11 @@ Errors:
 - `403 Forbidden` if the module does not belong to you
 - `405 Method not allowed` if the module cannot be set up
 - `402 Payment Required` if you lack the items needed. An array of `ItemStack`s will be returned
+
+### GET `/api/modules/{id}/who-has` -- Find a user with this module
+
+Response: `200 Ok` with an array of `User`s who have this module on their page
+Errors: `404 Module not found` if the module cannot be found
 
 ## Webhooks
 
