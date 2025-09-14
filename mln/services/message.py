@@ -79,7 +79,6 @@ def send_message(message, attachment=None):
 		if attachment is not None:  # send any attachment back to the user
 			attachment.message = reply
 			attachment.save()
-		run_message_webhooks(reply)
 
 def attach(message: Message, attachment: Attachment):
 	message.attachments.create(item_id=attachment.item_id, qty=attachment.qty)
@@ -108,7 +107,6 @@ def send_template(template: MessageTemplate, sender: User, recipient: User) -> M
 	message = Message.objects.create(sender=sender, recipient=recipient, body=template.body)
 	for attachment in template.attachments.all():
 		attach(message, attachment)
-	run_message_webhooks(message)
 	return message
 
 def first_obtained_item(user, item_id):
