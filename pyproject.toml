@@ -5,7 +5,7 @@ description = "An unofficial revival of the My Lego Network Flash game"
 readme = "README.md"
 requires-python = ">=3.13.5"
 dependencies = [
-    "django==4.2.22",
+    "django==4.2.24",
     "django-cors-headers>=4.7.0",
     "json-checker>=2.0.0",
     "pillow>=11.3.0",

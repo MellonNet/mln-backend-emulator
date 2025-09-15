@@ -1,4 +1,4 @@
-Django==4.2.22
+Django==4.2.24
 Pillow
 django-cors-headers==4.7.0
 json-checker==2.0.0
