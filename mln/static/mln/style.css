@@ -6,10 +6,25 @@ body {
 }
 
 footer {
-	color: grey;
-	font-size: x-small;
-	padding: 1rem;
+	color: grey
+}
+
+footer a {
+	margin-left: 0.25em;
+	margin-right: 0.25em;
+}
+
+footer > #credits {
+	font-size: small;
 	text-align: center;
+	line-height: 1.5em;
+}
+
+footer > #disclaimer {
+	text-align: justify;
+	font-size: x-small;
+	margin-left: 10px;
+	margin-right: 10px;
 }
 
 nav {

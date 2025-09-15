@@ -31,10 +31,7 @@ class ModuleMessage(ModuleClickHandler):
 
 	def on_click(self, module, clicker):
 		if random.random()*100 >= self.probability: return
-		if module.owner.profile.is_networker:
-			random_friend = clicker
-		else:
-			random_friend = choose_friend(module.owner)
+		random_friend = choose_friend(module.owner)
 		if random_friend is None: return  # lol ain't got no friends :(
 		print("Sending mail...")
 		send_template(self.message, module.owner, random_friend)
@@ -69,6 +66,7 @@ class ModuleExecutionCost(ModuleClickYield):
 	def should_yield(self, module): return True
 
 	def distribute_items(self, module, clicker):
+		if clicker.profile.is_networker: return
 		assert_has_item(clicker, self.item_id, self.qty)
 		remove_inv_item(clicker, self.item_id, self.qty)
 
