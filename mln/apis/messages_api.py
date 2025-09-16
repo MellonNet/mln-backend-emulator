@@ -43,8 +43,7 @@ def reply_to_message(data, user, id):
   attachment = create_attachment(data, reply)
   if type(attachment) is HttpResponse: return attachment
   message_services.send_message(reply, attachment)
-  result = message_response(reply)
-  return JsonResponse(result, safe=False, status=201)
+  return HttpResponse("Sent reply", status=201)
 
 @csrf_exempt
 @auth
